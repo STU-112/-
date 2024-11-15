@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <title>註冊資料表輸入</title>
+</head>
+<body>
+    <h2>註冊資料表輸入</h2>
+    <form action="insert.php" method="post">
+        <label for="userid">使用者ID:</label>
+        <input type="text" id="userid" name="userid" required><br><br>
+        
+        <label for="name">姓名:</label>
+        <input type="text" id="name" name="name" required><br><br>
+        
+        <label for="phone">電話:</label>
+        <input type="text" id="phone" name="phone"><br><br>
+        
+        <label for="address">地址:</label>
+        <input type="text" id="address" name="address"><br><br>
+        
+        <label for="username">帳號:</label>
+        <input type="text" id="username" name="username" required><br><br>
+        
+        <label for="password">密碼:</label>
+        <input type="password" id="password" name="password" required><br><br>
+        
+        <input type="submit" value="提交">
+    </form>
+</body>
+</html>
