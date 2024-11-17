@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>財團法人台北市失親兒福利基金會</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f9f9f9;
+            margin: 0;
+            padding: 20px;
+        }
+        header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        h1 {
+            color: #2e6da4;
+        }
+        h2 {
+            color: #5bc0de;
+            margin-top: 30px;
+            margin-bottom: 15px;
+        }
+        form {
+            background-color: white;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            padding: 20px;
+            max-width: 800px;
+            margin: 0 auto;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input[type="text"], input[type="date"], input[type="number"], select {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        .checkbox-group {
+            margin: 10px 0;
+        }
+        .checkbox-group label {
+            display: block;
+            margin: 5px 0;
+        }
+        .button {
+            background-color: #5bc0de;
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            margin-top: 20px;
+            text-align: center;
+            border-radius: 4px;
+            cursor: pointer;
+            width: 100%;
+            font-size: 16px;
+        }
+        .button:hover {
+            background-color: #46b8da;
+        }
+        .funding-section {
+            margin-top: 20px;
+        }
+        .file-upload-section {
+            margin-top: 30px;
+        }
+    </style>
+    <script>
+        let currentSerial = 1;
+
+        function togglePaymentFields(paymentMethod) {
+            const paymentFields = document.querySelectorAll('.payment-fields');
+            paymentFields.forEach(field => field.style.display = 'none');
+            if (paymentMethod) {
+                const selectedField = document.getElementById(paymentMethod);
+                if (selectedField) {
+                    selectedField.style.display = 'block';
+                }
+            }
+        }
+
+        function generateSerialNumber() {
+            const date = new Date();
+            const year = date.getFullYear() - 1911;
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const serial = String(currentSerial).padStart(5, '0');
+            return `${year}${month}${serial}`;
+        }
+
+        function validateForm() {
+            const projectCheckboxes = document.querySelectorAll('input[name="project[]"]:checked');
+            const fundingCheckboxes = document.querySelectorAll('input[name="funding[]"]:checked');
+
+            if (projectCheckboxes.length === 0 && fundingCheckboxes.length === 0) {
+                alert('請至少選擇一個請款項目或活動名稱。');
+                return false;
+            }
+
+            currentSerial++;
+            return true;
+        }
+
+        function updateCheckboxVisibility() {
+            const projectCheckboxes = document.querySelectorAll('input[name="project[]"]');
+            const fundingSection = document.querySelector('.funding-section');
+
+            const projectChecked = Array.from(projectCheckboxes).some(checkbox => checkbox.checked);
+            fundingSection.style.display = projectChecked ? 'none' : 'block';
+        }
+
+        window.onload = function() {
+            const serialNumberField = document.getElementById('serial-number');
+            serialNumberField.value = generateSerialNumber();
+            updateCheckboxVisibility();
+        };
+    </script>
+</head>
+<body>
+
+<header>
+    <h1>財團法人台北市失親兒福利基金會</h1>
+</header>
+
+<form action="支出報帳.php" method="post" enctype="multipart/form-data" onsubmit="return validateForm()">
+    <h2>預支請款表單</h2>
+    <label for="form-date">填寫表單日期:</label>
+    <input type="date" id="form-date" name="form-date" required>
+
+    <label for="serial-number">流水號:</label>
+    <input type="text" id="serial-number" name="serial-number" readonly>
+
+    <label for="recipient-name">填寫受款人姓名:</label>
+    <input type="text" id="recipient-name" name="recipient-name" required>
+
+    <label for="payment-date">付款日期:</label>
+    <input type="date" id="payment-date" name="payment-date" required>
+
+    <h2>請 款 事 由</h2>
+    <label for="activity-cost">活動費用:</label>
+    <input type="number" id="activity-cost" name="activity-cost" required>
+
+    <label>活動名稱:</label>
+    <div class="checkbox-group">
+        <label><input type="checkbox" name="project[]" value="half-day" onchange="updateCheckboxVisibility()"> 半日/一日型：EX:方案活動</label>
+        <label><input type="checkbox" name="project[]" value="overnight" onchange="updateCheckboxVisibility()"> 過夜型：EX:方案活動</label>
+        <label><input type="checkbox" name="project[]" value="sponsorship" onchange="updateCheckboxVisibility()"> 企業贊助活動: Happy Go</label>
+        <label><input type="checkbox" name="project[]" value="multiple" onchange="updateCheckboxVisibility()"> 多次型：EX:成長團體、領袖小組</label>
+        <label><input type="checkbox" name="project[]" value="other" onchange="updateCheckboxVisibility()"> 其他：體驗活動(10萬元預算以上)</label>
+    </div>
+
+    <div class="funding-section">
+        <label>請款項目：</label>
+        <div class="checkbox-group">
+            <label><input type="checkbox" name="funding[]" value="angel-care"> 天使關懷專案：禮金</label>
+            <label><input type="checkbox" name="funding[]" value="repair"> 修繕費</label>
+            <label><input type="checkbox" name="funding[]" value="transportation"> 探訪交通差旅</label>
+            <label><input type="checkbox" name="funding[]" value="postage"> 郵電費</label>
+            <label><input type="checkbox" name="funding[]" value="caring"> 慰問關懷</label>
+            <label><input type="checkbox" name="funding[]" value="telecom"> 電信費</label>
+            <label><input type="checkbox" name="funding[]" value="tutoring"> 課輔鐘點費</label>
+            <label><input type="checkbox" name="funding[]" value="stationery"> 文具印刷</label>
+            <label><input type="checkbox" name="funding[]" value="counseling"> 心輔諮商</label>
+            <label><input type="checkbox" name="funding[]" value="computer-supplies"> 電腦用品</label>
+        </div>
+    </div>
+
+    <label>獎助學金 共幾位: <input type="number" name="scholarship-count" placeholder="填寫人數" required></label>
+    <label>專案名稱: <input type="text" name="project-name" placeholder="請填寫專案名稱" required></label>
+    <label>主題: <input type="text" name="subject" placeholder="主題" required></label>
+    <label>日期: <input type="date" name="event-date" required></label>
+
+    <div class="checkbox-group">
+        <label>其他: <input type="text" name="other-content" placeholder="其他內容"></label>
+        <label>跨部門項目: <input type="text" name="cross-dept-content" placeholder="跨部門內容"></label>
+    </div>
+
+    <!-- 文件上傳部分 -->
+    <h2 class="file-upload-section">文件上傳區</h2>
+    <label for="csv-upload">上傳 CSV 檔案:</label>
+    <input type="file" id="csv-upload" name="csv-upload" accept=".csv">
+
+    <label for="image-upload">上傳圖片檔案:</label>
+    <input type="file" id="image-upload" name="image-upload" accept="image/*">
+
+    <input type="submit" value="提交表單" class="button">
+</form>
+
+</body>
+</html>
