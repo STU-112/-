@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>受款人資料輸入 - 台北市失親兒基金會</title>
+    <style>
+        /* 全局樣式 */
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(to bottom, #ffebcd, #ffdead);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        
+        .form-container {
+            background-color: rgba(255, 255, 255, 0.9);
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            max-width: 500px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 14px;
+            color: #555;
+        }
+
+        input[type="text"],
+        input[type="email"],
+        input[type="date"],
+        input[type="number"] {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-sizing: border-box;
+        }
+
+        input[type="submit"] {
+            width: 100%;
+            background-color: #f4a460;
+            color: white;
+            padding: 12px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        input[type="submit"]:hover {
+            background-color: #e59400;
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 20px;
+            color: #999;
+        }
+
+        .announcement {
+            background-color: #ffcc99;
+            border-radius: 5px;
+            padding: 15px;
+            margin-bottom: 20px;
+            text-align: center;
+            font-size: 18px;
+            font-weight: bold;
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+    <div class="form-container">
+        <div class="announcement">
+            台北市失親兒基金會
+        </div>
+        <h1>受款人資料輸入</h1>
+        <form action="nb.php" method="post">
+            <label for="姓名">受款人姓名:</label>
+            <input type="text" id="姓名" name="受款人姓名" required>
+
+            <label for="電子郵件">電子郵件:</label>
+            <input type="email" id="電子郵件" name="電子郵件" required>
+
+            <label for="電話號碼">電話號碼:</label>
+            <input type="text" id="電話號碼" name="電話號碼" required>
+
+            <label for="身分證字號">身分證字號:</label>
+            <input type="text" id="身分證字號" name="身分證字號" required>
+
+            <label for="聯絡地址">聯絡地址:</label>
+            <input type="text" id="聯絡地址" name="聯絡地址" required>
+
+            <label for="註冊日期">註冊日期:</label>
+            <input type="date" id="註冊日期" name="註冊日期" required>
+
+            <label for="驗證">驗證:</label>
+            <input type="number" id="驗證" name="驗證" required>
+
+            <label for="公司名稱">公司名稱:</label>
+            <input type="text" id="公司名稱" name="公司名稱" required>
+
+            <input type="submit" value="提交資料">
+        </form>
+        <footer>
+            <p>2024 © 台北市失親兒基金會</p>
+        </footer>
+    </div>
+</body>
+</html>

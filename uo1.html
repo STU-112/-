@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>系統管理員管理</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-image: url('https://www.transparenttextures.com/patterns/white-paper-texture.png'), linear-gradient(to right, #ffefba, #ffffff);
+            background-blend-mode: overlay;
+            color: #333;
+            margin: 0;
+            padding: 20px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #d86e4a;
+            font-size: 2.5em;
+            margin-bottom: 20px;
+            position: relative;
+            animation: slideIn 0.5s ease-in-out;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateY(-20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        h1::before, h1::after {
+            content: "✨";
+            position: absolute;
+            font-size: 1.5em;
+            top: 0;
+        }
+
+        h1::before { left: -30px; }
+        h1::after { right: -30px; }
+
+        .form-container {
+            margin-bottom: 40px;
+        }
+
+        form {
+            background-color: rgba(255, 255, 255, 0.9);
+            border-radius: 12px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+            padding: 30px;
+            max-width: 600px;
+            margin: auto;
+            animation: bounceIn 0.5s;
+        }
+
+        @keyframes bounceIn {
+            from { transform: scale(0.8); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: bold;
+            font-size: 1.1em;
+        }
+
+        input[type="text"],
+        input[type="password"],
+        input[type="number"] {
+            width: calc(100% - 24px);
+            padding: 12px;
+            margin-bottom: 15px;
+            border: 2px solid #d86e4a;
+            border-radius: 8px;
+            font-size: 1em;
+            transition: border-color 0.3s, transform 0.2s;
+        }
+
+        input[type="text"]:focus,
+        input[type="password"]:focus,
+        input[type="number"]:focus {
+            border-color: #a34a33;
+            outline: none;
+            transform: scale(1.02);
+        }
+
+        input[type="submit"] {
+            background-color: #d86e4a;
+            color: #fff;
+            border: none;
+            padding: 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            width: 100%;
+            font-size: 1.2em;
+            transition: background-color 0.3s, transform 0.2s;
+        }
+
+        input[type="submit"]:hover {
+            background-color: #b35839;
+            transform: scale(1.05);
+        }
+
+        .data-table {
+            margin-top: 20px;
+            border-collapse: collapse;
+            width: 100%;
+        }
+
+        .data-table th, .data-table td {
+            border: 1px solid #d86e4a;
+            padding: 8px;
+            text-align: left;
+        }
+
+        .data-table th {
+            background-color: #f2f2f2;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            font-size: 0.9em;
+        }
+
+        .footer p {
+            color: #d86e4a;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="form-container">
+        <h1>系統管理員管理</h1>
+        <form id="adminForm">
+            <label for="管理員ID">管理員ID</label>
+            <input type="text" id="管理員ID" name="管理員ID" required>
+
+            <label for="姓名">姓名</label>
+            <input type="text" id="姓名" name="姓名" required>
+
+            <label for="帳號">帳號</label>
+            <input type="text" id="帳號" name="帳號" required>
+
+            <label for="密碼">密碼</label>
+            <input type="password" id="密碼" name="密碼" required>
+
+            <label for="權限等級">權限等級</label>
+            <input type="number" id="權限等級" name="權限等級" required>
+
+            <label for="狀態">狀態</label>
+            <input type="text" id="狀態" name="狀態" required>
+
+            <label for="操作日誌">操作日誌</label>
+            <input type="text" id="操作日誌" name="操作日誌" required>
+
+            <input type="submit" value="提交">
+        </form>
+    </div>
+
+    <div>
+        <h2>管理員資料</h2>
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>管理員ID</th>
+                    <th>姓名</th>
+                    <th>帳號</th>
+                    <th>權限等級</th>
+                    <th>狀態</th>
+                    <th>操作日誌</th>
+                </tr>
+            </thead>
+            <tbody id="data-list">
+                <!-- 此處將顯示曾經輸入的資料 -->
+            </tbody>
+        </table>
+    </div>
+
+    <div class="footer">
+        <p>© 2024 台北市失親兒基金會</p>
+    </div>
+
+    <script>
+        document.getElementById('adminForm').onsubmit = function(event) {
+            event.preventDefault();
+
+            const formData = new FormData(event.target);
+            const dataList = document.getElementById('data-list');
+
+            const newRow = document.createElement('tr');
+            newRow.innerHTML = `
+                <td>${formData.get('管理員ID')}</td>
+                <td>${formData.get('姓名')}</td>
+                <td>${formData.get('帳號')}</td>
+                <td>${formData.get('權限等級')}</td>
+                <td>${formData.get('狀態')}</td>
+                <td>${formData.get('操作日誌')}</td>
+            `;
+            dataList.appendChild(newRow);
+
+            event.target.reset();
+        };
+    </script>
+
+</body>
+</html>
