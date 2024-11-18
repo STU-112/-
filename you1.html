@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>請款明細表單</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            margin: 0; /* 去掉默认的边距 */
+        }
+        form {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            max-width: 400px; /* 设置最大宽度 */
+            width: 100%; /* 使其适应小屏幕 */
+        }
+        h2 {
+            text-align: center; /* 标题居中 */
+            margin-bottom: 20px; /* 标题与表单的间距 */
+        }
+        label {
+            display: block; /* 标签显示为块级元素 */
+            margin: 10px 0 5px; /* 标签的上下间距 */
+        }
+        input[type="text"], input[type="number"], input[type="date"] {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px; /* 输入框的下间距 */
+            border: 1px solid #ccc;
+            border-radius: 3px;
+            box-sizing: border-box; /* 包括padding和border的总宽度 */
+        }
+        input[type="submit"] {
+            background-color: #28a745;
+            color: white;
+            padding: 10px;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+            width: 100%;
+            font-size: 16px; /* 增加字体大小 */
+        }
+        input[type="submit"]:hover {
+            background-color: #218838;
+        }
+    </style>
+</head>
+<body>
+
+<form action="you.php" method="POST">
+    <h2>請款明細表單</h2>
+    <label for="填表日期">填表日期:</label>
+    <input type="date" id="填表日期" name="填表日期" required>
+    
+    <label for="活動項目">活動項目:</label>
+    <input type="text" id="活動項目" name="活動項目" required>
+    
+    <label for="請款金額">請款金額:</label>
+    <input type="number" id="請款金額" name="請款金額" required>
+    
+    <label for="請款內容說明">請款內容說明:</label>
+    <input type="text" id="請款內容說明" name="請款內容說明" required>
+    
+    <label for="支出明細">支出明細:</label>
+    <input type="text" id="支出明細" name="支出明細" required>
+    
+    <input type="submit" value="提交">
+</form>
+
+</body>
+</html>

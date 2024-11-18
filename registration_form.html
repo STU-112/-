@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <title>資料輸入系統</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: inline-block;
+            width: 120px;
+        }
+        input[type="text"], input[type="password"] {
+            width: 200px;
+            padding: 5px;
+        }
+        button {
+            padding: 8px 15px;
+            margin-right: 10px;
+        }
+        #storedDataList {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h2>資料輸入系統</h2>
+    <form id="registrationForm">
+        <div class="form-group">
+            <label for="userid">使用者ID:</label>
+            <input type="text" id="userid" name="userid" required>
+        </div>
+        <div class="form-group">
+            <label for="name">姓名:</label>
+            <input type="text" id="name" name="name" required>
+        </div>
+        <div class="form-group">
+            <label for="phone">電話:</label>
+            <input type="text" id="phone" name="phone">
+        </div>
+        <div class="form-group">
+            <label for="address">地址:</label>
+            <input type="text" id="address" name="address">
+        </div>
+        <div class="form-group">
+            <label for="username">帳號:</label>
+            <input type="text" id="username" name="username" required>
+        </div>
+        <div class="form-group">
+            <label for="password">密碼:</label>
+            <input type="password" id="password" name="password" required>
+        </div>
+        <button type="button" onclick="saveRegistrationData()">暫存資料</button>
+        <button type="button" onclick="loadStoredData()">載入先前資料</button>
+        <button type="button" onclick="submitData()">提交資料</button>
+    </form>
+
+    <div id="storedDataList"></div>
+
+    <script>
+        // 暫存資料到 localStorage
+        function saveRegistrationData() {
+            const registrationData = {
+                userid: document.getElementById('userid').value,
+                name: document.getElementById('name').value,
+                phone: document.getElementById('phone').value,
+                address: document.getElementById('address').value,
+                username: document.getElementById('username').value,
+                password: document.getElementById('password').value,
+            };
+
+            // 獲取暫存的資料
+            let storedData = JSON.parse(localStorage.getItem('registrationData')) || [];
+            storedData.push(registrationData); // 將新資料加入暫存陣列
+            localStorage.setItem('registrationData', JSON.stringify(storedData)); // 存回 localStorage
+
+            alert('資料已暫存');
+            clearForm(); // 清空表單
+        }
+
+        // 清空表單
+        function clearForm() {
+            document.getElementById('registrationForm').reset(); // 使用 reset() 方法清空表單
+        }
+
+        // 載入先前資料
+        function loadStoredData() {
+            const storedData = JSON.parse(localStorage.getItem('registrationData')) || [];
+            const storedDataList = document.getElementById('storedDataList');
+            storedDataList.innerHTML = '';
+
+            if (storedData.length === 0) {
+                storedDataList.innerHTML = '<p>沒有暫存的資料</p>';
+                return;
+            }
+
+            storedData.forEach((data, index) => {
+                storedDataList.innerHTML += `
+                    <div>
+                        <input type="checkbox" id="record${index}" value="${index}">
+                        使用者ID: ${data.userid}, 姓名: ${data.name}, 電話: ${data.phone}, 地址: ${data.address}, 帳號: ${data.username}
+                    </div>
+                `;
+            });
+        }
+
+        // 提交選擇的暫存資料
+        function submitData() {
+            const storedData = JSON.parse(localStorage.getItem('registrationData'));
+            if (!storedData || storedData.length === 0) {
+                alert('沒有暫存資料可以提交');
+                return;
+            }
+
+            const selectedIndices = Array.from(document.querySelectorAll('#storedDataList input[type="checkbox"]:checked')).map(cb => cb.value);
+            if (selectedIndices.length === 0) {
+                alert('請選擇要提交的資料');
+                return;
+            }
+
+            const selectedData = selectedIndices.map(index => storedData[index]);
+
+            // 將暫存資料發送到 PHP
+            fetch('insert.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(selectedData),
+            })
+            .then(response => response.text())
+            .then(data => {
+                alert(data);
+                // 提交後清空暫存
+                const remainingData = storedData.filter((_, index) => !selectedIndices.includes(index.toString()));
+                localStorage.setItem('registrationData', JSON.stringify(remainingData)); // 更新 localStorage
+                document.getElementById('storedDataList').innerHTML = ''; // 清空顯示的資料
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        }
+    </script>
+</body>
+</html>
