@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>用戶註冊表單</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f0f2f5;
+        }
+        .header {
+            background-color: #ffcccb;
+            color: #333;
+            padding: 20px;
+            text-align: center;
+            font-size: 24px;
+            font-weight: bold;
+        }
+        .container {
+            display: flex;
+            justify-content: space-between;
+            width: 80%;
+            max-width: 1200px;
+            margin: 20px auto;
+        }
+        .form-container, .data-container {
+            width: 45%;
+            background-color: #ffffff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        .form-container {
+            border-right: 1px solid #e0e0e0;
+        }
+        h1, h3 {
+            margin-top: 0;
+        }
+        .input-group {
+            margin-bottom: 15px;
+        }
+        .input-group label {
+            display: block;
+            margin-bottom: 5px;
+        }
+        .input-group input {
+            width: 100%;
+            padding: 8px;
+            box-sizing: border-box;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        .submit-group {
+            text-align: center;
+            margin-top: 20px;
+        }
+        .submit-group input[type="button"], .submit-group input[type="submit"] {
+            padding: 10px 20px;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        .submit-group input[type="button"] {
+            background-color: #007BFF;
+        }
+        .submit-group input[type="submit"] {
+            background-color: #4CAF50;
+        }
+        .data-container table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .data-container th, .data-container td {
+            padding: 10px;
+            border: 1px solid #ddd;
+            text-align: left;
+        }
+        .data-container th {
+            background-color: #f2f2f2;
+        }
+        .data-container tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        失親兒
+    </div>
+    <div class="container">
+        <div class="form-container">
+            <h1>用戶註冊表單</h1>
+            <form id="註冊表單" action="chan.php" method="POST" onsubmit="return 處理提交()">
+                <div class="input-group">
+                    <label for="使用者ID">使用者ID:</label>
+                    <input type="text" id="使用者ID" name="使用者ID" required>
+                </div>
+
+                <div class="input-group">
+                    <label for="姓名">姓名:</label>
+                    <input type="text" id="姓名" name="姓名" required>
+                </div>
+
+                <div class="input-group">
+                    <label for="電話">電話:</label>
+                    <input type="text" id="電話" name="電話">
+                </div>
+
+                <div class="input-group">
+                    <label for="地址">地址:</label>
+                    <input type="text" id="地址" name="地址">
+                </div>
+
+                <div class="input-group">
+                    <label for="帳號">帳號:</label>
+                    <input type="text" id="帳號" name="帳號" required>
+                </div>
+
+                <div class="input-group">
+                    <label for="密碼">密碼:</label>
+                    <input type="password" id="密碼" name="密碼" required>
+                </div>
+
+                <div class="submit-group">
+                    <input type="button" value="暫存" onclick="處理暫存()">
+                    <input type="submit" value="提交">
+                </div>
+                <input type="hidden" name="提交資料" id="提交資料">
+            </form>
+        </div>
+
+        <div class="data-container">
+            <h3>暫存資料</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>選擇</th>
+                        <th>使用者ID</th>
+                        <th>姓名</th>
+                        <th>電話</th>
+                        <th>地址</th>
+                        <th>帳號</th>
+                        <th>密碼</th>
+                        <th>暫存時間</th>
+                    </tr>
+                </thead>
+                <tbody id="暫存資料表格">
+                    <!-- 暫存資料將顯示在這裡 -->
+                </tbody>
+            </table>
+            <div class="submit-group">
+                <input type="button" value="刪除選中" onclick="處理刪除()">
+                <input type="button" value="提交選中" onclick="提交選擇資料()">
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function 處理暫存() {
+            let 表單資料 = JSON.parse(localStorage.getItem('表單資料') || '[]');
+            表單資料.push({
+                使用者ID: document.getElementById('使用者ID').value,
+                姓名: document.getElementById('姓名').value,
+                電話: document.getElementById('電話').value,
+                地址: document.getElementById('地址').value,
+                帳號: document.getElementById('帳號').value,
+                密碼: document.getElementById('密碼').value,
+                時間戳記: new Date().toLocaleString('zh-TW', { timeZone: 'Asia/Taipei' })
+            });
+            localStorage.setItem('表單資料', JSON.stringify(表單資料));
+            alert("資料已暫存!");
+            清除表單欄位();
+            加載暫存資料(); 
+			處理提交();
+        }
+
+        function 處理提交() {
+            return true; 
+        }
+
+        function 處理刪除() {
+            const 已選取的項目 = document.querySelectorAll('input[name="記錄核取方塊"]:checked');
+            const 選取索引 = Array.from(已選取的項目).map(cb => cb.value);
+
+            if (選取索引.length === 0) {
+                alert("請選擇至少一條記錄來刪除!");
+                return;
+            }
+
+            let 表單資料 = JSON.parse(localStorage.getItem('表單資料') || '[]');
+            表單資料 = 表單資料.filter((_, index) => !選取索引.includes(index.toString()));
+            localStorage.setItem('表單資料', JSON.stringify(表單資料));
+            加載暫存資料(); 
+            alert("已成功刪除!");
+        }
+
+        function 提交選擇資料() {
+            const 已選取的項目 = document.querySelectorAll('input[name="記錄核取方塊"]:checked');
+            const 選取索引 = Array.from(已選取的項目).map(cb => cb.value);
+
+            if (選取索引.length === 0) {
+                alert("請選擇至少一條記錄來提交!");
+                return;
+            }
+            
+            let 表單資料 = JSON.parse(localStorage.getItem('表單資料') || '[]');
+            let 要提交的資料 = 選取索引.map(index => 表單資料[index]);
+            document.getElementById('提交資料').value = JSON.stringify(要提交的資料);
+
+            表單資料 = 表單資料.filter((_, index) => !選取索引.includes(index.toString()));
+            localStorage.setItem('表單資料', JSON.stringify(表單資料));
+            document.getElementById('註冊表單').submit();
+            
+	   }
+
+        function 加載暫存資料() {
+            let 表單資料 = JSON.parse(localStorage.getItem('表單資料') || '[]');
+            const 表格內容 = document.getElementById('暫存資料表格');
+            表格內容.innerHTML = '';
+
+            表單資料.forEach((資料, index) => {
+                const 列 = document.createElement('tr');
+
+                列.innerHTML = `
+                    <td><input type="checkbox" name="記錄核取方塊" value="${index}"></td>
+                    <td>${資料.使用者ID}</td>
+                    <td>${資料.姓名}</td>
+                    <td>${資料.電話}</td>
+                    <td>${資料.地址}</td>
+                    <td>${資料.帳號}</td>
+                    <td>${資料.密碼}</td>
+                    <td>${資料.時間戳記}</td>
+                `;
+                表格內容.appendChild(列);
+				處理提交();
+            });
+        }
+
+        function 清除表單欄位() {
+            document.getElementById('註冊表單').reset();
+        }
+
+        window.onload = 加載暫存資料;
+    </script>
+</body>
+</html>
