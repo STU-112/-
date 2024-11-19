@@ -1,180 +1,136 @@
 <?php
-// 資料庫連線參數設定
-$servername = "localhost:3307"; // 伺服器名稱
-$username = "root"; // 資料庫使用者名稱
-$password = " "; // 資料庫密碼 (空字串)
-$dbname = "支出報帳"; // 資料庫名稱
+// 連接資料庫
+$server = 'localhost:3307'; // 伺服器名稱
+$用戶名 = 'root'; // 用戶名
+$密碼 = ' '; // 密碼 (設為空字串而不是空格)
+$資料庫 = '支出報帳'; // 資料庫名稱
 
-// 創建連接
-$conn = new mysqli($servername, $username, $password);
-if ($conn->connect_error) {
-    die("連接失敗: " . $conn->connect_error);
+// 連接到 MySQL
+$連接 = mysqli_connect($server, $用戶名, $密碼);
+
+// 檢查連接
+if (!$連接) {
+    die("連接失敗: " . mysqli_connect_error());
 }
 
-// 建立資料庫
-$conn->query("CREATE DATABASE IF NOT EXISTS $dbname");
-$conn->select_db($dbname);
-
-// 建立資料表（用來存儲上傳的檔案資訊）
-$conn->query("CREATE TABLE IF NOT EXISTS 支出報帳資料表 (
-    id INT(11) AUTO_INCREMENT PRIMARY KEY,
-    form_date DATE,
-    serial_number VARCHAR(50),
-    recipient_name VARCHAR(100),
-    payment_date DATE,
-    activity_cost DECIMAL(10, 2),
-    project TEXT,
-    funding TEXT,
-    scholarship_count INT,
-    project_name VARCHAR(100),
-    subject VARCHAR(100),
-    event_date DATE,
-    other_content TEXT,
-    cross_dept_content TEXT,
-    csv_file_path VARCHAR(255),
-    image_file_path VARCHAR(255),
-    upload_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-)");
-
-// 從表單取得輸入資料
-$form_date = $_POST['form-date'];
-$serial_number = $_POST['serial-number'];
-$recipient_name = $_POST['recipient-name'];
-$payment_date = $_POST['payment-date'];
-$activity_cost = $_POST['activity-cost'];
-$project = isset($_POST['project']) ? implode(", ", $_POST['project']) : null;
-$funding = isset($_POST['funding']) ? implode(", ", $_POST['funding']) : null;
-$scholarship_count = $_POST['scholarship-count'];
-$project_name = $_POST['project-name'];
-$subject = $_POST['subject'];
-$event_date = $_POST['event-date'];
-$other_content = $_POST['other-content'];
-$cross_dept_content = $_POST['cross-dept-content'];
-
-// 處理文件上傳
-$csv_file_path = null; // CSV 檔案路徑初始為 null
-$image_file_path = null; // 圖片檔案路徑初始為 null
-
-// 檢查是否有上傳 CSV 檔案
-if (!empty($_FILES['csv-upload']['name'])) {
-    $csv_file_path = "uploads/" . basename($_FILES['csv-upload']['name']);
-    move_uploaded_file($_FILES['csv-upload']['tmp_name'], $csv_file_path);
-}
-
-// 檢查是否有上傳圖片檔案
-if (!empty($_FILES['image-upload']['name'])) {
-    $image_file_path = "uploads/" . basename($_FILES['image-upload']['name']);
-    move_uploaded_file($_FILES['image-upload']['tmp_name'], $image_file_path);
-}
-
-// 建立 SQL 插入語句
-$sql = "INSERT INTO 支出報帳資料表 (form_date, serial_number, recipient_name, payment_date, activity_cost, project, funding, 
-        scholarship_count, project_name, subject, event_date, other_content, cross_dept_content, csv_file_path, image_file_path) 
-        VALUES ('$form_date', '$serial_number', '$recipient_name', '$payment_date', '$activity_cost', '$project', '$funding', 
-        '$scholarship_count', '$project_name', '$subject', '$event_date', '$other_content', '$cross_dept_content', '$csv_file_path', '$image_file_path')";
-
-// 檢查資料是否成功插入資料庫
-if ($conn->query($sql) === TRUE) {
-    $insert_success = true; // 插入成功標誌
+// 檢查資料庫是否已存在，若不存在則創建
+$sql = "CREATE DATABASE IF NOT EXISTS `$資料庫`"; // 資料庫名稱用反引號包裹
+if (mysqli_query($連接, $sql)) {
+    echo "資料庫已存在或創建成功!!<br>";
 } else {
-    $insert_success = false; // 插入失敗標誌
+    die("創建資料庫失敗: " . mysqli_error($連接) . "<br>");
 }
 
-// 關閉資料庫連線
-$conn->close();
+// 選擇資料庫
+if (!mysqli_select_db($連接, $資料庫)) {
+    die("選擇資料庫失敗: " . mysqli_error($連接) . "<br>");
+}
+
+// 創建資料表
+$create_table_sql = "CREATE TABLE IF NOT EXISTS 支出報帳表單 (
+    count VARCHAR(50) PRIMARY KEY,
+    受款人 VARCHAR(50),
+    填表日期 DATE DEFAULT NULL,
+    付款日期 DATE DEFAULT NULL,
+    支出項目 VARCHAR(50),
+    活動名稱 VARCHAR(50) DEFAULT NULL,
+    專案日期 DATE DEFAULT NULL,
+    獎學金人數 INT DEFAULT NULL,
+    專案名稱 CHAR(10) DEFAULT NULL,
+    主題 CHAR(50) DEFAULT NULL,
+    獎學金日期 DATE DEFAULT NULL,
+    經濟扶助 CHAR(10) DEFAULT NULL,
+    其他項目 CHAR(50) DEFAULT NULL,
+    說明 CHAR(100) DEFAULT NULL,
+    支付方式 CHAR(10),
+    國字金額_hidden CHAR(50),
+    金額 DECIMAL(10,2) DEFAULT NULL,
+    簽收金額 DECIMAL(10,2) DEFAULT NULL,
+    簽收人 CHAR(10) DEFAULT NULL,
+    簽收日 DATE DEFAULT NULL,
+    銀行郵局 CHAR(10) DEFAULT NULL,
+    分行 CHAR(10) DEFAULT NULL,
+    戶名 CHAR(10) DEFAULT NULL,
+    帳戶 CHAR(10) DEFAULT NULL,
+    票號 CHAR(10) DEFAULT NULL,
+    到期日 DATE DEFAULT NULL,
+    預收金額 DECIMAL(10,2) DEFAULT NULL
+)";
+if (mysqli_query($連接, $create_table_sql)) {
+    echo "支用資料表創建成功或已存在!!<br>";
+} else {
+    die("創建支用資料表失敗: " . mysqli_error($連接) . "<br>");
+}
+
+// 生成流水號函數
+function generateSerialNumber($連接) {
+    $now = new DateTime();
+    $year = $now->format('Y') - 1911;
+    $month = str_pad($now->format('m'), 2, '0', STR_PAD_LEFT);
+    $prefix = "B{$year}{$month}";
+    $sql = "SELECT COUNT(*) as count FROM pay_table WHERE count LIKE '$prefix%'";
+    $result = mysqli_query($連接, $sql);
+    if (!$result) {
+        die("查詢流水號失敗: " . mysqli_error($連接) . "<br>");
+    }
+    $row = mysqli_fetch_assoc($result);
+    $serialNumber = $prefix . str_pad($row['count'] + 1, 5, '0', STR_PAD_LEFT);
+    return $serialNumber;
+}
+
+// 處理表單提交
+if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+    // 驗證必填字段
+    $必填字段 = ['填表日期', '受款人', '支出項目'];
+    foreach ($必填字段 as $field) {
+        if (empty($_POST[$field])) {
+            die("請填寫所有必填字段。");
+        }
+    }
+
+    // 取得表單數據
+    $受款人 = mysqli_real_escape_string($連接, $_POST['受款人']);
+    $填表日期 = mysqli_real_escape_string($連接, $_POST['填表日期']);
+    $付款日期 = !empty($_POST['付款日期']) ? "'" . mysqli_real_escape_string($連接, $_POST['付款日期']) . "'" : "NULL";
+    $支出項目 = mysqli_real_escape_string($連接, $_POST['支出項目']);
+    $活動名稱 = !empty($_POST['活動名稱']) ? "'" . mysqli_real_escape_string($連接, $_POST['活動名稱']) . "'" : "NULL";
+    $專案日期 = !empty($_POST['專案日期']) ? "'" . mysqli_real_escape_string($連接, $_POST['專案日期']) . "'" : "NULL";
+    $獎學金人數 = !empty($_POST['獎學金人數']) ? intval($_POST['獎學金人數']) : "NULL";
+    $專案名稱 = !empty($_POST['專案名稱']) ? "'" . mysqli_real_escape_string($連接, $_POST['專案名稱']) . "'" : "NULL";
+    $主題 = !empty($_POST['主題']) ? "'" . mysqli_real_escape_string($連接, $_POST['主題']) . "'" : "NULL";
+    $獎學金日期 = !empty($_POST['獎學金日期']) ? "'" . mysqli_real_escape_string($連接, $_POST['獎學金日期']) . "'" : "NULL";
+    $經濟扶助 = !empty($_POST['經濟扶助']) ? "'" . mysqli_real_escape_string($連接, $_POST['經濟扶助']) . "'" : "NULL";
+    $其他項目 = isset($_POST['其他項目']) ? implode(", ", $_POST['其他項目']) : "NULL"; // 將選中的項目轉為字串
+    $說明 = mysqli_real_escape_string($連接, $_POST['說明']);
+    $支付方式 = mysqli_real_escape_string($連接, $_POST['支付方式']);
+    $國字金額 = isset($_POST['國字金額_hidden']) ? $_POST['國字金額_hidden'] : '';
+    $金額 = !empty($_POST['金額']) ? "'" . mysqli_real_escape_string($連接, $_POST['金額']) . "'" : "NULL";
+    $簽收金額 = !empty($_POST['簽收金額']) ? "'" . mysqli_real_escape_string($連接, $_POST['簽收金額']) . "'" : "NULL";
+    $簽收人 = !empty($_POST['簽收人']) ? "'" . mysqli_real_escape_string($連接, $_POST['簽收人']) . "'" : "NULL";
+    $簽收日 = !empty($_POST['簽收日']) ? "'" . mysqli_real_escape_string($連接, $_POST['簽收日']) . "'" : "NULL";
+    $銀行郵局 = !empty($_POST['銀行郵局']) ? "'" . mysqli_real_escape_string($連接, $_POST['銀行郵局']) . "'" : "NULL";
+    $分行 = !empty($_POST['分行']) ? "'" . mysqli_real_escape_string($連接, $_POST['分行']) . "'" : "NULL";
+    $戶名 = !empty($_POST['戶名']) ? "'" . mysqli_real_escape_string($連接, $_POST['戶名']) . "'" : "NULL";
+    $帳戶 = !empty($_POST['帳戶']) ? "'" . mysqli_real_escape_string($連接, $_POST['帳戶']) . "'" : "NULL";
+    $票號 = !empty($_POST['票號']) ? "'" . mysqli_real_escape_string($連接, $_POST['票號']) . "'" : "NULL";
+    $到期日 = !empty($_POST['到期日']) ? "'" . mysqli_real_escape_string($連接, $_POST['到期日']) . "'" : "NULL";
+    $預收金額 = !empty($_POST['預收金額']) ? "'" . mysqli_real_escape_string($連接, $_POST['預收金額']) . "'" : "NULL";
+
+    // 生成流水號
+    $流水號 = generateSerialNumber($連接);
+
+    // 插入資料
+    $insert_record_sql = "INSERT INTO pay_table (count, 受款人, 填表日期, 付款日期, 支出項目, 活動名稱, 專案日期, 獎學金人數, 專案名稱, 主題, 獎學金日期, 經濟扶助, 其他項目, 說明, 支付方式, 國字金額_hidden, 金額, 簽收金額, 簽收人, 簽收日, 銀行郵局, 分行, 戶名, 帳戶, 票號, 到期日, 預收金額)
+    VALUES ('$流水號', '$受款人', '$填表日期', $付款日期, '$支出項目', $活動名稱, $專案日期, $獎學金人數, $專案名稱, $主題, $獎學金日期, $經濟扶助, '$其他項目', '$說明', '$支付方式', '$國字金額', $金額, $簽收金額, $簽收人, $簽收日, $銀行郵局, $分行, $戶名, $帳戶, $票號, $到期日, $預收金額)";
+
+    if (mysqli_query($連接, $insert_record_sql)) {
+        echo "表單已成功提交!!<br>";
+    } else {
+        die("插入資料失敗: " . mysqli_error($連接) . "<br>SQL: " . $insert_record_sql);
+    }
+}
+
+include '尋找很久.html';
+// 關閉資料庫連接
+mysqli_close($連接);
 ?>
-
-<!DOCTYPE html>
-<html lang="zh-Hant">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>上傳結果</title>
-    <style>
-        body {
-            margin: 0;
-            height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            background: linear-gradient(135deg, #74b9ff, #81ecec);
-            font-family: 'Noto Sans TC', sans-serif;
-            color: #2d3436;
-        }
-        .result-box {
-            background-color: #fff;
-            padding: 40px;
-            border-radius: 15px;
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
-            text-align: center;
-            width: 90%;
-            max-width: 400px;
-        }
-        h1 {
-            margin-bottom: 20px;
-            color: #0984e3;
-        }
-        p {
-            margin: 10px 0;
-            font-size: 18px;
-        }
-        .success {
-            color: #00b894;
-        }
-        .failure {
-            color: #d63031;
-        }
-        .countdown {
-            font-weight: bold;
-            color: #636e72;
-        }
-        .button {
-            display: inline-block;
-            margin-top: 20px;
-            padding: 10px 20px;
-            background-color: #0984e3;
-            color: white;
-            border: none;
-            border-radius: 25px;
-            cursor: pointer;
-            text-decoration: none;
-            font-size: 18px;
-            transition: background-color 0.3s ease;
-        }
-        .button:hover {
-            background-color: #74b9ff;
-        }
-    </style>
-</head>
-<body>
-    <div class="result-box">
-        <h1>上傳結果</h1>
-        <?php if ($insert_success): ?>
-            <p class="success">資料儲存成功！</p>
-            <?php if ($csv_file_path): ?>
-                <p><a href="<?php echo $csv_file_path; ?>" download>點此下載 CSV 檔案</a></p>
-            <?php endif; ?>
-            <?php if ($image_file_path): ?>
-                <p><a href="<?php echo $image_file_path; ?>" download>點此下載圖檔</a></p>
-            <?php endif; ?>
-        <?php else: ?>
-            <p class="failure">資料儲存失敗。</p>
-        <?php endif; ?>
-
-        <p>將在 <span id="countdown">5</span> 秒內返回。</p>
-        <a href="報帳.html" class="button">立即返回</a>
-    </div>
-
-    <script>
-        let countdown = 5;
-        const interval = setInterval(() => {
-            document.getElementById('countdown').innerText = countdown;
-            countdown--;
-            if (countdown < 0) {
-                clearInterval(interval);
-                window.location.href = "報帳.html";
-            }
-        }, 1000);
-    </script>
-</body>
-</html>
