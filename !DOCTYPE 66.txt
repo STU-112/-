@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>財團法人台北市失親兒福利基金會</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f9f9f9;
+            margin: 0;
+            padding: 20px;
+        }
+        header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        h1 {
+            color: #2e6da4;
+        }
+        h2 {
+            color: #5bc0de;
+            margin-top: 30px;
+        }
+        form {
+            background-color: white;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            padding: 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        label {
+            display: block;
+            margin: 10px 0 5px;
+        }
+        input[type="text"], input[type="date"], input[type="number"], select {
+            width: calc(100% - 22px);
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        .checkbox-group {
+            margin: 10px 0;
+        }
+        .button {
+            background-color: #5bc0de;
+            border: none;
+            color: white;
+            padding: 10px 15px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            margin-top: 10px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .success-message {
+            display: none;
+            margin-top: 20px;
+            color: green;
+            font-weight: bold;
+        }
+        .form-row {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        .form-group {
+            flex: 1;
+            min-width: 150px;
+        }
+        .hidden {
+            display: none;
+        }
+    </style>
+    <script>
+        let currentSerial = 1; // 初始化流水號
+
+        function togglePaymentFields(paymentMethod) {
+            const paymentFields = document.querySelectorAll('.payment-fields');
+            paymentFields.forEach(field => field.style.display = 'none');
+            if (paymentMethod) {
+                const selectedField = document.getElementById(paymentMethod);
+                if (selectedField) {
+                    selectedField.style.display = 'block';
+                }
+            }
+        }
+
+        function generateSerialNumber() {
+            const date = new Date();
+            const year = date.getFullYear() - 1911; // 民國年
+            const month = String(date.getMonth() + 1).padStart(2, '0'); // 月份
+            const serial = String(currentSerial).padStart(5, '0'); // 5位數流水號
+            return `${year}${month}${serial}`;
+        }
+
+        function validateForm() {
+            const projectChecked = document.querySelector('input[name="project"]:checked');
+            const activityName = document.getElementById('activity-name').value.trim();
+            const activityDate = document.getElementById('activity-date').value;
+
+            if (!projectChecked && !activityName) {
+                alert('請至少選擇一個請款項目或活動名稱。');
+                return false;
+            }
+
+            if (projectChecked && (!activityName || !activityDate)) {
+                alert('請填寫活動名稱和日期。');
+                return false;
+            }
+
+            currentSerial++;
+            return true; // 表單有效
+        }
+
+        function toggleActivitySelection(checkbox) {
+            const projectCheckboxes = document.querySelectorAll('input[name="project"]');
+            const activityFields = document.getElementById('activity-fields');
+
+            if (checkbox.checked) {
+                projectCheckboxes.forEach(radio => radio.checked = false); // 取消其他選項
+                activityFields.style.display = 'block'; // 顯示活動名稱和日期欄位
+            } else {
+                activityFields.style.display = 'none'; // 隱藏活動名稱和日期欄位
+            }
+        }
+
+        function toggleScholarshipFields(checkbox) {
+            const scholarshipFields = document.getElementById('scholarship-fields');
+            scholarshipFields.style.display = checkbox.checked ? 'block' : 'none';
+        }
+
+        function toggleOtherFields(checkbox) {
+            const otherContentField = document.getElementById('other-content-field');
+            otherContentField.style.display = checkbox.checked ? 'block' : 'none';
+        }
+
+        function toggleCrossDepartmentFields(checkbox) {
+            const crossDepartmentField = document.getElementById('cross-department-field');
+            crossDepartmentField.style.display = checkbox.checked ? 'block' : 'none';
+        }
+
+        function toggleEconomicSupportFields(checkbox) {
+            const economicSupportFields = document.getElementById('economic-support-fields');
+            economicSupportFields.style.display = checkbox.checked ? 'block' : 'none';
+        }
+
+        window.onload = function() {
+            const serialNumberField = document.getElementById('serial-number');
+            serialNumberField.value = generateSerialNumber(); // 初始流水號
+        };
+    </script>
+</head>
+<body>
+
+<header>
+    <h1>財團法人台北市失親兒福利基金會</h1>
+</header>
+
+<form action="op2.php" method="post" onsubmit="return validateForm()">
+    <h2>預支請款表單</h2>
+    <div class="form-row">
+        <div class="form-group">
+            <label for="form-date">填寫表單日期:</label>
+            <input type="date" id="form-date" name="form-date" required>
+        </div>
+        <div class="form-group">
+            <label for="serial-number">流水號:</label>
+            <input type="text" id="serial-number" name="serial-number" readonly>
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label for="recipient-name">填寫受款人姓名:</label>
+        <input type="text" id="recipient-name" name="recipient-name" required>
+    </div>
+
+    <div class="form-group">
+        <label for="payment-date">付款日期:</label>
+        <input type="date" id="payment-date" name="payment-date" required>
+    </div>
+
+    <h2>請 款 事 由</h2>
+    <div class="form-group">
+        <label><input type="checkbox" id="activity-cost-checkbox" onclick="toggleActivitySelection(this)"> 活動費用:</label>
+    </div>
+
+    <div id="activity-fields" style="display: none;">
+        <label>(專案)活動名稱:</label>
+        <div class="checkbox-group">
+            <label><input type="radio" name="project" value="half-day"> 半日/一日型：EX:方案活動</label>
+            <label><input type="radio" name="project" value="overnight"> 過夜型：EX:方案活動</label>
+            <label><input type="radio" name="project" value="sponsorship"> 企業贊助活動: Happy Go</label>
+            <label><input type="radio" name="project" value="multiple"> 多次型：EX:成長團體、領袖小組</label>
+            <label><input type="radio" name="project" value="other"> 其他：體驗活動(10萬元預算以上)</label>
+        </div>
+
+        <div class="form-group">
+            <label for="activity-name">活動名稱:</label>
+            <input type="text" id="activity-name" name="activity-name" placeholder="請填寫活動名稱" required>
+        </div>
+
+        <div class="form-group">
+            <label for="activity-date">活動日期:</label>
+            <input type="date" id="activity-date" name="activity-date" required>
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label>請款項目：</label>
+        <div class="checkbox-group">
+            <label><input type="checkbox" name="funding[]" value="angel-care"> 天使關懷專案：禮金</label>
+            <label><input type="checkbox" name="funding[]" value="repair"> 修繕費</label>
+            <label><input type="checkbox" name="funding[]" value="transportation"> 探訪交通差旅</label>
+            <label><input type="checkbox" name="funding[]" value="postage"> 郵電費</label>
+            <label><input type="checkbox" name="funding[]" value="caring"> 慰問關懷</label>
+            <label><input type="checkbox" name="funding[]" value="telecom"> 電信費</label>
+            <label><input type="checkbox" name="funding[]" value="food"> 餐費</label>
+            <label><input type="checkbox" id="economic-support-checkbox" name="economic-support" value="economic-support" onchange="toggleEconomicSupportFields(this)"> 經濟扶助</label>
+        </div>
+    </div>
+
+    <div id="economic-support-fields" class="hidden">
+        <div class="form-group" style="display: flex; gap: 20px;">
+            <label><input type="radio" name="economic-support" value="emergency-support"> 急難救助</label>
+            <label><input type="radio" name="economic-support" value="medical-aid"> 醫療補助</label>
+            <label><input type="radio" name="economic-support" value="living-support"> 生活扶助</label>
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label><input type="checkbox" id="scholarship-checkbox" onchange="toggleScholarshipFields(this)"> 獎助學金</label>
+    </div>
+    
+    <div id="scholarship-fields" class="hidden">
+        <div class="form-group">
+            <label>獎助學金 共幾位: <input type="number" name="scholarship-count" placeholder="填寫人數" required></label>
+        </div>
+        <div class="form-group">
+            <label>專案名稱: <input type="text" name="project-name" placeholder="請填寫專案名稱" required></label>
+        </div>
+        <div class="form-group">
+            <label>主題: <input type="text" name="subject" placeholder="主題" required></label>
+        </div>
+    </div>
+
+    <div class="checkbox-group">
+        <label><input type="checkbox" id="other-checkbox" onchange="toggleOtherFields(this)"> 其他:</label>
+        <input type="text" id="other-content-field" name="other-content" placeholder="其他內容" class="hidden">
+        
+        <label><input type="checkbox" id="cross-department-checkbox" onchange="toggleCrossDepartmentFields(this)"> 跨部門費用歸屬:</label>
+        <input type="text" id="cross-department-field" name="cross-department" placeholder="請簡述" class="hidden">
+    </div>
+
+    <h2>預支費用</h2>
+    <div class="form-group">
+        <label for="advance-amount">預支金額:</label>
+        <input type="number" id="advance-amount" name="advance-amount" required>
+    </div>
+
+    <h2>支付方式</h2>
+    <select id="payment_method" name="payment_method" onchange="togglePaymentFields(this.value)">
+        <option value="">選擇支付方式</option>
+        <option value="cash">現金</option>
+        <option value="transfer">轉帳</option>
+        <option value="allocation">劃撥</option>
+        <option value="remittance">匯款</option>
+        <option value="cheque">支票</option>
+    </select>
+
+    <div id="cash" class="payment-fields hidden">
+        <label for="cash-amount">現金金額:</label>
+        <input type="number" id="cash-amount" name="cash-amount" required>
+    </div>
+
+    <div id="transfer" class="payment-fields hidden">
+        <label for="transfer-amount">轉帳金額:</label>
+        <input type="number" id="transfer-amount" name="transfer-amount" required>
+        <label for="transfer-bank">轉帳銀行:</label>
+        <input type="text" name="transfer-bank" placeholder="銀行名稱">
+    </div>
+
+    <div id="allocation" class="payment-fields hidden">
+        <label for="allocation-amount">劃撥金額:</label>
+        <input type="number" id="allocation-amount" name="allocation-amount" required>
+        <label for="allocation-unit">劃撥人姓名:</label>
+        <input type="text" name="allocation-unit" placeholder="劃撥人姓名">
+        <label for="allocation-phone">劃撥人電話:</label>
+        <input type="text" name="allocation-phone" placeholder="劃撥人電話">
+        <label for="allocation-address">劃撥人通訊處:</label>
+        <input type="text" name="allocation-address" placeholder="劃撥人通訊處">
+        <label for="allocation-name">劃撥戶名:</label>
+        <input type="text" name="allocation-name" placeholder="貴公司名稱">
+        <label for="allocation-account">劃撥帳號:</label>
+        <input type="text" name="allocation-account" placeholder="劃撥帳號">
+    </div>
+
+    <div id="remittance" class="payment-fields hidden">
+        <label for="remittance-amount">匯款金額:</label>
+        <input type="number" id="remittance-amount" name="remittance-amount" required>
+        <label for="remittance-bank">銀行(郵局):</label>
+        <input type="text" name="remittance-bank" placeholder="填寫分行">
+        <label for="remittance-name">戶名:</label>
+        <input type="text" name="remittance-name" placeholder="帳戶名稱">
+        <label for="remittance-account">帳號:</label>
+        <input type="text" name="remittance-account" placeholder="銀行帳號">
+    </div>
+
+    <div id="cheque" class="payment-fields hidden">
+        <label for="cheque-number">支票票號:</label>
+        <input type="text" name="cheque-number" placeholder="填寫票號">
+        <label for="cheque-expiry">支票到期日:</label>
+        <input type="date" name="cheque-expiry" placeholder="填寫到期日">
+    </div>
+
+    <button type="submit" class="button">提交</button>
+    <div class="success-message">提交成功！</div>
+</form>
+
+</body>
+</html>

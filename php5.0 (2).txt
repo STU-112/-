@@ -1,0 +1,71 @@
+<?php
+// 顯示錯誤以便調試（開發時使用，生產環境請禁用）
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
+
+// 設定時區
+date_default_timezone_set("Asia/Taipei");
+
+// 設定 HTTP 回應為 JSON 格式
+header('Content-Type: application/json');
+
+// 資料庫連接參數
+$db_host = "localhost:"; // 主機名稱
+$db_port = "3307"; // 你的資料庫埠號
+$db_user = "root"; // 使用者名稱
+$db_pass = " "; // 資料庫密碼（空白）
+$db_name = "op2"; // 資料庫名稱
+
+// 建立資料庫連接
+$mysqli = new mysqli($db_host, $db_user, $db_pass, $db_name, $db_port);
+
+// 檢查資料庫連接
+if ($mysqli->connect_error) {
+    echo json_encode(['status' => 'error', 'message' => '資料庫連接失敗: ' . $mysqli->connect_error]);
+    exit;
+}
+
+// 設定字符集為 UTF-8
+$mysqli->set_charset("utf8");
+
+// 檢查表單是否以 POST 方式提交
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    // 從 POST 中獲取數據
+    $serialNumber = $_POST['serialNumber'] ?? '';
+    $payeeName = $_POST['payeeName'] ?? '';
+    $fillDate = $_POST['fillDate'] ?? '';
+    $paymentDate = $_POST['paymentDate'] ?? '';
+    $purpose = $_POST['purpose'] ?? '';
+    $notes = $_POST['notes'] ?? null;
+    $amountInChinese = $_POST['amountInChinese'] ?? null;
+
+    // 驗證必填欄位
+    if (empty($serialNumber) || empty($payeeName) || empty($fillDate) || empty($paymentDate) || empty($purpose)) {
+        echo json_encode(['status' => 'error', 'message' => '請填寫所有必填欄位。']);
+        exit;
+    }
+
+    // 準備插入數據的 SQL 語句
+    $stmt = $mysqli->prepare("
+        INSERT INTO 請款單 (serialNumber, payeeName, fillDate, paymentDate, purpose, notes, amountInChinese)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
+    ");
+
+    // 檢查是否準備成功
+    if ($stmt === false) {
+        echo json_encode(['status' => 'error', 'message' => '準備語句失敗: ' . $mysqli->error]);
+        exit;
+    }
+
+    // 綁定參數
+    $stmt->bind_param("sssssss", $serialNumber, $payeeName, $fillDate, $paymentDate, $purpose, $notes, $amountInChinese);
+
+    // 執行語句並回傳結果
+    if ($stmt->execute()) {
+        echo json_encode(['status' => 'success', 'message' => '請款單提交成功！']);
+    } else {
+        echo json_encode(['status' => 'error', 'message' => '提交失敗: ' . $stmt->error]);
+    }
+
+    // 關閉語句

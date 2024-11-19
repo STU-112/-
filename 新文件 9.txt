@@ -1,0 +1,535 @@
+<?php
+// 連接資料庫
+$server = 'localhost:3307'; // 伺服器名稱
+$用戶名 = 'root'; // 用戶名
+$密碼 = ' '; // 密碼 (若為空則應設為 '')
+$資料庫 = 'op2'; // 資料庫名稱
+
+// 連接到 MySQL
+$連接 = mysqli_connect($server, $用戶名, $密碼);
+
+// 檢查連接
+if (!$連接) {
+    die("連接失敗: " . mysqli_connect_error());
+}
+
+// 檢查資料庫是否已存在，若不存在則創建
+$sql = "CREATE DATABASE IF NOT EXISTS $資料庫";
+if (mysqli_query($連接, $sql)) {
+    echo "資料庫已存在或創建成功!!<br>";
+} else {
+    die("創建資料庫失敗: " . mysqli_error($連接) . "<br>");
+}
+
+// 選擇資料庫
+if (!mysqli_select_db($連接, $資料庫)) {
+    die("選擇資料庫失敗: " . mysqli_error($連接) . "<br>");
+}
+
+// 創建資料表
+$create_table_sql = "CREATE TABLE IF NOT EXISTS pay_table (
+    count VARCHAR(50) PRIMARY KEY,
+    form_type VARCHAR(50),
+    fillDate DATE,
+    recipient VARCHAR(50),
+    expenditure VARCHAR(50),
+    projectName VARCHAR(50),
+    amount INT,
+    paymentMethod VARCHAR(50),
+    accountName VARCHAR(50),
+    bankName VARCHAR(50),
+    checkNumber VARCHAR(50),
+    dueDate DATE,
+    reason VARCHAR(50)
+)";
+
+if (mysqli_query($連接, $create_table_sql)) {
+    echo "支用資料表創建成功或已存在!!<br>";
+} else {
+    die("創建支用資料表失敗: " . mysqli_error($連接) . "<br>");
+}
+
+// 生成流水號函數
+function generateSerialNumber($連接) {
+    $now = new DateTime();
+    $year = $now->format('Y') - 1911;
+    $month = str_pad($now->format('m'), 2, '0', STR_PAD_LEFT);
+    $prefix = "{$year}{$month}";
+    $sql = "SELECT COUNT(*) as count FROM pay_table WHERE count LIKE '$prefix%'";
+    $result = mysqli_query($連接, $sql);
+    if (!$result) {
+        die("查詢流水號失敗: " . mysqli_error($連接) . "<br>");
+    }
+    $row = mysqli_fetch_assoc($result);
+    $serialNumber = $prefix . str_pad($row['count'] + 1, 5, '0', STR_PAD_LEFT);
+    return $serialNumber;
+}
+
+// 處理表單提交
+if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+    if (isset($_POST['form_type'])) {
+        $表單類型 = mysqli_real_escape_string($連接, $_POST['form_type']);
+        $填表日期 = mysqli_real_escape_string($連接, $_POST['fillDate']);
+        $受款人 = mysqli_real_escape_string($連接, $_POST['recipient']);
+        $支出項目 = mysqli_real_escape_string($連接, $_POST['expenditure']);
+        $專案名稱 = mysqli_real_escape_string($連接, $_POST['projectName']);
+        $金額 = mysqli_real_escape_string($連接, $_POST['amount']);
+        $付款方式 = mysqli_real_escape_string($連接, $_POST['paymentMethod']);
+        $戶名 = mysqli_real_escape_string($連接, $_POST['accountName']);
+        $帳戶 = mysqli_real_escape_string($連接, $_POST['bankName']);
+        $票號 = mysqli_real_escape_string($連接, $_POST['checkNumber']);
+        $到期日 = mysqli_real_escape_string($連接, $_POST['dueDate']);
+        $事由 = mysqli_real_escape_string($連接, $_POST['reason']);
+
+        // 生成流水號
+        $流水號 = generateSerialNumber($連接);
+
+        // 插入資料
+        $insert_record_sql = "INSERT INTO pay_table (count, form_type, fillDate, recipient, expenditure, projectName, amount, paymentMethod, accountName, bankName, checkNumber, dueDate, reason)
+                              VALUES ('$流水號', '$表單類型', '$填表日期', '$受款人', '$支出項目', '$專案名稱', $金額, '$付款方式', '$戶名', '$帳戶', '$票號', '$到期日', '$事由')";
+
+        if (mysqli_query($連接, $insert_record_sql)) {
+            echo "表單已成功提交!!<br>";
+            // 重定向到 ll1.html
+            header("Location: ll1.html");
+            exit(); // 確保停止執行後續代碼
+        } else {
+            die("插入資料失敗: " . mysqli_error($連接) . "<br>");
+        }
+    } else {
+        echo "表單字段錯誤";
+    }    
+}
+
+// 關閉資料庫連接
+mysqli_close($連接);
+?>
+---------<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>失親兒線上審核申請</title>
+    <style>
+        /* 重置基本樣式 */
+        body, h2, p, table, button, input, select {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        /* 基本樣式 */
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f4f4f4;
+            padding: 20px;
+        }
+
+        /* 標題樣式 */
+        h2 {
+            color: #0056b3;
+            margin-bottom: 20px;
+        }
+
+        /* 隱藏樣式 */
+        .hidden {
+            display: none;
+        }
+
+        /* 容器樣式 */
+        .container {
+            max-width: 800px;
+            margin: auto;
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        /* 表單樣式 */
+        form {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin: 10px 0 5px;
+            font-weight: bold;
+        }
+
+        input[type="text"], input[type="date"], input[type="number"], select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin-bottom: 10px;
+        }
+
+        button {
+            background-color: #0056b3;
+            color: #fff;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #004494;
+        }
+
+        /* 表格樣式 */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        table, th, td {
+            border: 1px solid #ddd;
+        }
+
+        th, td {
+            padding: 10px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f4f4f4;
+        }
+
+        /* 響應式設計 */
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+
+            button {
+                width: 100%;
+                margin-top: 10px;
+            }
+
+            input[type="text"], input[type="date"], input[type="number"], select {
+                padding: 10px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            body {
+                padding: 10px;
+            }
+
+            h2 {
+                font-size: 20px;
+            }
+
+            button {
+                font-size: 14px;
+            }
+
+            input[type="text"], input[type="date"], input[type="number"], select {
+                font-size: 14px;
+                padding: 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 登入頁面 -->
+    <div class="login-container container">
+        <h2>登入</h2>
+        <form id="loginForm" onsubmit="login(event)">
+            <label for="username">帳號：</label>
+            <input type="text" id="username" name="username" required>
+            <label for="password">密碼：</label>
+            <input type="password" id="password" name="password" required>
+            <button type="submit">登入</button>
+        </form>
+    </div>
+
+    <!-- 主選單 -->
+    <div class="options-container container hidden">
+        <h2>主選單</h2>
+        <p id="userDepartment"></p>
+        <button onclick="showForm('支出報帳')">填寫支出報帳</button>
+        <button onclick="showForm('支出核銷')">填寫支出核銷</button>
+        <button onclick="showForm('預支請款')">填寫預支請款</button>
+        <button onclick="showMySubmissions()">查看送出表單狀況</button>
+        <button onclick="logout()">登出</button>
+    </div>
+
+    <!-- 填寫表單 -->
+    <div class="form-submit-container container hidden">
+        <h2 id="formTitle">填寫表單</h2>
+        <form id="expenditureForm" action="op2.php" method="POST">
+            <label for="fillDate">填表日期：</label>
+            <input type="date" id="fillDate" name="fillDate" required>
+            <label for="recipient">受款人：</label>
+            <input type="text" id="recipient" name="recipient" required>
+            <label for="expenditure">支出項目：</label>
+            <input type="text" id="expenditure" name="expenditure" required>
+            <label for="projectName">專案名稱：</label>
+            <input type="text" id="projectName" name="projectName" required>
+            <label for="amount">金額：</label>
+            <input type="number" id="amount" name="amount" required>
+            <label for="paymentMethod">付款方式：</label>
+            <select id="paymentMethod" name="paymentMethod" required>
+                <option value="">請選擇</option>
+                <option value="匯款">匯款</option>
+                <option value="支票">支票</option>
+                <option value="現金">現金</option>
+                <option value="話撥">話撥</option>
+            </select>
+            <div id="additionalFields">
+                <div id="wireTransferFieldsRow" class="hidden">
+                    <label for="accountName">戶名：</label>
+                    <input type="text" id="accountName" name="accountName">
+                    <label for="bankName">帳戶：</label>
+                    <input type="text" id="bankName" name="bankName">
+                </div>
+                <div id="checkFieldsRow" class="hidden">
+                    <label for="checkNumber">票號：</label>
+                    <input type="text" id="checkNumber" name="checkNumber">
+                    <label for="dueDate">到期日：</label>
+                    <input type="date" id="dueDate" name="dueDate">
+                </div>
+            </div>
+            <label for="reason">事由：</label>
+            <input type="text" id="reason" name="reason" required>
+            <button type="submit">提交表單</button>
+        </form>
+        <button onclick="goToHomePage()">返回主頁</button>
+    </div>
+
+    <!-- 送出的表單狀況 -->
+    <div class="my-submissions-container container hidden">
+        <h2>送出的表單狀況</h2>
+        <table id="submissionsTable">
+            <thead>
+                <tr>
+                    <th>流水號</th>
+                    <th>填表日期</th>
+                    <th>受款人</th>
+                    <th>支出項目</th>
+                    <th>專案名稱</th>
+                    <th>金額</th>
+                    <th>狀態</th>
+                    <th>操作</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+        <button onclick="goToHomePage()">返回主頁</button>
+    </div>
+
+    <!-- 表單詳細資訊 -->
+    <div class="details-container container hidden">
+        <h2>表單詳細資訊</h2>
+        <p><strong>流水號：</strong><span id="detailsSerialNumber"></span></p>
+        <p><strong>填表日期：</strong><span id="detailsFillDate"></span></p>
+        <p><strong>受款人：</strong><span id="detailsRecipient"></span></p>
+        <p><strong>支出項目：</strong><span id="detailsExpenditure"></span></p>
+        <p><strong>專案名稱：</strong><span id="detailsProjectName"></span></p>
+        <p><strong>金額：</strong><span id="detailsAmount"></span></p>
+        <p><strong>付款方式：</strong><span id="detailsPaymentMethod"></span></p>
+        <p><strong>事由：</strong><span id="detailsReason"></span></p>
+        <p><strong>狀態：</strong><span id="detailsStatus"></span></p>
+        <button onclick="goToMySubmissions()">返回送出表單狀況</button>
+    </div>
+
+    <script>
+        let loggedInUser = null;
+
+        function login(event) {
+            event.preventDefault(); // 防止表單提交
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+
+            // 假設的使用者資料
+            const users = {
+                'chair': { password: '1111', department: '董事會' },
+                'cash': { password: '1888', department: '出納部' },
+                'acc': { password: '123', department: '財務部' },
+                'ceo': { password: '12', department: '經理部門' },
+                'dir': { password: '122', department: '主管部門' },
+                'sup': { password: '12233', department: '督導部門' },
+                'han': { password: '1234', department: '資訊部' },
+            };
+
+            // 檢查使用者名稱和密碼
+            if (users[username] && users[username].password === password) {
+                loggedInUser = username;
+                document.getElementById('userDepartment').innerText = '部門：' + users[username].department;
+                toggleVisibility('.login-container', false);
+                toggleVisibility('.options-container', true);
+            } else {
+                alert('帳號或密碼錯誤！');
+            }
+        }
+
+        function toggleVisibility(selector, isVisible) {
+            const elements = document.querySelectorAll(selector);
+            elements.forEach((element) => {
+                element.classList.toggle('hidden', !isVisible);
+            });
+        }
+
+        function showForm(formType) {
+            document.getElementById('formTitle').innerText = formType;
+            toggleVisibility('.options-container', false);
+            toggleVisibility('.form-submit-container', true);
+        }
+
+        function goToHomePage() {
+            toggleVisibility('.form-submit-container', false);
+            toggleVisibility('.options-container', true);
+        }
+
+        function logout() {
+            loggedInUser = null;
+            toggleVisibility('.options-container', false);
+            toggleVisibility('.login-container', true);
+        }
+
+        function goToMySubmissions() {
+            // 這裡將會載入使用者送出的表單狀況
+            toggleVisibility('.my-submissions-container', true);
+            toggleVisibility('.options-container', false);
+            // 在此可以添加 AJAX 呼叫以載入表單資料
+        }
+
+        function showMySubmissions() {
+            // 這裡將會顯示使用者送出的表單狀況
+            toggleVisibility('.my-submissions-container', true);
+            toggleVisibility('.options-container', false);
+            // 在此可以添加 AJAX 呼叫以載入表單資料
+        }
+
+        // 根據選擇的付款方式顯示額外的欄位
+        document.getElementById('paymentMethod').addEventListener('change', function () {
+            const paymentMethod = this.value;
+            document.getElementById('wireTransferFieldsRow').classList.toggle('hidden', paymentMethod !== '匯款');
+            document.getElementById('checkFieldsRow').classList.toggle('hidden', paymentMethod !== '支票');
+        });
+    </script>
+</body>
+</html>
+-----------------------
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>支用表單</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f8f8f8;
+            margin: 0;
+            padding: 20px;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        form {
+            background: #fff;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            max-width: 600px;
+            margin: auto;
+        }
+        input, select {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        button {
+            background-color: #5cb85c;
+            color: white;
+            padding: 10px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            width: 100%;
+        }
+        button:hover {
+            background-color: #4cae4c;
+        }
+    </style>
+</head>
+<body>
+
+<h1>支用表單</h1>
+<form action="op2.php" method="POST" onsubmit="return validateForm()">
+    <label for="form_type">表單類型:</label>
+    <select id="form_type" name="form_type" required>
+        <option value="">請選擇</option>
+        <option value="支出">支出</option>
+        <option value="報銷">報銷</option>
+    </select>
+
+    <label for="fillDate">填表日期:</label>
+    <input type="date" id="fillDate" name="fillDate" required>
+
+    <label for="recipient">受款人:</label>
+    <input type="text" id="recipient" name="recipient" required>
+
+    <label for="expenditure">支出項目:</label>
+    <input type="text" id="expenditure" name="expenditure" required>
+
+    <label for="projectName">專案名稱:</label>
+    <input type="text" id="projectName" name="projectName" required>
+
+    <label for="amount">金額:</label>
+    <input type="number" id="amount" name="amount" required>
+
+    <label for="paymentMethod">付款方式:</label>
+    <input type="text" id="paymentMethod" name="paymentMethod" required>
+
+    <label for="accountName">戶名:</label>
+    <input type="text" id="accountName" name="accountName">
+
+    <label for="bankName">銀行名稱:</label>
+    <input type="text" id="bankName" name="bankName">
+
+    <label for="checkNumber">票號:</label>
+    <input type="text" id="checkNumber" name="checkNumber">
+
+    <label for="dueDate">到期日:</label>
+    <input type="date" id="dueDate" name="dueDate">
+
+    <label for="reason">事由:</label>
+    <input type="text" id="reason" name="reason">
+
+    <button type="submit">提交表單</button>
+</form>
+
+<script>
+    function validateForm() {
+        const formType = document.getElementById('form_type').value;
+        const fillDate = document.getElementById('fillDate').value;
+        const recipient = document.getElementById('recipient').value;
+        const expenditure = document.getElementById('expenditure').value;
+        const projectName = document.getElementById('projectName').value;
+        const amount = document.getElementById('amount').value;
+        const paymentMethod = document.getElementById('paymentMethod').value;
+
+        if (!formType || !fillDate || !recipient || !expenditure || !projectName || !amount || !paymentMethod) {
+            alert("請確保所有必填欄位均已填寫。");
+            return false; // 防止表單提交
+        }
+        return true; // 允許表單提交
+    }
+</script>
+
+</body>
+</html>
+

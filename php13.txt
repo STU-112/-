@@ -1,0 +1,244 @@
+<?php
+// op2.php
+
+// 設定時區為台北
+date_default_timezone_set("Asia/Taipei");
+
+// 設定 HTTP 回應為 JSON 格式
+header('Content-Type: application/json');
+
+// 資料庫連接參數
+$db_host = "localhost";       // 主機
+$db_port = "3307";            // 端口
+$db_user = "root";            // 資料庫使用者名稱
+$db_pass = " ";                // 資料庫密碼，請根據實際情況填寫
+$db_name = "op2";             // 資料庫名稱
+
+// 建立資料庫連接
+$mysqli = new mysqli($db_host, $db_user, $db_pass, $db_name, $db_port);
+
+// 檢查連接是否成功
+if ($mysqli->connect_error) {
+    echo json_encode(['status' => 'error', 'message' => '資料庫連接失敗: ' . $mysqli->connect_error]);
+    exit;
+}
+
+// 設定字符集為 UTF-8
+$mysqli->set_charset("utf8");
+
+// 建立「請款單」資料表，如果尚未存在
+$create_table_sql = "
+CREATE TABLE IF NOT EXISTS 請款單 (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    serialNumber VARCHAR(20) NOT NULL,
+    payeeName VARCHAR(100) NOT NULL,
+    fillDate DATE NOT NULL,
+    paymentDate DATE NOT NULL,
+    purpose VARCHAR(50) NOT NULL,
+    activityName VARCHAR(100),
+    activityDate DATE,
+    scholarshipCount INT,
+    scholarshipProject VARCHAR(100),
+    scholarshipTopic VARCHAR(100),
+    scholarshipDate DATE,
+    assistanceType VARCHAR(50),
+    projectType VARCHAR(50),
+    otherOption BOOLEAN DEFAULT FALSE,
+    crossDepartmentOption BOOLEAN DEFAULT FALSE,
+    crossDepartmentDetails VARCHAR(255),
+    notes TEXT,
+    paymentMethods VARCHAR(255),
+    cashAmount DECIMAL(10,2),
+    cashRecipient VARCHAR(100),
+    cashReceiptDate DATE,
+    transferPayment BOOLEAN DEFAULT FALSE,
+    postalPayment BOOLEAN DEFAULT FALSE,
+    remittancePayment BOOLEAN DEFAULT FALSE,
+    bankName VARCHAR(100),
+    bankBranch VARCHAR(100),
+    accountName VARCHAR(100),
+    accountNumber VARCHAR(50),
+    chequePayment BOOLEAN DEFAULT FALSE,
+    chequeNumber VARCHAR(100),
+    chequeDueDate DATE,
+    advanceAmount DECIMAL(10,2),
+    reviewComment TEXT,
+    submitted_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+";
+
+// 執行建立資料表的 SQL
+if ($mysqli->query($create_table_sql) !== TRUE) {
+    echo json_encode(['status' => 'error', 'message' => '建立資料表失敗: ' . $mysqli->error]);
+    exit;
+}
+
+// 檢查表單是否以 POST 方式提交
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    // 獲取並驗證表單數據
+    $serialNumber = isset($_POST['serialNumber']) ? trim($_POST['serialNumber']) : '';
+    $payeeName = isset($_POST['payeeName']) ? trim($_POST['payeeName']) : '';
+    $fillDate = isset($_POST['fillDate']) ? $_POST['fillDate'] : '';
+    $paymentDate = isset($_POST['paymentDate']) ? $_POST['paymentDate'] : '';
+    $purpose = isset($_POST['purpose']) ? trim($_POST['purpose']) : '';
+
+    // 根據請款事由獲取額外資訊
+    $activityName = isset($_POST['activityName']) ? trim($_POST['activityName']) : null;
+    $activityDate = isset($_POST['activityDate']) ? $_POST['activityDate'] : null;
+
+    $scholarshipCount = isset($_POST['scholarshipCount']) ? intval($_POST['scholarshipCount']) : null;
+    $scholarshipProject = isset($_POST['scholarshipProject']) ? trim($_POST['scholarshipProject']) : null;
+    $scholarshipTopic = isset($_POST['scholarshipTopic']) ? trim($_POST['scholarshipTopic']) : null;
+    $scholarshipDate = isset($_POST['scholarshipDate']) ? $_POST['scholarshipDate'] : null;
+
+    $assistanceType = isset($_POST['assistanceType']) ? trim($_POST['assistanceType']) : null;
+
+    $projectType = isset($_POST['projectType']) ? trim($_POST['projectType']) : null;
+
+    // 勾選欄位
+    $otherOption = isset($_POST['otherOption']) ? 1 : 0;
+    $crossDepartmentOption = isset($_POST['crossDepartmentOption']) ? 1 : 0;
+    $crossDepartmentDetails = isset($_POST['crossDepartmentDetails']) ? trim($_POST['crossDepartmentDetails']) : null;
+
+    // 說明欄位
+    $notes = isset($_POST['notes']) ? trim($_POST['notes']) : null;
+
+    // 支付方式
+    $paymentMethods = [];
+    $cashPayment = isset($_POST['cashPayment']) ? 1 : 0;
+    if ($cashPayment) {
+        $paymentMethods[] = '付現';
+    }
+    $transferPayment = isset($_POST['transferPayment']) ? 1 : 0;
+    if ($transferPayment) {
+        $paymentMethods[] = '轉帳';
+    }
+    $postalPayment = isset($_POST['postalPayment']) ? 1 : 0;
+    if ($postalPayment) {
+        $paymentMethods[] = '劃撥';
+    }
+    $remittancePayment = isset($_POST['remittancePayment']) ? 1 : 0;
+    if ($remittancePayment) {
+        $paymentMethods[] = '匯款';
+    }
+    $chequePayment = isset($_POST['chequePayment']) ? 1 : 0;
+    if ($chequePayment) {
+        $paymentMethods[] = '支票';
+    }
+    $paymentMethodsStr = implode('、', $paymentMethods);
+
+    // 支付方式相關資訊
+    $cashAmount = isset($_POST['cashAmount']) ? floatval($_POST['cashAmount']) : null;
+    $cashRecipient = isset($_POST['cashRecipient']) ? trim($_POST['cashRecipient']) : null;
+    $cashReceiptDate = isset($_POST['cashReceiptDate']) ? $_POST['cashReceiptDate'] : null;
+
+    $bankName = isset($_POST['bankName']) ? trim($_POST['bankName']) : null;
+    $bankBranch = isset($_POST['bankBranch']) ? trim($_POST['bankBranch']) : null;
+    $accountName = isset($_POST['accountName']) ? trim($_POST['accountName']) : null;
+    $accountNumber = isset($_POST['accountNumber']) ? trim($_POST['accountNumber']) : null;
+
+    $chequeNumber = isset($_POST['chequeNumber']) ? trim($_POST['chequeNumber']) : null;
+    $chequeDueDate = isset($_POST['chequeDueDate']) ? $_POST['chequeDueDate'] : null;
+
+    // 預支金額
+    $advanceAmount = isset($_POST['advanceAmount']) ? floatval($_POST['advanceAmount']) : 0.00;
+
+    // 審核意見初始為空
+    $reviewComment = '';
+
+    // 檢查必要欄位是否已填寫
+    if (empty($serialNumber) || empty($payeeName) || empty($fillDate) || empty($paymentDate) || empty($purpose)) {
+        echo json_encode(['status' => 'error', 'message' => '請填寫所有必填欄位。']);
+        exit;
+    }
+
+    // 準備插入資料的 SQL 語句，使用預處理語句以防止 SQL 注入
+    $stmt = $mysqli->prepare("
+        INSERT INTO 請款單 (
+            serialNumber, payeeName, fillDate, paymentDate, purpose,
+            activityName, activityDate,
+            scholarshipCount, scholarshipProject, scholarshipTopic, scholarshipDate,
+            assistanceType,
+            projectType,
+            otherOption, crossDepartmentOption, crossDepartmentDetails,
+            notes, paymentMethods,
+            cashAmount, cashRecipient, cashReceiptDate,
+            transferPayment, postalPayment, remittancePayment,
+            bankName, bankBranch, accountName, accountNumber,
+            chequePayment, chequeNumber, chequeDueDate,
+            advanceAmount, reviewComment
+        ) VALUES (
+            ?, ?, ?, ?, ?,
+            ?, ?,
+            ?, ?, ?, ?,
+            ?,
+            ?,
+            ?, ?, ?,
+            ?, ?,
+            ?, ?, ?,
+            ?, ?, ?,
+            ?, ?, ?, ?,
+            ?, ?, ?,
+            ?, ?
+        )
+    ");
+
+    if ($stmt === false) {
+        echo json_encode(['status' => 'error', 'message' => '準備語句失敗: ' . $mysqli->error]);
+        exit;
+    }
+
+    // 綁定參數
+    $stmt->bind_param(
+        "ssssssssssssssssssssssssssssssssss",
+        $serialNumber,
+        $payeeName,
+        $fillDate,
+        $paymentDate,
+        $purpose,
+        $activityName,
+        $activityDate,
+        $scholarshipCount,
+        $scholarshipProject,
+        $scholarshipTopic,
+        $scholarshipDate,
+        $assistanceType,
+        $projectType,
+        $otherOption,
+        $crossDepartmentOption,
+        $crossDepartmentDetails,
+        $notes,
+        $paymentMethodsStr,
+        $cashAmount,
+        $cashRecipient,
+        $cashReceiptDate,
+        $transferPayment,
+        $postalPayment,
+        $remittancePayment,
+        $bankName,
+        $bankBranch,
+        $accountName,
+        $accountNumber,
+        $chequePayment,
+        $chequeNumber,
+        $chequeDueDate,
+        $advanceAmount,
+        $reviewComment
+    );
+
+    // 執行插入操作
+    if ($stmt->execute()) {
+        echo json_encode(['status' => 'success', 'message' => '請款單提交成功！']);
+    } else {
+        echo json_encode(['status' => 'error', 'message' => '提交失敗: ' . $stmt->error]);
+    }
+
+    // 關閉語句
+    $stmt->close();
+
+    // 關閉資料庫連接
+    $mysqli->close();
+} else {
+    echo json_encode(['status' => 'error', 'message' => '無效的請求方式。']);
+}
+?>

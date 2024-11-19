@@ -1,0 +1,17 @@
+<HTML>
+
+
+<BODY>
+
+<div style="top:70px;left:370px;position:absolute;">
+ 
+<!<FORM ACTION="4-3.php" method="post">
+<!<FORM ACTION="4-2.php" method="post"> 
+<FORM ACTION="4-1.php" method="post">
+帳號：<INPUT TYPE=TEXT NAME="db_id"><BR>
+密碼：<INPUT TYPE=TEXT NAME="db_pw"><BR>
+<INPUT TYPE=SUBMIT VALUE="確定">
+</FORM>
+
+</BODY>
+</HTML>
