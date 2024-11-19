@@ -1,0 +1,155 @@
+<?php
+// 資料庫連線參數
+$servername = "localhost:3307";
+$username = "root";
+$password = "3307";
+
+// 連接到 op2 資料庫
+$dbname_op2 = "op2";
+$db_link_op2 = new mysqli($servername, $username, $password, $dbname_op2);
+
+// 連接到 Review_comments 資料庫
+$dbname_review = "Review_comments";
+$db_link_review = new mysqli($servername, $username, $password, $dbname_review);
+
+// 檢查資料庫連線
+if ($db_link_op2->connect_error) {
+    die("連線到 op2 資料庫失敗: " . $db_link_op2->connect_error);
+}
+
+if ($db_link_review->connect_error) {
+    die("連線到 Review_comments 資料庫失敗: " . $db_link_review->connect_error);
+}
+
+// 查詢 op2 資料庫中符合條件的 pay_table 資料
+$sql = "SELECT serial_count, form_type, amount, fillDate, recipient 
+        FROM pay_table WHERE amount >= 5001";
+$result = $db_link_op2->query($sql);
+
+// 顯示資料
+if ($result && $result->num_rows > 0) {
+    echo "
+    <style>
+        table {
+            width: 80%;
+            margin: 20px auto;
+            border-collapse: collapse;
+            font-family: Arial, sans-serif;
+        }
+        table, th, td {
+            border: 1px solid #ddd;
+        }
+        th, td {
+            padding: 12px;
+            text-align: center;
+        }
+        th {
+            background-color: #f2f2f2;
+            color: #333;
+        }
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        tr:hover {
+            background-color: #f1f1f1;
+        }
+        caption {
+            font-size: 1.5em;
+            margin: 10px;
+            font-weight: bold;
+        }
+    </style>
+    ";
+    
+    echo "<table>";
+    echo "<caption>執行長審核</caption>";
+    
+    // 顯示欄位名稱
+    echo "<tr>";
+    echo "<th>單號</th><th>表單類別</th><th>金額</th><th>督導意見</th><th>主任意見</th><th>審核狀態</th><th>操作</th>";
+    echo "</tr>";
+	
+   // 顯示每一行資料 
+while ($row = $result->fetch_assoc()) {
+    $serial_count = $row["serial_count"];
+
+		// 查詢督導審核意見是否存在於 Review_comments 資料庫
+		$sql_review_opinion1 = "SELECT 審核意見 FROM 督導審核意見 WHERE 單號 = '$serial_count' LIMIT 1";
+		$review_result = $db_link_review->query($sql_review_opinion1);
+
+
+		// 查詢主任審核意見是否存在
+        $sql_director_opinion2 = "SELECT 審核意見 FROM 主任審核意見 WHERE 單號 = '$serial_count' LIMIT 1";
+        $director_result = $db_link_review->query($sql_director_opinion2);
+
+
+		// 查詢主任審核意見是否存在
+        $sql_director_opinion3 = "SELECT 審核意見 FROM 執行長審核意見 WHERE 單號 = '$serial_count' LIMIT 1";
+        $execution_result = $db_link_review->query($sql_director_opinion3);
+
+
+
+
+
+    // 檢查督導是否有審核意見，且主任尚未審核
+    if ($review_result && $review_result->num_rows > 0) {
+        $review_row = $review_result->fetch_assoc();
+        $opinion1 = $review_row["審核意見"];
+		
+		
+		
+		// 檢查主任是否有審核意見，且執行長尚未審核
+    if ($director_result && $director_result->num_rows > 0) {
+        $review_row = $director_result->fetch_assoc();
+        $opinion2 = $review_row["審核意見"];
+		
+		
+        // 如果尚未有主任的審核意見，則顯示這筆資料
+        if ($execution_result && $execution_result->num_rows > 0) {
+			continue;
+        }
+			$opinion3 = "<span style='color: orange;'>未審核</span>";
+            
+        
+
+        echo "<tr>";
+        echo "<td>" . $row["serial_count"] . "</td>";
+        echo "<td>" . $row["form_type"] . "</td>";
+        echo "<td>" . $row["amount"] . "</td>";
+        echo "<td>" . $opinion1 . "</td>";
+        echo "<td>" . $opinion2 . "</td>";
+        echo "<td>" . $opinion3 . "</td>";
+        echo "<td>
+            <form method='post' action='執行長審查處理.php'>
+                <input type='hidden' name='serial_count' value='" . $row["serial_count"] . "'>
+                <button type='submit' name='review'>審查</button>
+            </form>
+        </td>";
+        echo "</tr>";
+
+        // 釋放主任審核意見結果集
+        if ($director_result) {
+            $director_result->free();
+        }
+    }
+
+    // 釋放督導審核意見結果集
+    if ($review_result) {
+        $review_result->free();
+    }
+}
+}
+    echo "</table>";
+} else {
+    echo "<p style='text-align:center;'>無資料顯示</p>";
+}
+
+// 釋放結果集
+if ($result) {
+    $result->free();
+}
+
+// 關閉資料庫連線
+$db_link_op2->close();
+$db_link_review->close();
+?>
