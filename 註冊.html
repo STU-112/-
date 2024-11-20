@@ -54,6 +54,30 @@
             box-shadow: 0 0 5px rgba(128, 189, 255, 0.5);
         }
 
+        .password-hint {
+            font-size: 12px;
+            color: #888;
+            margin-top: -10px;
+            margin-bottom: 15px;
+        }
+
+        .password-strength {
+            font-size: 14px;
+            margin-bottom: 15px;
+        }
+
+        .weak {
+            color: #dc3545;
+        }
+
+        .medium {
+            color: #ffc107;
+        }
+
+        .strong {
+            color: #28a745;
+        }
+
         .button-container {
             display: flex;
             justify-content: space-between;
@@ -81,21 +105,6 @@
 
         button:hover {
             opacity: 0.9;
-        }
-
-        body::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: -1;
-        }
-
-        .form-container form {
-            display: flex;
-            flex-direction: column;
         }
 
         @media (max-width: 768px) {
@@ -132,13 +141,9 @@
 </head>
 <body>
 
-
 <div class="form-container">
-<h1>用戶註冊</h1>
+    <h1>用戶註冊</h1>
     <form action="註冊.php" method="POST">
-        <label for="userId">使用者 ID:</label>
-        <input type="text" id="userId" name="使用者id" placeholder="輸入使用者 ID" required>
-
         <label for="name">姓名:</label>
         <input type="text" id="name" name="姓名" placeholder="輸入姓名" required>
 
@@ -155,9 +160,9 @@
             <option value="諮商部">諮商部</option>
             <option value="發展部">發展部</option>
             <option value="關懷部">關懷部</option>
-			<option value="研發部">研發部</option>
-			<option value="社工部">社工部</option>
-			<option value="其他">其他</option>
+            <option value="研發部">研發部</option>
+            <option value="社工部">社工部</option>
+            <option value="其他">其他</option>
         </select>
 
         <label for="position">職位:</label>
@@ -168,15 +173,17 @@
             <option value="主任">主任</option>
             <option value="執行長">執行長</option>
             <option value="會計">會計</option>
-			<option value="出納">出納</option>
-			<option value="董事長">董事長</option>
+            <option value="出納">出納</option>
+            <option value="董事長">董事長</option>
         </select>
 
         <label for="username">帳號:</label>
         <input type="text" id="username" name="帳號" placeholder="創建帳號" required>
 
         <label for="password">密碼:</label>
-        <input type="password" id="password" name="密碼" placeholder="創建密碼" required>
+        <input type="password" id="password" name="密碼" placeholder="創建密碼" required oninput="checkPasswordStrength()">
+        <div class="password-hint">密碼須包含大小寫字母、數字和特殊字符，長度至少 8 個字符。</div>
+        <div id="password-strength" class="password-strength"></div>
 
         <div class="button-container">
             <button type="submit" class="submit-btn">提交</button>
@@ -184,6 +191,32 @@
         </div>
     </form>
 </div>
+
+<script>
+    function checkPasswordStrength() {
+        const passwordInput = document.getElementById('password');
+        const strengthDisplay = document.getElementById('password-strength');
+        const password = passwordInput.value;
+
+        let strength = 0;
+        if (password.length >= 8) strength++;
+        if (/[A-Z]/.test(password)) strength++;
+        if (/[a-z]/.test(password)) strength++;
+        if (/[0-9]/.test(password)) strength++;
+        if (/[\W_]/.test(password)) strength++; // 檢測特殊字符
+
+        if (strength < 3) {
+            strengthDisplay.textContent = '密碼強度：弱';
+            strengthDisplay.className = 'password-strength weak';
+        } else if (strength < 5) {
+            strengthDisplay.textContent = '密碼強度：中';
+            strengthDisplay.className = 'password-strength medium';
+        } else {
+            strengthDisplay.textContent = '密碼強度：強';
+            strengthDisplay.className = 'password-strength strong';
+        }
+    }
+</script>
 
 </body>
 </html>
