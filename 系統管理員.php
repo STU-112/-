@@ -2,7 +2,7 @@
 // Establishing database connection 
 $servername = "localhost:3307"; // Database server name 
 $username = "root"; // Database user 
-$password = " "; // Database password
+$password = "3307"; // Database password
 $dbname = "註冊"; // Database name
 
 // Establishing connection 

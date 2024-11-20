@@ -2,7 +2,7 @@
 // 連接到資料庫
 $db_host = "localhost:3307"; // 指定主機和端口
 $db_id = "root";             // 資料庫用戶名
-$db_pw = " ";                // 資料庫密碼（請根據需要更新）
+$db_pw = "3307";             // 資料庫密碼（請根據需要更新）
 $db_name = "註冊";           // 資料庫名稱
 
 // 連接資料庫
@@ -27,7 +27,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
         // 檢查是否為 admin 帳號
         if ($帳號 === $admin_username && $密碼 === $admin_password) {
-            // 如果是 admin，則調轉到系統管理員頁面
+            // 如果是 admin，則調轉到管理員頁面
             echo "<script>alert('登入成功，歡迎管理員！'); window.location.href = '系統管理員.html';</script>";
         } else {
             // 檢查帳號是否存在於資料庫
@@ -43,10 +43,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 // 帳號存在，繼續檢查密碼
                 $row = $帳號查詢->fetch_assoc();
                 if ($密碼 == $row['密碼']) {
-                    // 密碼正確，顯示歡迎訊息
+                    // 密碼正確，顯示歡迎訊息並跳轉
                     $部門 = $row['部門'];
                     $職位 = $row['職位'];
-                    echo "<script>alert('登入成功！歡迎來自 $部門 部門的職位代號 $職位 的使用者！');</script>";
+                    echo "<script>alert('登入成功！歡迎來自 $部門 部門的職位代號 $職位 的使用者！'); window.location.href = '申請.html';</script>";
                 } else {
                     // 密碼錯誤
                     echo "<script>alert('密碼錯誤!'); window.location.href = '登入.html';</script>";

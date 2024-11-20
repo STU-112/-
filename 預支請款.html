@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>財團法人台北市失親兒福利基金會</title>
+    <style>
+        :root {
+            --primary-color: #007bff;
+            --secondary-color: #6c757d;
+            --background-color: #f8f9fa;
+            --input-border-color: #ced4da;
+            --input-focus-border-color: #80bdff;
+            --button-color: #007bff;
+            --button-hover-color: #0056b3;
+            --label-color: #495057;
+            --border-color: #ced4da;
+            --transition-speed: 0.3s;
+            --font-family: Arial, sans-serif;
+            --text-color: #495057;
+        }
+
+        body {
+            font-family: var(--font-family);
+            background-color: var(--background-color);
+            padding: 20px;
+            margin: 0;
+            color: var(--text-color);
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: white;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            text-align: center;
+            color: var(--primary-color);
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            flex: 0 0 180px;
+            font-weight: bold;
+            color: var(--label-color);
+        }
+
+        input, select, button {
+            padding: 10px;
+            font-size: 16px;
+            border-radius: 4px;
+            border: 1px solid var(--input-border-color);
+            background-color: #fff;
+            flex: 1;
+        }
+
+        input:focus, select:focus {
+            border-color: var(--input-focus-border-color);
+        }
+
+        .conditional-group {
+            display: none;
+            padding: 20px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            background-color: #f9f9f9;
+            margin-top: 15px;
+            transition: all var(--transition-speed) ease;
+        }
+
+        button {
+            background-color: var(--button-color);
+            color: white;
+            cursor: pointer;
+            border: none;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: var(--button-hover-color);
+        }
+
+        .form-group input[type="radio"] {
+            margin-right: 10px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>財團法人台北市失親兒福利基金會</h1>
+		
+		<form method='post' action='connect.php'>
+            <div class="form-group">
+                <label for="流水編號">流水編號</label>
+                <input type="text" id="流水編號" name="流水編號" value="流水編號" readonly>
+            </div>
+
+            <div class="form-group">
+                <label for="受款人姓名">受款人姓名</label>
+                <input type="text" id="受款人姓名" name="受款人姓名" placeholder="請輸入受款人姓名">
+            </div>
+			 <div class="form-group">
+                <label for="填表日期">填表日期</label>
+                <input type="date" id="填表日期" name="填表日期">
+            </div>
+
+            <div class="form-group">
+                <label for="付款日期">付款日期</label>
+                <input type="date" id="付款日期" name="付款日期">
+            </div>
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+		<button type="submit" class="submit-btn">提交</button>
+       
+	</form>
+	
+	
+	<div class="records-container" aria-labelledby="recordsTitle">
+            <h2 id="recordsTitle">提交紀錄</h2>
+            <table id="recordsTable">
+                <thead>
+                    <tr>
+                        <th>流水編號</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- 提交紀錄將在此插入 -->
+                </tbody>
+            </table>
+        </div>
+	
+    </div>
+	
+	
+	
+	<script>
+    // 從 URL 參數取得最新流水編號
+    const urlParams = new URLSearchParams(window.location.search);
+    const lastSerial = urlParams.get('lastSerial');
+
+    window.onload = function() {
+        if (lastSerial) {
+            // 顯示伺服器提供的流水編號
+            document.getElementById("流水編號").value = lastSerial;
+        } else {
+            // 如果沒有提供，初始化第一筆流水編號
+            const currentYear = new Date().getFullYear() - 1911;
+            const currentMonth = ("0" + (new Date().getMonth() + 1)).slice(-2);
+            const currentDate = ("0" + new Date().getDate()).slice(-2);
+            const serialNumber = "A" + currentYear + currentMonth + currentDate + "0001";
+
+            document.getElementById("流水編號").value = serialNumber;
+        }
+    };
+</script>
+
+</body>
+</html>

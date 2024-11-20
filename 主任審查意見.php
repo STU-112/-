@@ -13,7 +13,7 @@ if ($db_link->connect_error) {
 }
 
 // 創建資料表（如果表不存在）
-$create_table_sql = "CREATE TABLE IF NOT EXISTS 執行長審核意見 (
+$create_table_sql = "CREATE TABLE IF NOT EXISTS 主任審核意見 (
     流水號 INT AUTO_INCREMENT PRIMARY KEY,
     單號 VARCHAR(20) UNIQUE,
     審核意見 TEXT NOT NULL,
@@ -30,7 +30,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $status = mysqli_real_escape_string($db_link, $_POST['status']);
 
     // 插入資料 SQL 語句
-    $insert_record_sql = "INSERT INTO 執行長審核意見 (單號, 審核意見, 狀態) 
+    $insert_record_sql = "INSERT INTO 主任審核意見 (單號, 審核意見, 狀態) 
                           VALUES ('$number', '$opinion', '$status')";
 
     // 執行 SQL 語句

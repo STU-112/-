@@ -3,6 +3,7 @@
 $servername = "localhost:3307";
 $username = "root";
 $password = "3307";
+
 // 連接到 預支 資料庫
 $dbname_預支 = "預支";
 $db_link_預支 = new mysqli($servername, $username, $password, $dbname_預支);
@@ -60,11 +61,11 @@ if ($result && $result->num_rows > 0) {
     ";
     
     echo "<table>";
-    echo "<caption>執行長審核</caption>";
+    echo "<caption>主任審核</caption>";
     
     // 顯示欄位名稱
     echo "<tr>";
-    echo "<th>單號</th><th>受款人</th><th>金額</th><th>督導意見</th><th>主任意見</th><th>審核狀態</th><th>操作</th>";
+    echo "<th>單號</th><th>受款人</th><th>金額</th><th>支出項目</th><th>督導意見</th><th>審核狀態</th><th>操作</th>";
     echo "</tr>";
 	
    // 顯示每一行資料 
@@ -76,15 +77,9 @@ while ($row = $result->fetch_assoc()) {
 		$review_result = $db_link_review->query($sql_review_opinion1);
 
 
-		// 查詢主任審核意見是否存在
+        // 查詢主任審核意見是否存在
         $sql_director_opinion2 = "SELECT 審核意見 FROM 主任審核意見 WHERE 單號 = '$serial_count' LIMIT 1";
         $director_result = $db_link_review->query($sql_director_opinion2);
-
-
-		// 查詢主任審核意見是否存在
-        $sql_director_opinion3 = "SELECT 審核意見 FROM 執行長審核意見 WHERE 單號 = '$serial_count' LIMIT 1";
-        $execution_result = $db_link_review->query($sql_director_opinion3);
-
 
 
 
@@ -93,32 +88,26 @@ while ($row = $result->fetch_assoc()) {
     if ($review_result && $review_result->num_rows > 0) {
         $review_row = $review_result->fetch_assoc();
         $opinion1 = $review_row["審核意見"];
-		
-		
-		
-		// 檢查主任是否有審核意見，且執行長尚未審核
-    if ($director_result && $director_result->num_rows > 0) {
-        $review_row = $director_result->fetch_assoc();
-        $opinion2 = $review_row["審核意見"];
-		
-		
+
+
+
         // 如果尚未有主任的審核意見，則顯示這筆資料
-        if ($execution_result && $execution_result->num_rows > 0) {
+        if ($director_result && $director_result->num_rows > 0) {
 			continue;
         }
-			$opinion3 = "<span style='color: orange;'>未審核</span>";
-            
+			$opinion2 = "<span style='color: orange;'>未審核</span>";
+           
         
 
         echo "<tr>";
         echo "<td>" . $row["count"] . "</td>";
         echo "<td>" . $row["受款人"] . "</td>";
         echo "<td>" . $row["國字金額"] . "</td>";
+        echo "<td>" . $row["支出項目"] . "</td>";
         echo "<td>" . $opinion1 . "</td>";
         echo "<td>" . $opinion2 . "</td>";
-        echo "<td>" . $opinion3 . "</td>";
         echo "<td>
-            <form method='post' action='執行長審查處理.php'>
+            <form method='post' action='主任審查處理.php'>
                 <input type='hidden' name='count' value='" . $row["count"] . "'>
                 <button type='submit' name='review'>審查</button>
             </form>
@@ -135,7 +124,6 @@ while ($row = $result->fetch_assoc()) {
     if ($review_result) {
         $review_result->free();
     }
-}
 }
     echo "</table>";
 } else {

@@ -107,6 +107,18 @@
     </style>
 </head>
 <body>
+<div class="form-container" aria-labelledby="searchTitle">
+            <h2 id="searchTitle">搜索提交的表單</h2>
+            <form action="agg.php" method="get">
+                <div class="form-group">
+                    <label for="searchSerialNumber">請輸入流水編號：</label>
+                    <input type="text" name="serialNumber" id="searchSerialNumber" placeholder="例如：A11311000001" required aria-required="true">
+                </div>
+                <div class="form-footer">
+                    <button type="submit">搜索</button>
+                </div>
+            </form>
+        </div>
   <div class="container">
   <div class="form-container" aria-labelledby="formTitle">
  <form action="agg.php" method="POST" onsubmit="return validateForm()">
@@ -309,18 +321,7 @@
 </form>
 </div>
 </div>
-<div class="form-container" aria-labelledby="searchTitle">
-            <h2 id="searchTitle">搜索提交的表單</h2>
-            <form action="agg.php" method="get">
-                <div class="form-group">
-                    <label for="searchSerialNumber">請輸入流水編號：</label>
-                    <input type="text" name="serialNumber" id="searchSerialNumber" placeholder="例如：A11311000001" required aria-required="true">
-                </div>
-                <div class="form-footer">
-                    <button type="submit">搜索</button>
-                </div>
-            </form>
-        </div>
+
 <script>
 
 

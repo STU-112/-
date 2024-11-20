@@ -63,7 +63,7 @@ if ($result && $result->num_rows > 0) {
         "預收金額" => "預收金額"
     ];
     echo "
-    <form method='post' action='執行長審核意見.php'>
+    <form method='post' action='主任審查意見.php'>
     <style>
         table {
             width: 50%;
