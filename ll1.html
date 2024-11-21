@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>支用表單</title>
+    <title>財團法人台北市失親兒福利基金會</title>
     <style>
 	
 	:root {
@@ -23,9 +23,9 @@
 
         body {
             font-family: var(--font-family);
-            background-color: var(--background-color);
-            padding: 20px;
+            padding: 0px 0px;
             margin: 0;
+			background-color:#f5d3ab;
             color: var(--text-color);
         }
 
@@ -102,27 +102,59 @@
         .form-group input[type="radio"] {
             margin-right: 10px;
         }
-	-->
+		
+    .banner .overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.3); /* 使背景更加暗淡 */
+    z-index: -1;
+}
+
+		
+		
+		 .banner {
+		 width:97.3%;
+            background: linear-gradient(to bottom, #fbe3c9, #f5d3ab); /* 漸層效果 */
+            color: #5a3d2b;
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            padding: 10px 20px;
+            box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.2); /* 陰影效果 */
+        }
+
+        .banner a {
+            color: #5a3d2b;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 1.2em;
+        }
+
+        .banner a:hover {
+    color: #007bff; /* 當滑鼠懸停時變換顏色 */
+}
+		
+	
     
     </style>
 </head>
+
+
 <body>
-<div class="form-container" aria-labelledby="searchTitle">
-            <h2 id="searchTitle">搜索提交的表單</h2>
-            <form action="agg.php" method="get">
-                <div class="form-group">
-                    <label for="searchSerialNumber">請輸入流水編號：</label>
-                    <input type="text" name="serialNumber" id="searchSerialNumber" placeholder="例如：A11311000001" required aria-required="true">
-                </div>
-                <div class="form-footer">
-                    <button type="submit">搜索</button>
-                </div>
-            </form>
-        </div>
+<div class="banner">
+    <a href="申請紀錄.html">申請紀錄</a>
+</div>
+
+
   <div class="container">
   <div class="form-container" aria-labelledby="formTitle">
  <form action="agg.php" method="POST" onsubmit="return validateForm()">
-            <h1>財團法人台北市失親兒福利基金會</h1>
+
+            <h1>預支請款</h1>
+			<!-- 財團法人台北市失親兒福利基金會 -->
 			
 	<div class="form-group">
     <label for="受款人">受款人姓名:</label>

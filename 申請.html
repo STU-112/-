@@ -1,3 +1,11 @@
+<?php
+session_start();
+if (!isset($_SESSION['db_id'])) {
+    header("Location: 登入.html");
+    exit();
+}
+$db_id = $_SESSION['db_id'];
+?>
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
@@ -57,17 +65,51 @@
             font-size: 0.9rem;
             opacity: 0.8;
         }
+		.banner .overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.3); /* 使背景更加暗淡 */
+    z-index: -1;
+}
+		 .banner {
+		 width:100%;
+            background: linear-gradient(to bottom, #fbe3c9, #f5d3ab); /* 漸層效果 */
+            color: #5a3d2b;
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            padding: 10px 20px;
+            box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.2); /* 陰影效果 */
+        }
+
+        .banner a {
+            color: #5a3d2b;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 1.2em;
+        }
+
+        .banner a:hover {
+    color: #007bff; /* 當滑鼠懸停時變換顏色 */
+}
     </style>
 </head>
 <body>
+<div class="banner">
+    <span>歡迎, <?php echo htmlspecialchars($db_id); ?></span> <!-- 顯示使用者名稱 -->
+    <a href="申請紀錄.html">申請紀錄</a>
+</div>
     <div class="container">
         <h1>線上申請表單</h1>
         <a href="支出報帳.html" class="btn">支出報帳</a>
         <a href="支出核銷.html" class="btn">支出核銷</a>
-        <a href="尋找很久.html" class="btn">預支申請</a>
-        <a href="申請紀錄查詢.html" class="btn">申請紀錄查詢</a>
+        <a href="ll1.html" class="btn">預支申請</a>
+        <a href="search.php" class="btn">申請紀錄查詢</a>
         <div class="footer">
-            &copy; 2024 申請系統
+            &copy; 2024 財團法人台北市失親兒福利基金會
         </div>
     </div>
 </body>
