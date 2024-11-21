@@ -1,0 +1,2530 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>台北市失親兒基金會內部系統</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f5f5;
+        }
+        .sidebar {
+            height: 100vh;
+            position: fixed;
+            top: 0;
+            left: 0;
+            padding-top: 60px;
+            background-color: #2c3e50;
+            width: 250px;
+            transition: width 0.3s;
+        }
+        .sidebar.collapsed {
+            width: 80px;
+        }
+        .sidebar .nav-link {
+            color: #ecf0f1;
+        }
+        .sidebar .nav-link:hover {
+            background-color: #34495e;
+        }
+        .content {
+            margin-left: 250px;
+            padding: 20px;
+            transition: margin-left 0.3s;
+        }
+        .content.collapsed {
+            margin-left: 80px;
+        }
+        .header {
+            position: fixed;
+            top: 0;
+            left: 250px;
+            width: calc(100% - 250px);
+            background-color: #ffffff;
+            padding: 10px 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            z-index: 1000;
+            transition: left 0.3s, width 0.3s;
+        }
+        .header.collapsed {
+            left: 80px;
+            width: calc(100% - 80px);
+        }
+        .footer {
+            background-color: #2c3e50;
+            color: #ecf0f1;
+            text-align: center;
+            padding: 10px 0;
+            position: fixed;
+            bottom: 0;
+            left: 250px;
+            width: calc(100% - 250px);
+            box-shadow: 0 -2px 4px rgba(0,0,0,0.1);
+            transition: left 0.3s, width 0.3s;
+        }
+        .footer.collapsed {
+            left: 80px;
+            width: calc(100% - 80px);
+        }
+        /* Toggle Button */
+        #toggle-btn {
+            cursor: pointer;
+            color: #2c3e50;
+        }
+        /* Breadcrumb */
+        .breadcrumb {
+            background-color: transparent;
+        }
+        /* Dashboard Widgets */
+        .widget {
+            background-color: #ffffff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        /* Sidebar Logo */
+        .sidebar .logo {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .sidebar .logo img {
+            width: 80%;
+            height: auto;
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar -->
+    <nav class="sidebar">
+        <div class="logo mb-4">
+            <img src="https://via.placeholder.com/150x80?text=基金會Logo" alt="台北市失親兒基金會">
+        </div>
+        <ul class="nav flex-column">
+            <li class="nav-item">
+                <a class="nav-link" href="#"><i class="fas fa-tachometer-alt me-2"></i>儀表板</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#"><i class="fas fa-users me-2"></i>會員管理</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#"><i class="fas fa-project-diagram me-2"></i>項目管理</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#"><i class="fas fa-file-alt me-2"></i>報告與分析</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#"><i class="fas fa-bell me-2"></i>通知</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#"><i class="fas fa-cog me-2"></i>設定</a>
+            </li>
+            <!-- 添加更多導航項目 -->
+        </ul>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="content">
+        <!-- Header -->
+        <header class="header d-flex justify-content-end align-items-center">
+            <div class="me-3">
+                <input type="text" class="form-control" placeholder="全局搜索">
+            </div>
+            <div class="me-3 position-relative">
+                <i class="fas fa-bell fa-lg" id="notification-icon"></i>
+                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                    3
+                    <span class="visually-hidden">未讀通知</span>
+                </span>
+            </div>
+            <div class="dropdown me-3">
+                <a href="#" class="d-flex align-items-center text-dark text-decoration-none dropdown-toggle" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                    <img src="https://via.placeholder.com/30" alt="Avatar" class="rounded-circle me-2">
+                    <strong>林先生</strong>
+                </a>
+                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                    <li><a class="dropdown-item" href="#">個人設定</a></li>
+                    <li><a class="dropdown-item" href="#">登出</a></li>
+                </ul>
+            </div>
+            <div>
+                <i class="fas fa-bars fa-lg" id="toggle-btn"></i>
+            </div>
+        </header>
+
+        <!-- Breadcrumb -->
+        <nav aria-label="breadcrumb" class="mt-5">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="#">首頁</a></li>
+                <li class="breadcrumb-item active" aria-current="page">儀表板</li>
+            </ol>
+        </nav>
+
+        <!-- Main Dashboard Content -->
+        <div class="container-fluid">
+            <div class="row">
+                <!-- 關鍵指標 -->
+                <div class="col-md-4">
+                    <div class="widget">
+                        <h5>會員數量</h5>
+                        <p class="display-6">1,234 位</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="widget">
+                        <h5>進行中的項目</h5>
+                        <p class="display-6">12 個</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="widget">
+                        <h5>待處理報告</h5>
+                        <p class="display-6">5 份</p>
+                    </div>
+                </div>
+            </div>
+            <!-- 圖表區域 -->
+            <div class="row">
+                <div class="col-lg-6">
+                    <div class="widget">
+                        <h5>會員增長趨勢</h5>
+                        <!-- 圖表占位 -->
+                        <div style="height: 300px; background-color: #f0f0f0; display: flex; align-items: center; justify-content: center;">
+                            <span>圖表將顯示在此處</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-6">
+                    <div class="widget">
+                        <h5>項目進度分佈</h5>
+                        <!-- 圖表占位 -->
+                        <div style="height: 300px; background-color: #f0f0f0; display: flex; align-items: center; justify-content: center;">
+                            <span>圖表將顯示在此處</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- 快捷操作區 -->
+            <div class="row">
+                <div class="col-12">
+                    <div class="widget">
+                        <h5>快捷操作</h5>
+                        <div class="d-flex flex-wrap">
+                            <button class="btn btn-primary me-2 mb-2"><i class="fas fa-plus me-1"></i>新增會員</button>
+                            <button class="btn btn-success me-2 mb-2"><i class="fas fa-file-alt me-1"></i>提交報告</button>
+                            <button class="btn btn-warning me-2 mb-2"><i class="fas fa-calendar-alt me-1"></i>查看日曆</button>
+                            <button class="btn btn-info me-2 mb-2"><i class="fas fa-chart-line me-1"></i>生成報告</button>
+                            <!-- 添加更多快捷操作按鈕 -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- 通知與公告 -->
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="widget">
+                        <h5>最新公告</h5>
+                        <ul class="list-group list-group-flush">
+                            <li class="list-group-item">2024年度會員大會將於5月舉行，敬請期待。</li>
+                            <li class="list-group-item">新的會員管理系統即將上線，請提前熟悉操作。</li>
+                            <li class="list-group-item">感謝所有志工在過去一年中的辛勤付出。</li>
+                            <!-- 添加更多公告 -->
+                        </ul>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="widget">
+                        <h5>待辦事項</h5>
+                        <ul class="list-group list-group-flush">
+                            <li class="list-group-item">審核新的會員申請</li>
+                            <li class="list-group-item">準備下月的項目報告</li>
+                            <li class="list-group-item">更新網站內容</li>
+                            <!-- 添加更多待辦事項 -->
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        台北市失親兒基金會 ©2024 | <a href="#" class="text-light">聯絡我們</a>
+    </footer>
+
+    <!-- Bootstrap JS and dependencies (Popper.js) -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- 自定義JS -->
+    <script>
+        const toggleBtn = document.getElementById('toggle-btn');
+        const sidebar = document.querySelector('.sidebar');
+        const content = document.querySelector('.content');
+        const header = document.querySelector('.header');
+        const footer = document.querySelector('.footer');
+
+        toggleBtn.addEventListener('click', () => {
+            sidebar.classList.toggle('collapsed');
+            content.classList.toggle('collapsed');
+            header.classList.toggle('collapsed');
+            footer.classList.toggle('collapsed');
+        });
+    </script>
+</body>
+</html>
+=============================================
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>台北市失親兒基金會內部系統</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            background-color: #f8f9fa;
+            overflow-x: hidden;
+        }
+        /* 側邊欄樣式 */
+        .sidebar {
+            height: 100vh;
+            position: fixed;
+            top: 0;
+            left: 0;
+            padding-top: 60px;
+            background-color: #2c3e50;
+            width: 250px;
+            transition: width 0.3s;
+            overflow: hidden;
+        }
+        .sidebar.collapsed {
+            width: 80px;
+        }
+        .sidebar .logo {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 0 10px;
+        }
+        .sidebar .logo img {
+            width: 100%;
+            height: auto;
+        }
+        .sidebar .nav-link {
+            color: #ecf0f1;
+            transition: all 0.3s;
+        }
+        .sidebar .nav-link:hover {
+            background-color: #34495e;
+            color: #ffffff;
+        }
+        .sidebar .nav-link i {
+            min-width: 25px;
+            font-size: 1.1rem;
+        }
+        .sidebar.collapsed .nav-link span {
+            display: none;
+        }
+        /* 內容區域樣式 */
+        .content {
+            margin-left: 250px;
+            padding: 20px;
+            transition: margin-left 0.3s;
+        }
+        .content.collapsed {
+            margin-left: 80px;
+        }
+        /* 頂部導航欄樣式 */
+        .header {
+            position: fixed;
+            top: 0;
+            left: 250px;
+            width: calc(100% - 250px);
+            background-color: #ffffff;
+            padding: 10px 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            z-index: 1000;
+            transition: left 0.3s, width 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .header.collapsed {
+            left: 80px;
+            width: calc(100% - 80px);
+        }
+        /* 底部欄樣式 */
+        .footer {
+            background-color: #2c3e50;
+            color: #ecf0f1;
+            text-align: center;
+            padding: 10px 0;
+            position: fixed;
+            bottom: 0;
+            left: 250px;
+            width: calc(100% - 250px);
+            box-shadow: 0 -2px 4px rgba(0,0,0,0.1);
+            transition: left 0.3s, width 0.3s;
+        }
+        .footer.collapsed {
+            left: 80px;
+            width: calc(100% - 80px);
+        }
+        /* 切換按鈕樣式 */
+        #toggle-btn {
+            cursor: pointer;
+            color: #2c3e50;
+            font-size: 1.5rem;
+            transition: transform 0.3s;
+        }
+        #toggle-btn:hover {
+            transform: rotate(90deg);
+        }
+        /* 面包屑導航樣式 */
+        .breadcrumb {
+            background-color: transparent;
+        }
+        /* 儀表板小工具樣式 */
+        .widget {
+            background-color: #ffffff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+            transition: transform 0.3s;
+        }
+        .widget:hover {
+            transform: translateY(-5px);
+        }
+        .widget h5 {
+            margin-bottom: 15px;
+            color: #2c3e50;
+        }
+        /* 步驟條樣式 */
+        .stepper {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 30px;
+            counter-reset: step;
+        }
+        .stepper .step {
+            text-align: center;
+            position: relative;
+            flex: 1;
+        }
+        .stepper .step::before {
+            counter-increment: step;
+            content: counter(step);
+            width: 30px;
+            height: 30px;
+            line-height: 30px;
+            border: 2px solid #2c3e50;
+            display: block;
+            text-align: center;
+            margin: 0 auto 10px;
+            border-radius: 50%;
+            background-color: #ecf0f1;
+            color: #2c3e50;
+        }
+        .stepper .step.active::before,
+        .stepper .step.completed::before {
+            background-color: #2c3e50;
+            color: #ffffff;
+        }
+        .stepper .step::after {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 2px;
+            background-color: #2c3e50;
+            top: 15px;
+            left: -50%;
+            z-index: -1;
+        }
+        .stepper .step:first-child::after {
+            content: none;
+        }
+        .stepper .step.completed + .step::after {
+            background-color: #2c3e50;
+        }
+        /* 響應式調整 */
+        @media (max-width: 992px) {
+            .sidebar {
+                width: 80px;
+            }
+            .content {
+                margin-left: 80px;
+            }
+            .header {
+                left: 80px;
+                width: calc(100% - 80px);
+            }
+            .footer {
+                left: 80px;
+                width: calc(100% - 80px);
+            }
+            .stepper::before {
+                display: none;
+            }
+            .stepper .step::after {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 登錄模態窗口 -->
+    <div class="modal fade" id="loginModal" tabindex="-1" aria-labelledby="loginModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <form id="loginForm">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="loginModalLabel">登入系統</h5>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label for="username" class="form-label">用戶名</label>
+                            <input type="text" class="form-control" id="username" placeholder="輸入用戶名" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="password" class="form-label">密碼</label>
+                            <input type="password" class="form-control" id="password" placeholder="輸入密碼" required>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-primary">登入</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- 側邊欄 -->
+    <nav class="sidebar" id="sidebar">
+        <div class="logo">
+            <img src="https://via.placeholder.com/150x80?text=基金會Logo" alt="台北市失親兒基金會">
+        </div>
+        <ul class="nav flex-column">
+            <li class="nav-item" id="nav-dashboard">
+                <a class="nav-link active" href="#dashboardSection"><i class="fas fa-tachometer-alt"></i> <span>儀表板</span></a>
+            </li>
+            <li class="nav-item" id="nav-advancePaymentSection">
+                <a class="nav-link" href="#advancePaymentSection"><i class="fas fa-money-bill-wave"></i> <span>預支申請</span></a>
+            </li>
+            <li class="nav-item" id="nav-expenseReportSection">
+                <a class="nav-link" href="#expenseReportSection"><i class="fas fa-receipt"></i> <span>報帳申請</span></a>
+            </li>
+            <li class="nav-item" id="nav-verificationSection">
+                <a class="nav-link" href="#verificationSection"><i class="fas fa-check-circle"></i> <span>核銷申請</span></a>
+            </li>
+            <li class="nav-item" id="nav-workflowSection">
+                <a class="nav-link" href="#workflowSection"><i class="fas fa-project-diagram"></i> <span>流程管理</span></a>
+            </li>
+            <li class="nav-item" id="nav-recordsSection">
+                <a class="nav-link" href="#recordsSection"><i class="fas fa-history"></i> <span>申請記錄</span></a>
+            </li>
+            <li class="nav-item" id="nav-adminSection">
+                <a class="nav-link" href="#adminSection"><i class="fas fa-user-shield"></i> <span>系統管理</span></a>
+            </li>
+            <!-- 更多導航項目 -->
+        </ul>
+    </nav>
+
+    <!-- 主要內容區域 -->
+    <div class="content" id="mainContent">
+        <!-- 頂部導航欄 -->
+        <header class="header">
+            <div class="d-flex align-items-center">
+                <i class="fas fa-bars" id="toggle-btn"></i>
+            </div>
+            <div class="d-flex align-items-center">
+                <input type="text" class="form-control me-3" id="searchInput" placeholder="搜尋流水號或街道">
+                <button class="btn btn-outline-secondary me-3" id="searchBtn"><i class="fas fa-search"></i> 搜尋</button>
+                <div class="dropdown me-3">
+                    <a href="#" class="d-flex align-items-center text-dark text-decoration-none dropdown-toggle" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                        <img src="https://via.placeholder.com/30" alt="Avatar" class="rounded-circle me-2">
+                        <strong id="userRoleDisplay">使用者</strong>
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                        <li><a class="dropdown-item" href="#" id="logoutBtn">登出</a></li>
+                    </ul>
+                </div>
+            </div>
+        </header>
+
+        <!-- 面包屑導航 -->
+        <nav aria-label="breadcrumb" class="mt-5">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="#">首頁</a></li>
+                <li class="breadcrumb-item active" aria-current="page" id="breadcrumbCurrent">儀表板</li>
+            </ol>
+        </nav>
+
+        <!-- 主要儀表板內容 -->
+        <div class="container-fluid">
+            <!-- 儀表板 -->
+            <div class="row" id="dashboardSection">
+                <div class="col-md-4">
+                    <div class="widget text-center">
+                        <h5>預支申請數量</h5>
+                        <p class="display-6" id="advanceCount">0 件</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="widget text-center">
+                        <h5>報帳申請數量</h5>
+                        <p class="display-6" id="expenseCount">0 件</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="widget text-center">
+                        <h5>核銷申請數量</h5>
+                        <p class="display-6" id="verificationCount">0 件</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 表單模組 (僅經辦人可見) -->
+            <div class="row" id="formsSection">
+                <!-- 預支申請表單 -->
+                <div class="col-lg-6 mb-4" id="advancePaymentSection">
+                    <div class="widget">
+                        <h5>預支申請</h5>
+                        <form id="advanceForm">
+                            <div class="mb-3">
+                                <label for="advanceAmount" class="form-label">預支金額</label>
+                                <input type="number" class="form-control" id="advanceAmount" placeholder="請輸入金額" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="advancePurpose" class="form-label">用途</label>
+                                <input type="text" class="form-control" id="advancePurpose" placeholder="請描述用途" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="advanceStreet" class="form-label">街道</label>
+                                <input type="text" class="form-control" id="advanceStreet" placeholder="請輸入街道" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="advanceDate" class="form-label">預支日期</label>
+                                <input type="date" class="form-control" id="advanceDate" required>
+                            </div>
+                            <button type="submit" class="btn btn-primary">提交申請</button>
+                        </form>
+                    </div>
+                </div>
+                <!-- 報帳申請表單 -->
+                <div class="col-lg-6 mb-4" id="expenseReportSection">
+                    <div class="widget">
+                        <h5>報帳申請</h5>
+                        <form id="expenseForm">
+                            <div class="mb-3">
+                                <label for="expenseAmount" class="form-label">報帳金額</label>
+                                <input type="number" class="form-control" id="expenseAmount" placeholder="請輸入金額" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="expenseDetails" class="form-label">詳細說明</label>
+                                <textarea class="form-control" id="expenseDetails" rows="3" placeholder="請描述報帳詳情" required></textarea>
+                            </div>
+                            <div class="mb-3">
+                                <label for="expenseStreet" class="form-label">街道</label>
+                                <input type="text" class="form-control" id="expenseStreet" placeholder="請輸入街道" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="expenseDate" class="form-label">報帳日期</label>
+                                <input type="date" class="form-control" id="expenseDate" required>
+                            </div>
+                            <button type="submit" class="btn btn-success">提交申請</button>
+                        </form>
+                    </div>
+                </div>
+                <!-- 核銷申請表單 -->
+                <div class="col-lg-6 mb-4" id="verificationSection">
+                    <div class="widget">
+                        <h5>核銷申請</h5>
+                        <form id="verificationForm">
+                            <div class="mb-3">
+                                <label for="verificationAmount" class="form-label">核銷金額</label>
+                                <input type="number" class="form-control" id="verificationAmount" placeholder="請輸入金額" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="verificationDetails" class="form-label">詳細說明</label>
+                                <textarea class="form-control" id="verificationDetails" rows="3" placeholder="請描述核銷詳情" required></textarea>
+                            </div>
+                            <div class="mb-3">
+                                <label for="verificationStreet" class="form-label">街道</label>
+                                <input type="text" class="form-control" id="verificationStreet" placeholder="請輸入街道" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="verificationDate" class="form-label">核銷日期</label>
+                                <input type="date" class="form-control" id="verificationDate" required>
+                            </div>
+                            <button type="submit" class="btn btn-warning">提交申請</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 流程管理 (僅審核角色可見) -->
+            <div class="row" id="workflowSection" style="display: none;">
+                <div class="col-12 mb-4">
+                    <div class="widget">
+                        <h5>流程管理</h5>
+                        <!-- 步驟條 -->
+                        <div class="stepper">
+                            <div class="step" id="step1">經辦人提交</div>
+                            <div class="step" id="step2">會計審核</div>
+                            <div class="step" id="step3">出納審核</div>
+                            <div class="step" id="step4">主管審核</div>
+                            <div class="step" id="step5">主任審核</div>
+                            <div class="step" id="step6">執行長審核</div>
+                            <div class="step" id="step7">董事長批准</div>
+                        </div>
+                        <!-- 流程詳細狀態 -->
+                        <div class="accordion" id="workflowAccordion">
+                            <!-- 流程階段會動態生成 -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 申請記錄 -->
+            <div class="row" id="recordsSection">
+                <div class="col-12 mb-4">
+                    <div class="widget">
+                        <h5>申請記錄</h5>
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>流水號</th>
+                                    <th>申請類型</th>
+                                    <th>申請人</th>
+                                    <th>金額</th>
+                                    <th>街道</th>
+                                    <th>日期</th>
+                                    <th>當前狀態</th>
+                                    <th>操作</th>
+                                </tr>
+                            </thead>
+                            <tbody id="recordsTableBody">
+                                <!-- 申請記錄會動態生成 -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 系統管理員頁面 -->
+            <div class="row" id="adminSection" style="display: none;">
+                <div class="col-12 mb-4">
+                    <div class="widget">
+                        <h5>系統管理</h5>
+                        <h6>用戶管理</h6>
+                        <form id="addUserForm">
+                            <div class="row">
+                                <div class="col-md-3 mb-3">
+                                    <label for="newUsername" class="form-label">用戶名</label>
+                                    <input type="text" class="form-control" id="newUsername" placeholder="輸入用戶名" required>
+                                </div>
+                                <div class="col-md-3 mb-3">
+                                    <label for="newPassword" class="form-label">密碼</label>
+                                    <input type="password" class="form-control" id="newPassword" placeholder="輸入密碼" required>
+                                </div>
+                                <div class="col-md-3 mb-3">
+                                    <label for="newRole" class="form-label">職級</label>
+                                    <select class="form-select" id="newRole" required>
+                                        <option value="" selected>選擇職級</option>
+                                        <option value="clerk">經辦人</option>
+                                        <option value="accountant">會計</option>
+                                        <option value="cashier">出納</option>
+                                        <option value="supervisor">主管(督導)</option>
+                                        <option value="director">主任</option>
+                                        <option value="ceo">執行長</option>
+                                        <option value="chairman">董事長</option>
+                                        <option value="admin">系統管理員</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-3 mb-3 d-flex align-items-end">
+                                    <button type="submit" class="btn btn-primary w-100">新增用戶</button>
+                                </div>
+                            </div>
+                        </form>
+                        <h6>現有用戶</h6>
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>用戶名</th>
+                                    <th>職級</th>
+                                    <th>操作</th>
+                                </tr>
+                            </thead>
+                            <tbody id="usersTableBody">
+                                <!-- 用戶列表會動態生成 -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 底部欄 -->
+    <footer class="footer">
+        台北市失親兒基金會 ©2024 | <a href="#" class="text-light">聯絡我們</a>
+    </footer>
+
+    <!-- 查看詳情模態窗口 -->
+    <div class="modal fade" id="viewDetailsModal" tabindex="-1" aria-labelledby="viewDetailsModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 id="viewDetailsModalLabel" class="modal-title">申請詳情</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="關閉"></button>
+                </div>
+                <div class="modal-body">
+                    <p><strong>流水號：</strong><span id="detailSerialNumber"></span></p>
+                    <p><strong>申請類型：</strong><span id="detailType"></span></p>
+                    <p><strong>申請人：</strong><span id="detailApplicant"></span></p>
+                    <p><strong>金額：</strong><span id="detailAmount"></span></p>
+                    <p><strong>街道：</strong><span id="detailStreet"></span></p>
+                    <p><strong>日期：</strong><span id="detailDate"></span></p>
+                    <p><strong>當前狀態：</strong><span id="detailStatus"></span></p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">關閉</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 編輯申請模態窗口 (經辦人專用) -->
+    <div class="modal fade" id="editApplicationModal" tabindex="-1" aria-labelledby="editApplicationModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form id="editApplicationForm">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="editApplicationModalLabel">編輯申請</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="關閉"></button>
+                    </div>
+                    <div class="modal-body">
+                        <!-- 編輯表單內容 -->
+                        <input type="hidden" id="editFormIndex">
+                        <div class="mb-3">
+                            <label for="editType" class="form-label">申請類型</label>
+                            <select class="form-select" id="editType" required>
+                                <option value="" selected>選擇類型</option>
+                                <option value="advance">預支申請</option>
+                                <option value="expense">報帳申請</option>
+                                <option value="verification">核銷申請</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="editAmount" class="form-label">申請金額</label>
+                            <input type="number" class="form-control" id="editAmount" placeholder="請輸入金額" required>
+                        </div>
+                        <div class="mb-3" id="editPurposeDiv">
+                            <label for="editPurpose" class="form-label">用途</label>
+                            <input type="text" class="form-control" id="editPurpose" placeholder="請描述用途" required>
+                        </div>
+                        <div class="mb-3" id="editDetailsDiv" style="display: none;">
+                            <label for="editDetails" class="form-label">詳細說明</label>
+                            <textarea class="form-control" id="editDetails" rows="3" placeholder="請描述詳情" required></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label for="editStreet" class="form-label">街道</label>
+                            <input type="text" class="form-control" id="editStreet" placeholder="請輸入街道" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="editDate" class="form-label">申請日期</label>
+                            <input type="date" class="form-control" id="editDate" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="editStatus" class="form-label">當前狀態</label>
+                            <select class="form-select" id="editStatus" required>
+                                <option value="" selected>選擇狀態</option>
+                                <option value="submitted">已提交</option>
+                                <option value="reviewed">已審核</option>
+                                <option value="approved">已批准</option>
+                                <option value="rejected">已拒絕</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                        <button type="submit" class="btn btn-warning">保存更改</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS 和依賴項 (Popper.js) -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- 自定義 JavaScript -->
+    <script>
+        // 定義角色權限和導航選項
+        const roles = {
+            clerk: {
+                name: "經辦人",
+                role: "clerk",
+                navItems: ["dashboardSection", "advancePaymentSection", "expenseReportSection", "verificationSection", "recordsSection"],
+                canViewForms: true,
+                canApprove: false,
+                canManageUsers: false,
+                canAccessWorkflow: false
+            },
+            accountant: {
+                name: "會計",
+                role: "accountant",
+                navItems: ["dashboardSection", "workflowSection", "recordsSection"],
+                canViewForms: false,
+                canApprove: true,
+                canManageUsers: false,
+                canAccessWorkflow: true,
+                level: 2
+            },
+            cashier: {
+                name: "出納",
+                role: "cashier",
+                navItems: ["dashboardSection", "workflowSection", "recordsSection"],
+                canViewForms: false,
+                canApprove: true,
+                canManageUsers: false,
+                canAccessWorkflow: true,
+                level: 3
+            },
+            supervisor: {
+                name: "主管(督導)",
+                role: "supervisor",
+                navItems: ["dashboardSection", "workflowSection", "recordsSection"],
+                canViewForms: false,
+                canApprove: true,
+                canManageUsers: false,
+                canAccessWorkflow: true,
+                level: 4
+            },
+            director: {
+                name: "主任",
+                role: "director",
+                navItems: ["dashboardSection", "workflowSection", "recordsSection"],
+                canViewForms: false,
+                canApprove: true,
+                canManageUsers: false,
+                canAccessWorkflow: true,
+                level: 5
+            },
+            ceo: {
+                name: "執行長",
+                role: "ceo",
+                navItems: ["dashboardSection", "workflowSection", "recordsSection"],
+                canViewForms: false,
+                canApprove: true,
+                canManageUsers: false,
+                canAccessWorkflow: true,
+                level: 6
+            },
+            chairman: {
+                name: "董事長",
+                role: "chairman",
+                navItems: ["dashboardSection", "workflowSection", "recordsSection"],
+                canViewForms: false,
+                canApprove: true,
+                canManageUsers: false,
+                canAccessWorkflow: true,
+                level: 7
+            },
+            admin: {
+                name: "系統管理員",
+                role: "admin",
+                navItems: ["dashboardSection", "adminSection", "recordsSection"],
+                canViewForms: false,
+                canApprove: true,
+                canManageUsers: true,
+                canAccessWorkflow: false,
+                level: 8
+            }
+        };
+
+        let currentRole = null;
+        let forms = []; // 模擬表單數據
+        let users = []; // 模擬用戶數據
+
+        // 初始化用戶數據（第一次使用時）
+        if (!localStorage.getItem('users')) {
+            users = [
+                { username: "admin", password: "admin123", role: "admin" },
+                { username: "clerk1", password: "clerk123", role: "clerk" },
+                { username: "accountant1", password: "acc123", role: "accountant" },
+                { username: "cashier1", password: "cash123", role: "cashier" },
+                { username: "supervisor1", password: "sup123", role: "supervisor" },
+                { username: "director1", password: "dir123", role: "director" },
+                { username: "ceo1", password: "ceo123", role: "ceo" },
+                { username: "chairman1", password: "chair123", role: "chairman" }
+            ];
+            localStorage.setItem('users', JSON.stringify(users));
+        } else {
+            users = JSON.parse(localStorage.getItem('users'));
+        }
+
+        // 初始化表單數據（第一次使用時）
+        if (!localStorage.getItem('forms')) {
+            forms = [
+                {
+                    serialNumber: generateSerialNumber(),
+                    type: "advance",
+                    applicant: "clerk1",
+                    amount: 10000,
+                    street: "中正路",
+                    date: "2024-04-01",
+                    status: "主任審核"
+                },
+                {
+                    serialNumber: generateSerialNumber(),
+                    type: "expense",
+                    applicant: "clerk1",
+                    amount: 5000,
+                    street: "忠孝東路",
+                    date: "2024-04-05",
+                    status: "出納審核"
+                },
+                {
+                    serialNumber: generateSerialNumber(),
+                    type: "verification",
+                    applicant: "clerk1",
+                    amount: 2000,
+                    street: "民生西路",
+                    date: "2024-04-10",
+                    status: "主管審核"
+                }
+            ];
+            localStorage.setItem('forms', JSON.stringify(forms));
+        } else {
+            forms = JSON.parse(localStorage.getItem('forms'));
+        }
+
+        // 更新申請數量顯示
+        function updateDashboard() {
+            document.getElementById('advanceCount').textContent = forms.filter(f => f.type === "advance").length + " 件";
+            document.getElementById('expenseCount').textContent = forms.filter(f => f.type === "expense").length + " 件";
+            document.getElementById('verificationCount').textContent = forms.filter(f => f.type === "verification").length + " 件";
+        }
+
+        // 生成唯一流水號
+        function generateSerialNumber() {
+            const today = new Date();
+            const rocYear = today.getFullYear() - 1911;
+            const month = String(today.getMonth() + 1).padStart(2, '0');
+            const yearMonth = `A${rocYear}${month}`;
+            // 計算當月已有的申請數量
+            const count = forms.filter(f => f.serialNumber.startsWith(yearMonth)).length + 1;
+            const serial = `${yearMonth}${String(count).padStart(4, '0')}`;
+            return serial;
+        }
+
+        // 顯示登錄模態窗口
+        const loginModal = new bootstrap.Modal(document.getElementById('loginModal'), {
+            backdrop: 'static',
+            keyboard: false
+        });
+        loginModal.show();
+
+        // 處理登錄表單提交
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const username = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value.trim();
+
+            // 查找用戶
+            const user = users.find(u => u.username === username && u.password === password);
+            if (user && roles[user.role]) {
+                currentRole = roles[user.role];
+                updateUIForRole();
+                loginModal.hide();
+            } else {
+                alert('用戶名或密碼錯誤。');
+            }
+        });
+
+        // 更新UI根據角色
+        function updateUIForRole() {
+            // 更新用戶名稱顯示
+            document.getElementById('userRoleDisplay').textContent = currentRole.name;
+
+            // 更新導航欄
+            const navLinks = document.querySelectorAll('.sidebar .nav-item');
+            navLinks.forEach(link => {
+                const id = link.id;
+                if (currentRole.navItems.includes(id)) {
+                    link.style.display = 'block';
+                } else {
+                    link.style.display = 'none';
+                }
+            });
+
+            // 更新申請表單的顯示
+            const formsSection = document.getElementById('formsSection');
+            const formDivs = formsSection.querySelectorAll('div[id$="Section"]');
+            formDivs.forEach(formDiv => {
+                if (currentRole.canViewForms) {
+                    formDiv.style.display = 'block';
+                } else {
+                    formDiv.style.display = 'none';
+                }
+            });
+
+            // 更新流程管理的顯示
+            if (currentRole.canAccessWorkflow) {
+                document.getElementById('workflowSection').style.display = 'block';
+                initializeWorkflow();
+            } else {
+                document.getElementById('workflowSection').style.display = 'none';
+            }
+
+            // 更新系統管理員頁面顯示
+            if (currentRole.canManageUsers) {
+                document.getElementById('adminSection').style.display = 'block';
+                renderUsers();
+            } else {
+                document.getElementById('adminSection').style.display = 'none';
+            }
+
+            // 更新申請記錄的操作按鈕
+            const editButtons = document.querySelectorAll('.edit-btn');
+            const deleteButtons = document.querySelectorAll('.delete-btn');
+            const approveButtons = document.querySelectorAll('.approve-btn');
+
+            if (currentRole.canApprove && !currentRole.canManageUsers) {
+                editButtons.forEach(btn => btn.style.display = 'none');
+                deleteButtons.forEach(btn => btn.style.display = 'none');
+                approveButtons.forEach(btn => btn.style.display = 'inline-block');
+            } else if (currentRole.canManageUsers) {
+                editButtons.forEach(btn => btn.style.display = 'none');
+                deleteButtons.forEach(btn => btn.style.display = 'none');
+                approveButtons.forEach(btn => btn.style.display = 'none');
+            } else {
+                editButtons.forEach(btn => btn.style.display = 'inline-block');
+                deleteButtons.forEach(btn => btn.style.display = 'inline-block');
+                approveButtons.forEach(btn => btn.style.display = 'none');
+            }
+
+            // 更新步驟條
+            updateStepper();
+
+            // 更新申請記錄
+            renderRecords();
+
+            // 更新儀表板
+            updateDashboard();
+        }
+
+        // 初始化流程管理
+        function initializeWorkflow() {
+            const workflowAccordion = document.getElementById('workflowAccordion');
+            workflowAccordion.innerHTML = ''; // 清空現有內容
+
+            // 定義流程階段
+            const stages = [
+                { id: 'collapseOne', title: '經辦人提交', description: '經辦人提交了預支/報帳/核銷申請。', responsible: '經辦人', status: '已完成' },
+                { id: 'collapseTwo', title: '會計審核', description: '會計審核申請的財務資料和合理性。', responsible: '會計', status: '已完成' },
+                { id: 'collapseThree', title: '出納審核', description: '出納審核申請的付款細節和資金可用性。', responsible: '出納', status: '已完成' },
+                { id: 'collapseFour', title: '主管審核', description: '主管審核申請的必要性和合理性。', responsible: '主管(督導)', status: '已完成' },
+                { id: 'collapseFive', title: '主任審核', description: '主任審核申請的整體合理性和資金分配。', responsible: '主任', status: '進行中' },
+                { id: 'collapseSix', title: '執行長審核', description: '執行長審核申請的戰略意義和資金使用。', responsible: '執行長', status: '待審核' },
+                { id: 'collapseSeven', title: '董事長批准', description: '董事長最終批准申請的資金使用。', responsible: '董事長', status: '待批准' }
+            ];
+
+            stages.forEach((stage, index) => {
+                const accordionItem = document.createElement('div');
+                accordionItem.className = 'accordion-item';
+
+                const headerId = `heading${index + 1}`;
+                const collapseId = stage.id;
+
+                accordionItem.innerHTML = `
+                    <h2 class="accordion-header" id="${headerId}">
+                        <button class="accordion-button ${index < 5 ? '' : 'collapsed'}" type="button" data-bs-toggle="collapse" data-bs-target="#${collapseId}" aria-expanded="${index < 5 ? 'true' : 'false'}" aria-controls="${collapseId}">
+                            ${stage.title}
+                        </button>
+                    </h2>
+                    <div id="${collapseId}" class="accordion-collapse collapse ${index < 5 ? 'show' : ''}" aria-labelledby="${headerId}" data-bs-parent="#workflowAccordion">
+                        <div class="accordion-body">
+                            <p>${stage.description}</p>
+                            <p><strong>負責人：</strong>${stage.responsible}</p>
+                            <p><strong>狀態：</strong>${stage.status}</p>
+                        </div>
+                    </div>
+                `;
+
+                workflowAccordion.appendChild(accordionItem);
+            });
+        }
+
+        // 更新步驟條根據流程狀態
+        function updateStepper() {
+            // 此處可以根據具體申請的狀態更新步驟條
+            // 為簡化，假設所有申請的最新狀態相同
+        }
+
+        // 申請記錄渲染
+        function renderRecords() {
+            const recordsTableBody = document.getElementById('recordsTableBody');
+            recordsTableBody.innerHTML = ''; // 清空現有記錄
+
+            // 根據角色顯示不同的申請記錄
+            let filteredForms = forms;
+            if (currentRole.canApprove && currentRole.role !== 'admin') {
+                // 審核角色查看所有表單
+                filteredForms = forms;
+            } else {
+                // 經辦人僅查看自己的表單
+                filteredForms = forms.filter(form => form.applicant === currentRole.name);
+            }
+
+            filteredForms.forEach((record, index) => {
+                const tr = document.createElement('tr');
+
+                tr.innerHTML = `
+                    <td>${record.serialNumber}</td>
+                    <td>${record.type === "advance" ? "預支申請" : record.type === "expense" ? "報帳申請" : "核銷申請"}</td>
+                    <td>${record.applicant}</td>
+                    <td>NT$${record.amount}</td>
+                    <td>${record.street}</td>
+                    <td>${record.date}</td>
+                    <td>${record.status}</td>
+                    <td>
+                        <button class="btn btn-sm btn-info me-2 view-btn" data-bs-toggle="modal" data-bs-target="#viewDetailsModal" data-index="${index}"><i class="fas fa-eye"></i></button>
+                        ${currentRole.canApprove && currentRole.role !== 'admin' ? `
+                            <button class="btn btn-sm btn-success me-2 approve-btn" data-index="${index}"><i class="fas fa-thumbs-up"></i> 批准</button>
+                            <button class="btn btn-sm btn-danger me-2 reject-btn" data-index="${index}"><i class="fas fa-thumbs-down"></i> 拒絕</button>
+                        ` : `
+                            ${currentRole.canManageUsers ? '' : `
+                                <button class="btn btn-sm btn-warning me-2 edit-btn" data-bs-toggle="modal" data-bs-target="#editApplicationModal" data-index="${index}"><i class="fas fa-edit"></i></button>
+                                <button class="btn btn-sm btn-danger delete-btn" data-index="${index}"><i class="fas fa-trash-alt"></i></button>
+                            `}
+                        `}
+                    </td>
+                `;
+                recordsTableBody.appendChild(tr);
+            });
+        }
+
+        // 處理登出
+        document.getElementById('logoutBtn').addEventListener('click', () => {
+            location.reload();
+        });
+
+        // 處理側邊欄切換
+        const toggleBtn = document.getElementById('toggle-btn');
+        toggleBtn.addEventListener('click', () => {
+            document.getElementById('sidebar').classList.toggle('collapsed');
+            document.getElementById('mainContent').classList.toggle('collapsed');
+            document.querySelector('.header').classList.toggle('collapsed');
+            document.querySelector('.footer').classList.toggle('collapsed');
+        });
+
+        // 處理表單提交事件 (經辦人)
+        document.getElementById('advanceForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const amount = document.getElementById('advanceAmount').value;
+            const purpose = document.getElementById('advancePurpose').value;
+            const street = document.getElementById('advanceStreet').value;
+            const date = document.getElementById('advanceDate').value;
+
+            const newForm = {
+                serialNumber: generateSerialNumber(),
+                type: "advance",
+                applicant: currentRole.name,
+                amount: parseInt(amount),
+                purpose: purpose,
+                street: street,
+                date: date,
+                status: "會計審核"
+            };
+            forms.push(newForm);
+            localStorage.setItem('forms', JSON.stringify(forms));
+
+            renderRecords();
+            updateDashboard();
+            this.reset();
+            alert('預支申請提交成功！');
+        });
+
+        document.getElementById('expenseForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const amount = document.getElementById('expenseAmount').value;
+            const details = document.getElementById('expenseDetails').value;
+            const street = document.getElementById('expenseStreet').value;
+            const date = document.getElementById('expenseDate').value;
+
+            const newForm = {
+                serialNumber: generateSerialNumber(),
+                type: "expense",
+                applicant: currentRole.name,
+                amount: parseInt(amount),
+                details: details,
+                street: street,
+                date: date,
+                status: "出納審核"
+            };
+            forms.push(newForm);
+            localStorage.setItem('forms', JSON.stringify(forms));
+
+            renderRecords();
+            updateDashboard();
+            this.reset();
+            alert('報帳申請提交成功！');
+        });
+
+        document.getElementById('verificationForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const amount = document.getElementById('verificationAmount').value;
+            const details = document.getElementById('verificationDetails').value;
+            const street = document.getElementById('verificationStreet').value;
+            const date = document.getElementById('verificationDate').value;
+
+            const newForm = {
+                serialNumber: generateSerialNumber(),
+                type: "verification",
+                applicant: currentRole.name,
+                amount: parseInt(amount),
+                details: details,
+                street: street,
+                date: date,
+                status: "主管審核"
+            };
+            forms.push(newForm);
+            localStorage.setItem('forms', JSON.stringify(forms));
+
+            renderRecords();
+            updateDashboard();
+            this.reset();
+            alert('核銷申請提交成功！');
+        });
+
+        // 查看詳情
+        document.getElementById('recordsTableBody').addEventListener('click', function(e) {
+            if (e.target.closest('.view-btn')) {
+                const index = e.target.closest('.view-btn').getAttribute('data-index');
+                const form = forms[index];
+                document.getElementById('detailSerialNumber').textContent = form.serialNumber;
+                document.getElementById('detailType').textContent = form.type === "advance" ? "預支申請" : form.type === "expense" ? "報帳申請" : "核銷申請";
+                document.getElementById('detailApplicant').textContent = form.applicant;
+                document.getElementById('detailAmount').textContent = `NT$${form.amount}`;
+                document.getElementById('detailStreet').textContent = form.street;
+                document.getElementById('detailDate').textContent = form.date;
+                document.getElementById('detailStatus').textContent = form.status;
+            }
+
+            // 編輯申請
+            if (e.target.closest('.edit-btn')) {
+                const index = e.target.closest('.edit-btn').getAttribute('data-index');
+                const form = forms[index];
+                document.getElementById('editFormIndex').value = index;
+                document.getElementById('editType').value = form.type;
+                document.getElementById('editAmount').value = form.amount;
+                document.getElementById('editStreet').value = form.street;
+                document.getElementById('editDate').value = form.date;
+                document.getElementById('editStatus').value = form.status;
+
+                if (form.type === "advance") {
+                    document.getElementById('editPurposeDiv').style.display = 'block';
+                    document.getElementById('editDetailsDiv').style.display = 'none';
+                    document.getElementById('editPurpose').value = form.purpose || '';
+                } else {
+                    document.getElementById('editPurposeDiv').style.display = 'none';
+                    document.getElementById('editDetailsDiv').style.display = 'block';
+                    document.getElementById('editDetails').value = form.details || '';
+                }
+            }
+
+            // 刪除申請
+            if (e.target.closest('.delete-btn')) {
+                const index = e.target.closest('.delete-btn').getAttribute('data-index');
+                if (confirm('確定要刪除此申請嗎？')) {
+                    forms.splice(index, 1);
+                    localStorage.setItem('forms', JSON.stringify(forms));
+                    renderRecords();
+                    updateDashboard();
+                }
+            }
+
+            // 批准申請
+            if (e.target.closest('.approve-btn')) {
+                const index = e.target.closest('.approve-btn').getAttribute('data-index');
+                approveApplication(index);
+            }
+
+            // 拒絕申請
+            if (e.target.closest('.reject-btn')) {
+                const index = e.target.closest('.reject-btn').getAttribute('data-index');
+                rejectApplication(index);
+            }
+        });
+
+        // 處理編輯申請表單提交事件
+        document.getElementById('editApplicationForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const index = document.getElementById('editFormIndex').value;
+            const type = document.getElementById('editType').value;
+            const amount = document.getElementById('editAmount').value;
+            const street = document.getElementById('editStreet').value;
+            const date = document.getElementById('editDate').value;
+            const status = document.getElementById('editStatus').value;
+
+            if (type === "advance") {
+                const purpose = document.getElementById('editPurpose').value;
+                forms[index] = {
+                    ...forms[index],
+                    type: type,
+                    amount: parseInt(amount),
+                    purpose: purpose,
+                    street: street,
+                    date: date,
+                    status: status
+                };
+            } else {
+                const details = document.getElementById('editDetails').value;
+                forms[index] = {
+                    ...forms[index],
+                    type: type,
+                    amount: parseInt(amount),
+                    details: details,
+                    street: street,
+                    date: date,
+                    status: status
+                };
+            }
+
+            localStorage.setItem('forms', JSON.stringify(forms));
+            renderRecords();
+            updateDashboard();
+            this.reset();
+            alert('申請已更新！');
+        });
+
+        // 批准申請
+        function approveApplication(index) {
+            forms[index].status = getNextStatus(forms[index].status);
+            localStorage.setItem('forms', JSON.stringify(forms));
+            renderRecords();
+            updateDashboard();
+            alert('申請已批准！');
+        }
+
+        // 拒絕申請
+        function rejectApplication(index) {
+            forms[index].status = "已拒絕";
+            localStorage.setItem('forms', JSON.stringify(forms));
+            renderRecords();
+            updateDashboard();
+            alert('申請已拒絕！');
+        }
+
+        // 獲取下一個狀態
+        function getNextStatus(currentStatus) {
+            const statusOrder = ["submitted", "reviewed", "approved", "rejected"];
+            const currentIndex = statusOrder.indexOf(currentStatus);
+            if (currentIndex === -1 || currentIndex === statusOrder.length - 1) {
+                return currentStatus;
+            }
+            return statusOrder[currentIndex + 1];
+        }
+
+        // 填充編輯表單
+        function populateEditForm(index) {
+            const form = forms[index];
+            document.getElementById('editType').value = form.type;
+            document.getElementById('editAmount').value = form.amount;
+            document.getElementById('editStreet').value = form.street;
+            document.getElementById('editDate').value = form.date;
+            document.getElementById('editStatus').value = form.status;
+
+            if (form.type === "advance") {
+                document.getElementById('editPurposeDiv').style.display = 'block';
+                document.getElementById('editDetailsDiv').style.display = 'none';
+                document.getElementById('editPurpose').value = form.purpose || '';
+            } else {
+                document.getElementById('editPurposeDiv').style.display = 'none';
+                document.getElementById('editDetailsDiv').style.display = 'block';
+                document.getElementById('editDetails').value = form.details || '';
+            }
+        }
+
+        // 搜尋功能
+        document.getElementById('searchBtn').addEventListener('click', function() {
+            const query = document.getElementById('searchInput').value.trim().toLowerCase();
+            if (query === "") {
+                renderRecords();
+                return;
+            }
+
+            const filtered = forms.filter(form => 
+                form.serialNumber.toLowerCase().includes(query) || 
+                form.street.toLowerCase().includes(query)
+            );
+
+            const recordsTableBody = document.getElementById('recordsTableBody');
+            recordsTableBody.innerHTML = ''; // 清空現有記錄
+
+            filtered.forEach((record, index) => {
+                const tr = document.createElement('tr');
+
+                tr.innerHTML = `
+                    <td>${record.serialNumber}</td>
+                    <td>${record.type === "advance" ? "預支申請" : record.type === "expense" ? "報帳申請" : "核銷申請"}</td>
+                    <td>${record.applicant}</td>
+                    <td>NT$${record.amount}</td>
+                    <td>${record.street}</td>
+                    <td>${record.date}</td>
+                    <td>${record.status}</td>
+                    <td>
+                        <button class="btn btn-sm btn-info me-2 view-btn" data-bs-toggle="modal" data-bs-target="#viewDetailsModal" data-index="${index}"><i class="fas fa-eye"></i></button>
+                        ${currentRole.canApprove && currentRole.role !== 'admin' ? `
+                            <button class="btn btn-sm btn-success me-2 approve-btn" data-index="${index}"><i class="fas fa-thumbs-up"></i> 批准</button>
+                            <button class="btn btn-sm btn-danger me-2 reject-btn" data-index="${index}"><i class="fas fa-thumbs-down"></i> 拒絕</button>
+                        ` : `
+                            ${currentRole.canManageUsers ? '' : `
+                                <button class="btn btn-sm btn-warning me-2 edit-btn" data-bs-toggle="modal" data-bs-target="#editApplicationModal" data-index="${index}"><i class="fas fa-edit"></i></button>
+                                <button class="btn btn-sm btn-danger delete-btn" data-index="${index}"><i class="fas fa-trash-alt"></i></button>
+                            `}
+                        `}
+                    </td>
+                `;
+                recordsTableBody.appendChild(tr);
+            });
+        });
+
+        // 用戶管理
+        function renderUsers() {
+            const usersTableBody = document.getElementById('usersTableBody');
+            usersTableBody.innerHTML = ''; // 清空現有用戶
+
+            users.forEach((user, index) => {
+                const tr = document.createElement('tr');
+
+                tr.innerHTML = `
+                    <td>${user.username}</td>
+                    <td>${getRoleName(user.role)}</td>
+                    <td>
+                        ${user.role !== 'admin' ? `<button class="btn btn-sm btn-danger delete-user-btn" data-index="${index}"><i class="fas fa-trash-alt"></i> 刪除</button>` : ''}
+                    </td>
+                `;
+                usersTableBody.appendChild(tr);
+            });
+        }
+
+        // 新增用戶
+        document.getElementById('addUserForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const username = document.getElementById('newUsername').value.trim();
+            const password = document.getElementById('newPassword').value.trim();
+            const role = document.getElementById('newRole').value;
+
+            if (username === "" || password === "" || role === "") {
+                alert('請填寫所有欄位。');
+                return;
+            }
+
+            // 檢查用戶名是否已存在
+            const existing = users.find(u => u.username === username);
+            if (existing) {
+                alert('用戶名已存在。');
+                return;
+            }
+
+            users.push({ username, password, role });
+            localStorage.setItem('users', JSON.stringify(users));
+            renderUsers();
+            this.reset();
+            alert('用戶新增成功！');
+        });
+
+        // 刪除用戶
+        document.getElementById('usersTableBody').addEventListener('click', function(e) {
+            if (e.target.closest('.delete-user-btn')) {
+                const index = e.target.closest('.delete-user-btn').getAttribute('data-index');
+                if (confirm('確定要刪除此用戶嗎？')) {
+                    users.splice(index, 1);
+                    localStorage.setItem('users', JSON.stringify(users));
+                    renderUsers();
+                }
+            }
+        });
+
+        // 獲取角色名稱
+        function getRoleName(role) {
+            const roleNames = {
+                clerk: "經辦人",
+                accountant: "會計",
+                cashier: "出納",
+                supervisor: "主管(督導)",
+                director: "主任",
+                ceo: "執行長",
+                chairman: "董事長",
+                admin: "系統管理員"
+            };
+            return roleNames[role] || "未知職級";
+        }
+
+        // 批准申請
+        function approveApplication(index) {
+            // 根據當前狀態更新下一步
+            switch(forms[index].status) {
+                case "會計審核":
+                    forms[index].status = "出納審核";
+                    break;
+                case "出納審核":
+                    forms[index].status = "主管審核";
+                    break;
+                case "主管審核":
+                    forms[index].status = "主任審核";
+                    break;
+                case "主任審核":
+                    forms[index].status = "執行長審核";
+                    break;
+                case "執行長審核":
+                    forms[index].status = "董事長批准";
+                    break;
+                case "董事長批准":
+                    forms[index].status = "已批准";
+                    break;
+                default:
+                    alert('申請已完成或狀態無法進行批准。');
+                    return;
+            }
+            localStorage.setItem('forms', JSON.stringify(forms));
+            renderRecords();
+            updateDashboard();
+            alert('申請已批准！');
+        }
+
+        // 拒絕申請
+        function rejectApplication(index) {
+            forms[index].status = "已拒絕";
+            localStorage.setItem('forms', JSON.stringify(forms));
+            renderRecords();
+            updateDashboard();
+            alert('申請已拒絕！');
+        }
+
+        // 搜尋按Enter鍵觸發
+        document.getElementById('searchInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                document.getElementById('searchBtn').click();
+            }
+        });
+
+        // 查看詳情
+        document.getElementById('recordsTableBody').addEventListener('click', function(e) {
+            if (e.target.closest('.view-btn')) {
+                const index = e.target.closest('.view-btn').getAttribute('data-index');
+                const form = forms[index];
+                document.getElementById('detailSerialNumber').textContent = form.serialNumber;
+                document.getElementById('detailType').textContent = form.type === "advance" ? "預支申請" : form.type === "expense" ? "報帳申請" : "核銷申請";
+                document.getElementById('detailApplicant').textContent = form.applicant;
+                document.getElementById('detailAmount').textContent = `NT$${form.amount}`;
+                document.getElementById('detailStreet').textContent = form.street;
+                document.getElementById('detailDate').textContent = form.date;
+                document.getElementById('detailStatus').textContent = form.status;
+            }
+
+            // 編輯申請
+            if (e.target.closest('.edit-btn')) {
+                const index = e.target.closest('.edit-btn').getAttribute('data-index');
+                const form = forms[index];
+                document.getElementById('editFormIndex').value = index;
+                document.getElementById('editType').value = form.type;
+                document.getElementById('editAmount').value = form.amount;
+                document.getElementById('editStreet').value = form.street;
+                document.getElementById('editDate').value = form.date;
+                document.getElementById('editStatus').value = form.status;
+
+                if (form.type === "advance") {
+                    document.getElementById('editPurposeDiv').style.display = 'block';
+                    document.getElementById('editDetailsDiv').style.display = 'none';
+                    document.getElementById('editPurpose').value = form.purpose || '';
+                } else {
+                    document.getElementById('editPurposeDiv').style.display = 'none';
+                    document.getElementById('editDetailsDiv').style.display = 'block';
+                    document.getElementById('editDetails').value = form.details || '';
+                }
+            }
+
+            // 刪除申請
+            if (e.target.closest('.delete-btn')) {
+                const index = e.target.closest('.delete-btn').getAttribute('data-index');
+                if (confirm('確定要刪除此申請嗎？')) {
+                    forms.splice(index, 1);
+                    localStorage.setItem('forms', JSON.stringify(forms));
+                    renderRecords();
+                    updateDashboard();
+                }
+            }
+
+            // 批准申請
+            if (e.target.closest('.approve-btn')) {
+                const index = e.target.closest('.approve-btn').getAttribute('data-index');
+                approveApplication(index);
+            }
+
+            // 拒絕申請
+            if (e.target.closest('.reject-btn')) {
+                const index = e.target.closest('.reject-btn').getAttribute('data-index');
+                rejectApplication(index);
+            }
+        });
+
+        // 處理編輯申請表單提交事件
+        document.getElementById('editApplicationForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const index = document.getElementById('editFormIndex').value;
+            const type = document.getElementById('editType').value;
+            const amount = document.getElementById('editAmount').value;
+            const street = document.getElementById('editStreet').value;
+            const date = document.getElementById('editDate').value;
+            const status = document.getElementById('editStatus').value;
+
+            if (type === "advance") {
+                const purpose = document.getElementById('editPurpose').value;
+                forms[index] = {
+                    ...forms[index],
+                    type: type,
+                    amount: parseInt(amount),
+                    purpose: purpose,
+                    street: street,
+                    date: date,
+                    status: status
+                };
+            } else {
+                const details = document.getElementById('editDetails').value;
+                forms[index] = {
+                    ...forms[index],
+                    type: type,
+                    amount: parseInt(amount),
+                    details: details,
+                    street: street,
+                    date: date,
+                    status: status
+                };
+            }
+
+            localStorage.setItem('forms', JSON.stringify(forms));
+            renderRecords();
+            updateDashboard();
+            this.reset();
+            alert('申請已更新！');
+        });
+
+        // 獲取角色名稱
+        function getRoleName(role) {
+            const roleNames = {
+                clerk: "經辦人",
+                accountant: "會計",
+                cashier: "出納",
+                supervisor: "主管(督導)",
+                director: "主任",
+                ceo: "執行長",
+                chairman: "董事長",
+                admin: "系統管理員"
+            };
+            return roleNames[role] || "未知職級";
+        }
+
+        // 用戶管理
+        function renderUsers() {
+            const usersTableBody = document.getElementById('usersTableBody');
+            usersTableBody.innerHTML = ''; // 清空現有用戶
+
+            users.forEach((user, index) => {
+                const tr = document.createElement('tr');
+
+                tr.innerHTML = `
+                    <td>${user.username}</td>
+                    <td>${getRoleName(user.role)}</td>
+                    <td>
+                        ${user.role !== 'admin' ? `<button class="btn btn-sm btn-danger delete-user-btn" data-index="${index}"><i class="fas fa-trash-alt"></i> 刪除</button>` : ''}
+                    </td>
+                `;
+                usersTableBody.appendChild(tr);
+            });
+        }
+
+        // 新增用戶
+        document.getElementById('addUserForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const username = document.getElementById('newUsername').value.trim();
+            const password = document.getElementById('newPassword').value.trim();
+            const role = document.getElementById('newRole').value;
+
+            if (username === "" || password === "" || role === "") {
+                alert('請填寫所有欄位。');
+                return;
+            }
+
+            // 檢查用戶名是否已存在
+            const existing = users.find(u => u.username === username);
+            if (existing) {
+                alert('用戶名已存在。');
+                return;
+            }
+
+            users.push({ username, password, role });
+            localStorage.setItem('users', JSON.stringify(users));
+            renderUsers();
+            this.reset();
+            alert('用戶新增成功！');
+        });
+
+        // 刪除用戶
+        document.getElementById('usersTableBody').addEventListener('click', function(e) {
+            if (e.target.closest('.delete-user-btn')) {
+                const index = e.target.closest('.delete-user-btn').getAttribute('data-index');
+                if (confirm('確定要刪除此用戶嗎？')) {
+                    users.splice(index, 1);
+                    localStorage.setItem('users', JSON.stringify(users));
+                    renderUsers();
+                }
+            }
+        });
+
+        // 批准申請
+        function approveApplication(index) {
+            // 根據當前狀態更新下一步
+            switch(forms[index].status) {
+                case "會計審核":
+                    forms[index].status = "出納審核";
+                    break;
+                case "出納審核":
+                    forms[index].status = "主管審核";
+                    break;
+                case "主管審核":
+                    forms[index].status = "主任審核";
+                    break;
+                case "主任審核":
+                    forms[index].status = "執行長審核";
+                    break;
+                case "執行長審核":
+                    forms[index].status = "董事長批准";
+                    break;
+                case "董事長批准":
+                    forms[index].status = "已批准";
+                    break;
+                default:
+                    alert('申請已完成或狀態無法進行批准。');
+                    return;
+            }
+            localStorage.setItem('forms', JSON.stringify(forms));
+            renderRecords();
+            updateDashboard();
+            alert('申請已批准！');
+        }
+
+        // 拒絕申請
+        function rejectApplication(index) {
+            forms[index].status = "已拒絕";
+            localStorage.setItem('forms', JSON.stringify(forms));
+            renderRecords();
+            updateDashboard();
+            alert('申請已拒絕！');
+        }
+
+        // 搜尋功能
+        document.getElementById('searchBtn').addEventListener('click', function() {
+            const query = document.getElementById('searchInput').value.trim().toLowerCase();
+            if (query === "") {
+                renderRecords();
+                return;
+            }
+
+            const filtered = forms.filter(form => 
+                form.serialNumber.toLowerCase().includes(query) || 
+                form.street.toLowerCase().includes(query)
+            );
+
+            const recordsTableBody = document.getElementById('recordsTableBody');
+            recordsTableBody.innerHTML = ''; // 清空現有記錄
+
+            filtered.forEach((record, index) => {
+                const tr = document.createElement('tr');
+
+                tr.innerHTML = `
+                    <td>${record.serialNumber}</td>
+                    <td>${record.type === "advance" ? "預支申請" : record.type === "expense" ? "報帳申請" : "核銷申請"}</td>
+                    <td>${record.applicant}</td>
+                    <td>NT$${record.amount}</td>
+                    <td>${record.street}</td>
+                    <td>${record.date}</td>
+                    <td>${record.status}</td>
+                    <td>
+                        <button class="btn btn-sm btn-info me-2 view-btn" data-bs-toggle="modal" data-bs-target="#viewDetailsModal" data-index="${index}"><i class="fas fa-eye"></i></button>
+                        ${currentRole.canApprove && currentRole.role !== 'admin' ? `
+                            <button class="btn btn-sm btn-success me-2 approve-btn" data-index="${index}"><i class="fas fa-thumbs-up"></i> 批准</button>
+                            <button class="btn btn-sm btn-danger me-2 reject-btn" data-index="${index}"><i class="fas fa-thumbs-down"></i> 拒絕</button>
+                        ` : `
+                            ${currentRole.canManageUsers ? '' : `
+                                <button class="btn btn-sm btn-warning me-2 edit-btn" data-bs-toggle="modal" data-bs-target="#editApplicationModal" data-index="${index}"><i class="fas fa-edit"></i></button>
+                                <button class="btn btn-sm btn-danger delete-btn" data-index="${index}"><i class="fas fa-trash-alt"></i></button>
+                            `}
+                        `}
+                    </td>
+                `;
+                recordsTableBody.appendChild(tr);
+            });
+        });
+
+        // 初始化流程管理
+        function initializeWorkflow() {
+            const workflowAccordion = document.getElementById('workflowAccordion');
+            workflowAccordion.innerHTML = ''; // 清空現有內容
+
+            // 定義流程階段
+            const stages = [
+                { id: 'collapseOne', title: '經辦人提交', description: '經辦人提交了預支/報帳/核銷申請。', responsible: '經辦人', status: '已完成' },
+                { id: 'collapseTwo', title: '會計審核', description: '會計審核申請的財務資料和合理性。', responsible: '會計', status: '已完成' },
+                { id: 'collapseThree', title: '出納審核', description: '出納審核申請的付款細節和資金可用性。', responsible: '出納', status: '已完成' },
+                { id: 'collapseFour', title: '主管審核', description: '主管審核申請的必要性和合理性。', responsible: '主管(督導)', status: '已完成' },
+                { id: 'collapseFive', title: '主任審核', description: '主任審核申請的整體合理性和資金分配。', responsible: '主任', status: '進行中' },
+                { id: 'collapseSix', title: '執行長審核', description: '執行長審核申請的戰略意義和資金使用。', responsible: '執行長', status: '待審核' },
+                { id: 'collapseSeven', title: '董事長批准', description: '董事長最終批准申請的資金使用。', responsible: '董事長', status: '待批准' }
+            ];
+
+            stages.forEach((stage, index) => {
+                const accordionItem = document.createElement('div');
+                accordionItem.className = 'accordion-item';
+
+                const headerId = `heading${index + 1}`;
+                const collapseId = stage.id;
+
+                accordionItem.innerHTML = `
+                    <h2 class="accordion-header" id="${headerId}">
+                        <button class="accordion-button ${index < 5 ? '' : 'collapsed'}" type="button" data-bs-toggle="collapse" data-bs-target="#${collapseId}" aria-expanded="${index < 5 ? 'true' : 'false'}" aria-controls="${collapseId}">
+                            ${stage.title}
+                        </button>
+                    </h2>
+                    <div id="${collapseId}" class="accordion-collapse collapse ${index < 5 ? 'show' : ''}" aria-labelledby="${headerId}" data-bs-parent="#workflowAccordion">
+                        <div class="accordion-body">
+                            <p>${stage.description}</p>
+                            <p><strong>負責人：</strong>${stage.responsible}</p>
+                            <p><strong>狀態：</strong>${stage.status}</p>
+                        </div>
+                    </div>
+                `;
+
+                workflowAccordion.appendChild(accordionItem);
+            });
+        }
+
+        // 系統管理員用戶管理
+        function renderUsers() {
+            const usersTableBody = document.getElementById('usersTableBody');
+            usersTableBody.innerHTML = ''; // 清空現有用戶
+
+            users.forEach((user, index) => {
+                const tr = document.createElement('tr');
+
+                tr.innerHTML = `
+                    <td>${user.username}</td>
+                    <td>${getRoleName(user.role)}</td>
+                    <td>
+                        ${user.role !== 'admin' ? `<button class="btn btn-sm btn-danger delete-user-btn" data-index="${index}"><i class="fas fa-trash-alt"></i> 刪除</button>` : ''}
+                    </td>
+                `;
+                usersTableBody.appendChild(tr);
+            });
+        }
+
+        // 新增用戶
+        document.getElementById('addUserForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const username = document.getElementById('newUsername').value.trim();
+            const password = document.getElementById('newPassword').value.trim();
+            const role = document.getElementById('newRole').value;
+
+            if (username === "" || password === "" || role === "") {
+                alert('請填寫所有欄位。');
+                return;
+            }
+
+            // 檢查用戶名是否已存在
+            const existing = users.find(u => u.username === username);
+            if (existing) {
+                alert('用戶名已存在。');
+                return;
+            }
+
+            users.push({ username, password, role });
+            localStorage.setItem('users', JSON.stringify(users));
+            renderUsers();
+            this.reset();
+            alert('用戶新增成功！');
+        });
+
+        // 刪除用戶
+        document.getElementById('usersTableBody').addEventListener('click', function(e) {
+            if (e.target.closest('.delete-user-btn')) {
+                const index = e.target.closest('.delete-user-btn').getAttribute('data-index');
+                if (confirm('確定要刪除此用戶嗎？')) {
+                    users.splice(index, 1);
+                    localStorage.setItem('users', JSON.stringify(users));
+                    renderUsers();
+                }
+            }
+        });
+
+        // 批准申請
+        function approveApplication(index) {
+            // 根據當前狀態更新下一步
+            switch(forms[index].status) {
+                case "會計審核":
+                    forms[index].status = "出納審核";
+                    break;
+                case "出納審核":
+                    forms[index].status = "主管審核";
+                    break;
+                case "主管審核":
+                    forms[index].status = "主任審核";
+                    break;
+                case "主任審核":
+                    forms[index].status = "執行長審核";
+                    break;
+                case "執行長審核":
+                    forms[index].status = "董事長批准";
+                    break;
+                case "董事長批准":
+                    forms[index].status = "已批准";
+                    break;
+                default:
+                    alert('申請已完成或狀態無法進行批准。');
+                    return;
+            }
+            localStorage.setItem('forms', JSON.stringify(forms));
+            renderRecords();
+            updateDashboard();
+            alert('申請已批准！');
+        }
+
+        // 拒絕申請
+        function rejectApplication(index) {
+            forms[index].status = "已拒絕";
+            localStorage.setItem('forms', JSON.stringify(forms));
+            renderRecords();
+            updateDashboard();
+            alert('申請已拒絕！');
+        }
+
+        // 搜尋按Enter鍵觸發
+        document.getElementById('searchInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                document.getElementById('searchBtn').click();
+            }
+        });
+
+        // 查看詳情
+        document.getElementById('recordsTableBody').addEventListener('click', function(e) {
+            if (e.target.closest('.view-btn')) {
+                const index = e.target.closest('.view-btn').getAttribute('data-index');
+                const form = forms[index];
+                document.getElementById('detailSerialNumber').textContent = form.serialNumber;
+                document.getElementById('detailType').textContent = form.type === "advance" ? "預支申請" : form.type === "expense" ? "報帳申請" : "核銷申請";
+                document.getElementById('detailApplicant').textContent = form.applicant;
+                document.getElementById('detailAmount').textContent = `NT$${form.amount}`;
+                document.getElementById('detailStreet').textContent = form.street;
+                document.getElementById('detailDate').textContent = form.date;
+                document.getElementById('detailStatus').textContent = form.status;
+            }
+
+            // 編輯申請
+            if (e.target.closest('.edit-btn')) {
+                const index = e.target.closest('.edit-btn').getAttribute('data-index');
+                const form = forms[index];
+                document.getElementById('editFormIndex').value = index;
+                document.getElementById('editType').value = form.type;
+                document.getElementById('editAmount').value = form.amount;
+                document.getElementById('editStreet').value = form.street;
+                document.getElementById('editDate').value = form.date;
+                document.getElementById('editStatus').value = form.status;
+
+                if (form.type === "advance") {
+                    document.getElementById('editPurposeDiv').style.display = 'block';
+                    document.getElementById('editDetailsDiv').style.display = 'none';
+                    document.getElementById('editPurpose').value = form.purpose || '';
+                } else {
+                    document.getElementById('editPurposeDiv').style.display = 'none';
+                    document.getElementById('editDetailsDiv').style.display = 'block';
+                    document.getElementById('editDetails').value = form.details || '';
+                }
+            }
+
+            // 刪除申請
+            if (e.target.closest('.delete-btn')) {
+                const index = e.target.closest('.delete-btn').getAttribute('data-index');
+                if (confirm('確定要刪除此申請嗎？')) {
+                    forms.splice(index, 1);
+                    localStorage.setItem('forms', JSON.stringify(forms));
+                    renderRecords();
+                    updateDashboard();
+                }
+            }
+
+            // 批准申請
+            if (e.target.closest('.approve-btn')) {
+                const index = e.target.closest('.approve-btn').getAttribute('data-index');
+                approveApplication(index);
+            }
+
+            // 拒絕申請
+            if (e.target.closest('.reject-btn')) {
+                const index = e.target.closest('.reject-btn').getAttribute('data-index');
+                rejectApplication(index);
+            }
+        });
+
+        // 處理編輯申請表單提交事件
+        document.getElementById('editApplicationForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const index = document.getElementById('editFormIndex').value;
+            const type = document.getElementById('editType').value;
+            const amount = document.getElementById('editAmount').value;
+            const street = document.getElementById('editStreet').value;
+            const date = document.getElementById('editDate').value;
+            const status = document.getElementById('editStatus').value;
+
+            if (type === "advance") {
+                const purpose = document.getElementById('editPurpose').value;
+                forms[index] = {
+                    ...forms[index],
+                    type: type,
+                    amount: parseInt(amount),
+                    purpose: purpose,
+                    street: street,
+                    date: date,
+                    status: status
+                };
+            } else {
+                const details = document.getElementById('editDetails').value;
+                forms[index] = {
+                    ...forms[index],
+                    type: type,
+                    amount: parseInt(amount),
+                    details: details,
+                    street: street,
+                    date: date,
+                    status: status
+                };
+            }
+
+            localStorage.setItem('forms', JSON.stringify(forms));
+            renderRecords();
+            updateDashboard();
+            this.reset();
+            alert('申請已更新！');
+        });
+
+        // 獲取角色名稱
+        function getRoleName(role) {
+            const roleNames = {
+                clerk: "經辦人",
+                accountant: "會計",
+                cashier: "出納",
+                supervisor: "主管(督導)",
+                director: "主任",
+                ceo: "執行長",
+                chairman: "董事長",
+                admin: "系統管理員"
+            };
+            return roleNames[role] || "未知職級";
+        }
+
+        // 用戶管理
+        function renderUsers() {
+            const usersTableBody = document.getElementById('usersTableBody');
+            usersTableBody.innerHTML = ''; // 清空現有用戶
+
+            users.forEach((user, index) => {
+                const tr = document.createElement('tr');
+
+                tr.innerHTML = `
+                    <td>${user.username}</td>
+                    <td>${getRoleName(user.role)}</td>
+                    <td>
+                        ${user.role !== 'admin' ? `<button class="btn btn-sm btn-danger delete-user-btn" data-index="${index}"><i class="fas fa-trash-alt"></i> 刪除</button>` : ''}
+                    </td>
+                `;
+                usersTableBody.appendChild(tr);
+            });
+        }
+
+        // 初始化系統管理員用戶管理
+        function initializeAdminSection() {
+            if (currentRole.canManageUsers) {
+                renderUsers();
+            }
+        }
+
+        // 批准申請
+        function approveApplication(index) {
+            // 根據當前狀態更新下一步
+            switch(forms[index].status) {
+                case "會計審核":
+                    forms[index].status = "出納審核";
+                    break;
+                case "出納審核":
+                    forms[index].status = "主管審核";
+                    break;
+                case "主管審核":
+                    forms[index].status = "主任審核";
+                    break;
+                case "主任審核":
+                    forms[index].status = "執行長審核";
+                    break;
+                case "執行長審核":
+                    forms[index].status = "董事長批准";
+                    break;
+                case "董事長批准":
+                    forms[index].status = "已批准";
+                    break;
+                default:
+                    alert('申請已完成或狀態無法進行批准。');
+                    return;
+            }
+            localStorage.setItem('forms', JSON.stringify(forms));
+            renderRecords();
+            updateDashboard();
+            alert('申請已批准！');
+        }
+
+        // 拒絕申請
+        function rejectApplication(index) {
+            forms[index].status = "已拒絕";
+            localStorage.setItem('forms', JSON.stringify(forms));
+            renderRecords();
+            updateDashboard();
+            alert('申請已拒絕！');
+        }
+
+        // 處理登錄後初始化系統管理員部分
+        function handlePostLoginInitialization() {
+            if (currentRole.canManageUsers) {
+                initializeAdminSection();
+            }
+        }
+
+        // 搜尋功能
+        document.getElementById('searchBtn').addEventListener('click', function() {
+            const query = document.getElementById('searchInput').value.trim().toLowerCase();
+            if (query === "") {
+                renderRecords();
+                return;
+            }
+
+            const filtered = forms.filter(form => 
+                form.serialNumber.toLowerCase().includes(query) || 
+                form.street.toLowerCase().includes(query)
+            );
+
+            const recordsTableBody = document.getElementById('recordsTableBody');
+            recordsTableBody.innerHTML = ''; // 清空現有記錄
+
+            filtered.forEach((record, index) => {
+                const tr = document.createElement('tr');
+
+                tr.innerHTML = `
+                    <td>${record.serialNumber}</td>
+                    <td>${record.type === "advance" ? "預支申請" : record.type === "expense" ? "報帳申請" : "核銷申請"}</td>
+                    <td>${record.applicant}</td>
+                    <td>NT$${record.amount}</td>
+                    <td>${record.street}</td>
+                    <td>${record.date}</td>
+                    <td>${record.status}</td>
+                    <td>
+                        <button class="btn btn-sm btn-info me-2 view-btn" data-bs-toggle="modal" data-bs-target="#viewDetailsModal" data-index="${index}"><i class="fas fa-eye"></i></button>
+                        ${currentRole.canApprove && currentRole.role !== 'admin' ? `
+                            <button class="btn btn-sm btn-success me-2 approve-btn" data-index="${index}"><i class="fas fa-thumbs-up"></i> 批准</button>
+                            <button class="btn btn-sm btn-danger me-2 reject-btn" data-index="${index}"><i class="fas fa-thumbs-down"></i> 拒絕</button>
+                        ` : `
+                            ${currentRole.canManageUsers ? '' : `
+                                <button class="btn btn-sm btn-warning me-2 edit-btn" data-bs-toggle="modal" data-bs-target="#editApplicationModal" data-index="${index}"><i class="fas fa-edit"></i></button>
+                                <button class="btn btn-sm btn-danger delete-btn" data-index="${index}"><i class="fas fa-trash-alt"></i></button>
+                            `}
+                        `}
+                    </td>
+                `;
+                recordsTableBody.appendChild(tr);
+            });
+        });
+
+        // 搜尋按Enter鍵觸發
+        document.getElementById('searchInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                document.getElementById('searchBtn').click();
+            }
+        });
+
+        // 查看詳情
+        document.getElementById('recordsTableBody').addEventListener('click', function(e) {
+            if (e.target.closest('.view-btn')) {
+                const index = e.target.closest('.view-btn').getAttribute('data-index');
+                const form = forms[index];
+                document.getElementById('detailSerialNumber').textContent = form.serialNumber;
+                document.getElementById('detailType').textContent = form.type === "advance" ? "預支申請" : form.type === "expense" ? "報帳申請" : "核銷申請";
+                document.getElementById('detailApplicant').textContent = form.applicant;
+                document.getElementById('detailAmount').textContent = `NT$${form.amount}`;
+                document.getElementById('detailStreet').textContent = form.street;
+                document.getElementById('detailDate').textContent = form.date;
+                document.getElementById('detailStatus').textContent = form.status;
+            }
+
+            // 編輯申請
+            if (e.target.closest('.edit-btn')) {
+                const index = e.target.closest('.edit-btn').getAttribute('data-index');
+                const form = forms[index];
+                document.getElementById('editFormIndex').value = index;
+                document.getElementById('editType').value = form.type;
+                document.getElementById('editAmount').value = form.amount;
+                document.getElementById('editStreet').value = form.street;
+                document.getElementById('editDate').value = form.date;
+                document.getElementById('editStatus').value = form.status;
+
+                if (form.type === "advance") {
+                    document.getElementById('editPurposeDiv').style.display = 'block';
+                    document.getElementById('editDetailsDiv').style.display = 'none';
+                    document.getElementById('editPurpose').value = form.purpose || '';
+                } else {
+                    document.getElementById('editPurposeDiv').style.display = 'none';
+                    document.getElementById('editDetailsDiv').style.display = 'block';
+                    document.getElementById('editDetails').value = form.details || '';
+                }
+            }
+
+            // 刪除申請
+            if (e.target.closest('.delete-btn')) {
+                const index = e.target.closest('.delete-btn').getAttribute('data-index');
+                if (confirm('確定要刪除此申請嗎？')) {
+                    forms.splice(index, 1);
+                    localStorage.setItem('forms', JSON.stringify(forms));
+                    renderRecords();
+                    updateDashboard();
+                }
+            }
+
+            // 批准申請
+            if (e.target.closest('.approve-btn')) {
+                const index = e.target.closest('.approve-btn').getAttribute('data-index');
+                approveApplication(index);
+            }
+
+            // 拒絕申請
+            if (e.target.closest('.reject-btn')) {
+                const index = e.target.closest('.reject-btn').getAttribute('data-index');
+                rejectApplication(index);
+            }
+        });
+
+        // 處理編輯申請表單提交事件
+        document.getElementById('editApplicationForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const index = document.getElementById('editFormIndex').value;
+            const type = document.getElementById('editType').value;
+            const amount = document.getElementById('editAmount').value;
+            const street = document.getElementById('editStreet').value;
+            const date = document.getElementById('editDate').value;
+            const status = document.getElementById('editStatus').value;
+
+            if (type === "advance") {
+                const purpose = document.getElementById('editPurpose').value;
+                forms[index] = {
+                    ...forms[index],
+                    type: type,
+                    amount: parseInt(amount),
+                    purpose: purpose,
+                    street: street,
+                    date: date,
+                    status: status
+                };
+            } else {
+                const details = document.getElementById('editDetails').value;
+                forms[index] = {
+                    ...forms[index],
+                    type: type,
+                    amount: parseInt(amount),
+                    details: details,
+                    street: street,
+                    date: date,
+                    status: status
+                };
+            }
+
+            localStorage.setItem('forms', JSON.stringify(forms));
+            renderRecords();
+            updateDashboard();
+            this.reset();
+            alert('申請已更新！');
+        });
+
+        // 系統管理員用戶管理
+        function renderUsers() {
+            const usersTableBody = document.getElementById('usersTableBody');
+            usersTableBody.innerHTML = ''; // 清空現有用戶
+
+            users.forEach((user, index) => {
+                const tr = document.createElement('tr');
+
+                tr.innerHTML = `
+                    <td>${user.username}</td>
+                    <td>${getRoleName(user.role)}</td>
+                    <td>
+                        ${user.role !== 'admin' ? `<button class="btn btn-sm btn-danger delete-user-btn" data-index="${index}"><i class="fas fa-trash-alt"></i> 刪除</button>` : ''}
+                    </td>
+                `;
+                usersTableBody.appendChild(tr);
+            });
+        }
+
+        // 獲取角色名稱
+        function getRoleName(role) {
+            const roleNames = {
+                clerk: "經辦人",
+                accountant: "會計",
+                cashier: "出納",
+                supervisor: "主管(督導)",
+                director: "主任",
+                ceo: "執行長",
+                chairman: "董事長",
+                admin: "系統管理員"
+            };
+            return roleNames[role] || "未知職級";
+        }
+
+        // 用戶管理
+        function renderUsersManagement() {
+            const usersTableBody = document.getElementById('usersTableBody');
+            usersTableBody.innerHTML = ''; // 清空現有用戶
+
+            users.forEach((user, index) => {
+                const tr = document.createElement('tr');
+
+                tr.innerHTML = `
+                    <td>${user.username}</td>
+                    <td>${getRoleName(user.role)}</td>
+                    <td>
+                        ${user.role !== 'admin' ? `<button class="btn btn-sm btn-danger delete-user-btn" data-index="${index}"><i class="fas fa-trash-alt"></i> 刪除</button>` : ''}
+                    </td>
+                `;
+                usersTableBody.appendChild(tr);
+            });
+        }
+
+        // 初始化系統管理員用戶管理
+        function initializeAdminSection() {
+            if (currentRole.canManageUsers) {
+                renderUsersManagement();
+            }
+        }
+
+        // 批准申請
+        function approveApplication(index) {
+            // 根據當前狀態更新下一步
+            switch(forms[index].status) {
+                case "會計審核":
+                    forms[index].status = "出納審核";
+                    break;
+                case "出納審核":
+                    forms[index].status = "主管審核";
+                    break;
+                case "主管審核":
+                    forms[index].status = "主任審核";
+                    break;
+                case "主任審核":
+                    forms[index].status = "執行長審核";
+                    break;
+                case "執行長審核":
+                    forms[index].status = "董事長批准";
+                    break;
+                case "董事長批准":
+                    forms[index].status = "已批准";
+                    break;
+                default:
+                    alert('申請已完成或狀態無法進行批准。');
+                    return;
+            }
+            localStorage.setItem('forms', JSON.stringify(forms));
+            renderRecords();
+            updateDashboard();
+            alert('申請已批准！');
+        }
+
+        // 拒絕申請
+        function rejectApplication(index) {
+            forms[index].status = "已拒絕";
+            localStorage.setItem('forms', JSON.stringify(forms));
+            renderRecords();
+            updateDashboard();
+            alert('申請已拒絕！');
+        }
+
+        // 處理登錄後初始化系統管理員部分
+        function handlePostLoginInitialization() {
+            if (currentRole.canManageUsers) {
+                initializeAdminSection();
+            }
+        }
+
+        // 初始化系統
+        function initializeSystem() {
+            updateDashboard();
+            renderRecords();
+            handlePostLoginInitialization();
+        }
+
+        // 用戶管理
+        document.getElementById('adminSection').addEventListener('submit', function(e) {
+            if (e.target.id === 'addUserForm') {
+                e.preventDefault();
+                const username = document.getElementById('newUsername').value.trim();
+                const password = document.getElementById('newPassword').value.trim();
+                const role = document.getElementById('newRole').value;
+
+                if (username === "" || password === "" || role === "") {
+                    alert('請填寫所有欄位。');
+                    return;
+                }
+
+                // 檢查用戶名是否已存在
+                const existing = users.find(u => u.username === username);
+                if (existing) {
+                    alert('用戶名已存在。');
+                    return;
+                }
+
+                users.push({ username, password, role });
+                localStorage.setItem('users', JSON.stringify(users));
+                renderUsersManagement();
+                this.reset();
+                alert('用戶新增成功！');
+            }
+        });
+
+        // 刪除用戶
+        document.getElementById('usersTableBody').addEventListener('click', function(e) {
+            if (e.target.closest('.delete-user-btn')) {
+                const index = e.target.closest('.delete-user-btn').getAttribute('data-index');
+                if (confirm('確定要刪除此用戶嗎？')) {
+                    users.splice(index, 1);
+                    localStorage.setItem('users', JSON.stringify(users));
+                    renderUsersManagement();
+                }
+            }
+        });
+
+        // 初始化系統
+        initializeSystem();
+    </script>
+</body>
+</html>
