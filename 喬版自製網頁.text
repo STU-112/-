@@ -1,0 +1,1190 @@
+<!DOCTYPE html> 
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>公司內部預支請款單</title>
+    <style>
+        /* CSS變數定義 */
+        :root {
+            --primary-color: #4a90e2;
+            --secondary-color: #50e3c2;
+            --background-color: #f7f9fc;
+            --form-background: #ffffff;
+            --border-color: #e0e0e0;
+            --text-color: #333333;
+            --label-color: #555555;
+            --input-border: #cccccc;
+            --button-color: #28a745;
+            --button-hover: #218838;
+            --disabled-color: #94d3a2;
+            --error-color: #e74c3c;
+            --transition-speed: 0.3s;
+            --font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        /* 基本樣式設定 */
+        body {
+            font-family: var(--font-family);
+            background-color: var(--background-color);
+            padding: 20px;
+            margin: 0;
+            color: var(--text-color);
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .form-container, .records-container {
+            background-color: var(--form-background);
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+            margin-bottom: 40px;
+        }
+
+        h2, h3 {
+            text-align: center;
+            color: var(--primary-color);
+            margin-bottom: 10px;
+        }
+
+        h3 {
+            color: var(--secondary-color);
+            margin-bottom: 30px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            flex: 0 0 180px;
+            font-weight: bold;
+            color: var(--label-color);
+        }
+
+        .form-group input[type="text"],
+        .form-group input[type="number"],
+        .form-group input[type="date"],
+        .form-group select,
+        .form-group textarea {
+            flex: 1;
+            padding: 10px 14px;
+            border: 1px solid var(--input-border);
+            border-radius: 6px;
+            font-size: 1em;
+            transition: border-color var(--transition-speed);
+        }
+
+        .form-group input[type="text"]:focus,
+        .form-group input[type="number"]:focus,
+        .form-group input[type="date"]:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            border-color: var(--primary-color);
+            outline: none;
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            height: 120px;
+        }
+
+        .conditional-group {
+            display: none;
+            padding: 20px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            background-color: #f9f9f9;
+            margin-top: 15px;
+            transition: all var(--transition-speed) ease;
+        }
+
+        .form-footer {
+            text-align: right;
+        }
+
+        .form-footer button {
+            padding: 12px 24px;
+            background-color: var(--button-color);
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: background-color var(--transition-speed);
+        }
+
+        .form-footer button:disabled {
+            background-color: var(--disabled-color);
+            cursor: not-allowed;
+        }
+
+        .form-footer button:hover:not(:disabled) {
+            background-color: var(--button-hover);
+        }
+
+        .currency-unit {
+            margin-left: 10px;
+            font-weight: bold;
+            color: var(--label-color);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            background-color: var(--form-background);
+        }
+
+        th, td {
+            border: 1px solid var(--border-color);
+            padding: 14px;
+            text-align: left;
+            vertical-align: top;
+        }
+
+        th {
+            background-color: #f0f4f8;
+            color: var(--text-color);
+        }
+
+        .serial-button {
+            background-color: transparent;
+            border: none;
+            color: var(--primary-color);
+            cursor: pointer;
+            text-decoration: underline;
+            font-size: 1em;
+            padding: 0;
+        }
+
+        .serial-button:hover {
+            color: var(--secondary-color);
+        }
+
+        .details-row {
+            display: none;
+            background-color: #f9f9f9;
+        }
+
+        .details-cell {
+            padding: 20px;
+            border: 1px solid var(--border-color);
+            color: var(--label-color);
+        }
+
+        /* 改善的支付方式選項 */
+        .payment-option {
+            margin-right: 20px;
+            display: flex;
+            align-items: center;
+        }
+
+        .payment-option input {
+            margin-right: 8px;
+        }
+
+        /* 動畫效果 */
+        .fade-in {
+            animation: fadeIn var(--transition-speed) forwards;
+        }
+
+        .fade-out {
+            animation: fadeOut var(--transition-speed) forwards;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; max-height: 0; }
+            to { opacity: 1; max-height: 1000px; }
+        }
+
+        @keyframes fadeOut {
+            from { opacity: 1; max-height: 1000px; }
+            to { opacity: 0; max-height: 0; }
+        }
+
+        /* 自定義彈窗樣式 */
+        .modal {
+            display: none; /* 隱藏彈窗 */
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.5); /* 半透明背景 */
+        }
+
+        .modal-content {
+            background-color: var(--form-background);
+            margin: 5% auto; /* 垂直置中 */
+            padding: 25px;
+            border: 1px solid var(--border-color);
+            width: 90%;
+            max-width: 700px;
+            border-radius: 12px;
+            text-align: center;
+            position: relative;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+        }
+
+        .close {
+            color: #aaa;
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            font-size: 24px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .close:hover,
+        .close:focus {
+            color: var(--text-color);
+        }
+
+        .neon-star {
+            color: #FFD700; /* 黃色 */
+            font-size: 2em;
+            animation: neon 1.5s infinite alternate;
+        }
+
+        @keyframes neon {
+            from {
+                text-shadow: 0 0 5px #FFD700, 0 0 10px #FFD700, 0 0 20px #FFD700, 0 0 40px #FFD700;
+            }
+            to {
+                text-shadow: 0 0 10px #FFD700, 0 0 20px #FFD700, 0 0 30px #FFD700, 0 0 50px #FFD700;
+            }
+        }
+
+        /* 結果彈窗樣式 */
+        .result-content {
+            text-align: left;
+            padding: 20px;
+            background: #fff;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            font-size: 1em;
+            line-height: 1.6;
+        }
+
+        .result-content h3 {
+            text-align: center;
+            color: var(--primary-color);
+            margin-bottom: 20px;
+        }
+
+        .result-content p {
+            margin: 10px 0;
+        }
+
+        .result-content strong {
+            color: var(--label-color);
+        }
+
+        /* 響應式設計 */
+        @media (max-width: 768px) {
+            .form-group {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .form-group label {
+                flex: none;
+                margin-bottom: 8px;
+            }
+
+            .payment-option {
+                margin-right: 10px;
+            }
+
+            .result-content {
+                padding: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="form-container" aria-labelledby="formTitle">
+            <h2 id="formTitle">財團法人台北市失親兒福利基金會</h2>
+            <h3>預支請款單</h3>
+            <form action="db_connect.php" method="post">
+            <!-- 流水編號和相關資訊 -->
+            <div class="form-header">
+                <div class="form-group">
+                    <label for="serialNumber">流水編號：</label>
+                    <span id="serialNumber" name="流水編號">A11311000001</span>
+                </div>
+                <div class="form-group">
+                    <label for="payeeName">受款人：</label>
+                    <input type="text" name="受款人" id="payeeName" placeholder="請輸入姓名" required aria-required="true">
+                </div>
+                <div class="form-group">
+                    <label for="fillDate">填表日期：</label>
+                    <input type="date" id="fillDate" name="填表日期" required aria-required="true">
+                </div>
+                <div class="form-group">
+                    <label for="paymentDate">付款日期：</label>
+                    <input type="date" id="paymentDate" name="付款日期" required aria-required="true">
+                </div>
+            </div>
+
+            <!-- 申請資訊區 -->
+            <div class="form-group">
+                <label for="purpose">請款事由：</label>
+                <select id="purpose" onchange="updateConditionalFields()" name="請款事由" required aria-required="true">
+                    <option value="">請選擇</option>
+                    <option value="activity">活動費用</option>
+                    <option value="scholarship">獎學金</option>
+                    <option value="assistance">經濟扶助</option>
+                    <option value="project">事由項目</option>
+                </select>
+            </div>
+
+            <!-- 活動費用條件式顯示區 -->
+            <div id="activityFields" class="conditional-group" aria-live="polite">
+                <div class="form-group">
+                    <label for="activityName">(專案)活動名稱：</label>
+                    <select id="activityName" required aria-required="true">
+                        <option value="">請選擇</option>
+                        <option value="halfday">半日/一日型：EX:方案活動</option>
+                        <option value="overnight">過夜型：EX:方案活動</option>
+                        <option value="sponsored">企業贊助活動:Happy Go</option>
+                        <option value="multiple">多次型：EX:成長團體、領袖小組</option>
+                        <option value="other">其他：體驗活動(10萬元預算以上)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="activityDate">日期：</label>
+                    <input type="date" id="activityDate" required aria-required="true">
+                </div>
+            </div>
+
+            <!-- 獎學金條件式顯示區 -->
+            <div id="scholarshipFields" class="conditional-group" aria-live="polite">
+                <div class="form-group">
+                    <label for="scholarshipCount">獎助學金 共幾位：</label>
+                    <input type="number" id="scholarshipCount" min="1" required aria-required="true">
+                </div>
+                <div class="form-group">
+                    <label for="scholarshipProject">專案名稱：</label>
+                    <input type="text" id="scholarshipProject" placeholder="請輸入專案名稱" required aria-required="true">
+                </div>
+                <div class="form-group">
+                    <label for="scholarshipTopic">主題：</label>
+                    <input type="text" id="scholarshipTopic" placeholder="請輸入主題" required aria-required="true">
+                </div>
+                <div class="form-group">
+                    <label for="scholarshipDate">日期：</label>
+                    <input type="date" id="scholarshipDate" required aria-required="true">
+                </div>
+            </div>
+
+            <!-- 經濟扶助條件式顯示區 -->
+            <div id="assistanceFields" class="conditional-group" aria-live="polite">
+                <div class="form-group">
+                    <label for="assistanceType">經濟扶助類型：</label>
+                    <select id="assistanceType" required aria-required="true">
+                        <option value="">請選擇</option>
+                        <option value="economic">經濟扶助</option>
+                        <option value="emergency">急難救助</option>
+                        <option value="medical">醫療補助</option>
+                        <option value="living">生活扶助</option>
+                        <option value="other">其他專案</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- 事由項目條件式顯示區 -->
+            <div id="projectFields" class="conditional-group" aria-live="polite">
+                <div class="form-group">
+                    <label for="projectType">事由項目：</label>
+                    <select id="projectType" required aria-required="true">
+                        <option value="">請選擇</option>
+                        <option value="angelProject">天使關懷專案：禮金</option>
+                        <option value="repair">修繕費</option>
+                        <option value="visitTravel">探訪交通差旅</option>
+                        <option value="postal">郵電費</option>
+                        <option value="comfort">慰問關懷</option>
+                        <option value="telecom">電信費</option>
+                        <option value="tutoring">課輔鐘點費</option>
+                        <option value="stationery">文具印刷</option>
+                        <option value="counseling">心輔諮商</option>
+                        <option value="computerSupplies">電腦用品</option>
+                        <option value="connection">關懷站連結</option>
+                        <option value="celebration">慶典福利</option>
+                        <option value="education">教育訓練</option>
+                        <option value="misc">雜項購置</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- 勾選欄位 -->
+            <div class="form-group"> 
+                <label><input type="checkbox" id="otherOption"> 其他</label>
+                <label><input type="checkbox" id="crossDepartmentOption" onclick="toggleCrossDepartmentInput()"> 跨部門費用歸屬</label>
+                <input type="text" id="crossDepartmentDetails" placeholder="請填寫跨部門費用歸屬" style="display:none; margin-left:10px;">
+            </div>
+
+            <!-- 說明欄位 -->
+            <div class="form-group">
+                <label for="notes">說明：</label>
+                <textarea id="notes" class="notes" placeholder="輸入您的備註或註解..."></textarea>
+            </div>
+
+            <!-- 支付方式欄位 -->
+            <div class="form-group">
+                <label>支付方式：</label>
+                <div>
+                    <label class="payment-option">
+                        <input type="checkbox" id="cashPayment" onclick="togglePaymentFields('cash')"> 付現
+                    </label>
+                    <label class="payment-option">
+                        <input type="checkbox" id="transferPayment" onclick="togglePaymentFields('transfer')"> 轉帳
+                    </label>
+                    <label class="payment-option">
+                        <input type="checkbox" id="postalPayment" onclick="togglePaymentFields('postal')"> 劃撥
+                    </label>
+                    <label class="payment-option">
+                        <input type="checkbox" id="remittancePayment" onclick="togglePaymentFields('remittance')"> 匯款
+                    </label>
+                    <label class="payment-option">
+                        <input type="checkbox" id="chequePayment" onclick="togglePaymentFields('cheque')"> 支票
+                    </label>
+                </div>
+            </div>
+
+            <!-- 新增「金額」欄位 -->
+            <div class="form-group">
+                <label for="amountInDigits">金額：</label>
+                <input type="number" id="amountInDigits" placeholder="請輸入金額" min="0" required aria-required="true" oninput="convertAmountToChinese()">
+                <span class="currency-unit" id="amountInChinese">元整</span>
+            </div>
+
+            <!-- 現金簽收欄 -->
+            <div id="cashFields" class="conditional-group" aria-live="polite">
+                <div class="form-group">
+                    <label for="cashAmount">金額：</label>
+                    <input type="number" id="cashAmount" min="0" required aria-required="true">
+                </div>
+                <div class="form-group">
+                    <label for="cashRecipient">簽收人：</label>
+                    <input type="text" id="cashRecipient" placeholder="請輸入簽收人" required aria-required="true">
+                </div>
+                <div class="form-group">
+                    <label for="cashReceiptDate">簽收日：</label>
+                    <input type="date" id="cashReceiptDate" required aria-required="true">
+                </div>
+            </div>
+
+            <!-- 轉帳欄位 -->
+            <div id="transferFields" class="conditional-group" aria-live="polite">
+                <div class="form-group">
+                    <label for="transferBankName">銀行(郵局)：</label>
+                    <input type="text" id="transferBankName" placeholder="請輸入銀行名稱" required aria-required="true">
+                </div>
+                <div class="form-group">
+                    <label for="transferBankBranch">分行：</label>
+                    <input type="text" id="transferBankBranch" placeholder="請輸入分行名稱" required aria-required="true">
+                </div>
+                <div class="form-group">
+                    <label for="transferAccountName">戶名：</label>
+                    <input type="text" id="transferAccountName" placeholder="請輸入戶名" required aria-required="true">
+                </div>
+                <div class="form-group">
+                    <label for="transferAccountNumber">帳號：</label>
+                    <input type="text" id="transferAccountNumber" placeholder="請輸入帳號" required aria-required="true">
+                </div>
+            </div>
+
+            <!-- 劃撥欄位 -->
+            <div id="postalFields" class="conditional-group" aria-live="polite">
+                <div class="form-group">
+                    <label for="postalBankName">銀行(郵局)：</label>
+                    <input type="text" id="postalBankName" placeholder="請輸入銀行名稱" required aria-required="true">
+                </div>
+                <div class="form-group">
+                    <label for="postalBankBranch">分行：</label>
+                    <input type="text" id="postalBankBranch" placeholder="請輸入分行名稱" required aria-required="true">
+                </div>
+                <div class="form-group">
+                    <label for="postalAccountName">戶名：</label>
+                    <input type="text" id="postalAccountName" placeholder="請輸入戶名" required aria-required="true">
+                </div>
+                <div class="form-group">
+                    <label for="postalAccountNumber">帳號：</label>
+                    <input type="text" id="postalAccountNumber" placeholder="請輸入帳號" required aria-required="true">
+                </div>
+            </div>
+
+            <!-- 匯款欄位 -->
+            <div id="remittanceFields" class="conditional-group" aria-live="polite">
+                <div class="form-group">
+                    <label for="bankName">銀行(郵局)：</label>
+                    <input type="text" id="bankName" placeholder="請輸入銀行名稱" required aria-required="true">
+                </div>
+                <div class="form-group">
+                    <label for="bankBranch">分行：</label>
+                    <input type="text" id="bankBranch" placeholder="請輸入分行名稱" required aria-required="true">
+                </div>
+                <div class="form-group">
+                    <label for="accountName">戶名：</label>
+                    <input type="text" id="accountName" placeholder="請輸入戶名" required aria-required="true">
+                </div>
+                <div class="form-group">
+                    <label for="accountNumber">帳號：</label>
+                    <input type="text" id="accountNumber" placeholder="請輸入帳號" required aria-required="true">
+                </div>
+            </div>
+
+            <!-- 支票欄位 -->
+            <div id="chequeFields" class="conditional-group" aria-live="polite">
+                <div class="form-group">
+                    <label for="chequeNumber">票號：</label>
+                    <input type="text" id="chequeNumber" placeholder="請輸入票號" required aria-required="true">
+                </div>
+                <div class="form-group">
+                    <label for="chequeDueDate">到期日：</label>
+                    <input type="date" id="chequeDueDate" required aria-required="true">
+                </div>
+                <!-- 新增「請輸入預支金額」欄位 -->
+                <div class="form-group">
+                    <label for="advanceAmount">請輸入預支金額：</label>
+                    <input type="number" id="advanceAmount" min="0" required aria-required="true">
+                </div>
+            </div>
+            </form>
+
+
+            <!-- 表單提交按鈕 -->
+            <div class="form-footer">
+                <button type="button" onclick="submitForm()" id="submitBtn">提交</button>
+            </div>
+        </div>
+
+        <!-- 提交成功彈窗 -->
+        <div id="successModal" class="modal">
+            <div class="modal-content">
+                <span class="close" onclick="closeModal('successModal')">&times;</span>
+                <p><span class="neon-star">★</span>您的表單已提交！<br>若查看內容請至提交紀錄區<span class="neon-star">★</span></p>
+            </div>
+        </div>
+
+        <!-- 表單結果彈窗 -->
+        <div id="resultModal" class="modal">
+            <div class="modal-content">
+                <span class="close" onclick="closeModal('resultModal')">&times;</span>
+                <div class="result-content">
+                    <h3>請款單結果</h3>
+                    <p><strong>流水編號：</strong><span id="resultSerialNumber"></span></p>
+                    <p><strong>受款人：</strong><span id="resultPayeeName"></span></p>
+                    <p><strong>填表日期：</strong><span id="resultFillDate"></span></p>
+                    <p><strong>付款日期：</strong><span id="resultPaymentDate"></span></p>
+                    <p><strong>請款事由：</strong><span id="resultPurpose"></span></p>
+                    <p><strong>額外資訊：</strong><span id="resultAdditionalInfo"></span></p>
+                    <p><strong>說明：</strong><span id="resultNotes"></span></p>
+                    <p><strong>金額：</strong><span id="resultAmount"></span></p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 提交紀錄區 -->
+        <div class="records-container" aria-labelledby="recordsTitle">
+            <h2 id="recordsTitle">提交紀錄</h2>
+            <table id="recordsTable">
+                <thead>
+                    <tr>
+                        <th>流水編號</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- 提交紀錄將在此插入 -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        // 使用 IIFE 避免全域變數污染
+        (function() {
+            let submissions = []; // 用來儲存所有提交的紀錄
+            let currentSerialNumber = 1; // 初始化流水號
+
+            // 初始化表單
+            function init() {
+                loadSubmissions();
+                generateSerialNumber();
+                addEventListeners();
+            }
+
+            // 生成流水號
+            function generateSerialNumber() {
+                const today = new Date();
+                const year = today.getFullYear() - 1911; // 民國年
+                const month = String(today.getMonth() + 1).padStart(2, '0');
+                const day = String(today.getDate()).padStart(2, '0');
+                const formattedSerial = String(currentSerialNumber).padStart(5, '0');
+                document.getElementById("serialNumber").innerText = `A${year}${month}${day}${formattedSerial}`;
+            }
+
+            // 切換跨部門費用歸屬輸入欄位
+            function toggleCrossDepartmentInput() {
+                const crossDeptInput = document.getElementById("crossDepartmentDetails");
+                const crossDeptCheckbox = document.getElementById("crossDepartmentOption");
+                crossDeptInput.style.display = crossDeptCheckbox.checked ? 'inline-block' : 'none';
+                if (!crossDeptCheckbox.checked) {
+                    crossDeptInput.value = '';
+                }
+            }
+
+            // 切換支付方式相關欄位顯示
+            function togglePaymentFields(type) {
+                const fieldMap = {
+                    'cash': 'cashFields',
+                    'transfer': 'transferFields',
+                    'postal': 'postalFields',
+                    'remittance': 'remittanceFields',
+                    'cheque': 'chequeFields'
+                };
+                const fieldId = fieldMap[type];
+                const field = document.getElementById(fieldId);
+                const checkbox = document.getElementById(`${type}Payment`);
+                if (checkbox.checked) {
+                    field.style.display = 'block';
+                    field.classList.remove('fade-out');
+                    field.classList.add('fade-in');
+                    setRequiredFields(type, true);
+                } else {
+                    field.classList.remove('fade-in');
+                    field.classList.add('fade-out');
+                    setTimeout(() => {
+                        field.style.display = 'none';
+                        clearFields(field);
+                        setRequiredFields(type, false);
+                    }, 300);
+                }
+            }
+
+            // 設定必填欄位
+            function setRequiredFields(type, isRequired) {
+                const fieldMap = {
+                    'cash': ['cashAmount', 'cashRecipient', 'cashReceiptDate'],
+                    'transfer': ['transferBankName', 'transferBankBranch', 'transferAccountName', 'transferAccountNumber'],
+                    'postal': ['postalBankName', 'postalBankBranch', 'postalAccountName', 'postalAccountNumber'],
+                    'remittance': ['bankName', 'bankBranch', 'accountName', 'accountNumber'],
+                    'cheque': ['chequeNumber', 'chequeDueDate', 'advanceAmount']
+                };
+                fieldMap[type].forEach(id => {
+                    const input = document.getElementById(id);
+                    if (input) {
+                        if (isRequired) {
+                            input.setAttribute('required', 'true');
+                        } else {
+                            input.removeAttribute('required');
+                        }
+                    }
+                });
+            }
+
+            // 清空欄位值
+            function clearFields(container) {
+                const inputs = container.querySelectorAll('input, select');
+                inputs.forEach(input => {
+                    if (input.type === 'checkbox' || input.type === 'radio') {
+                        input.checked = false;
+                    } else {
+                        input.value = '';
+                    }
+                });
+            }
+
+            // 金額轉換函數
+            function convertToChineseNumerals(num) {
+                const cnNums = ['零','壹','貳','參','肆','伍','陸','柒','捌','玖'];
+                const cnIntRadice = ['', '拾', '佰', '仟'];
+                const cnIntUnits = ['', '萬', '億', '兆', '京'];
+                const cnDecUnits = ['角', '分', '厘'];
+                const cnInteger = '整';
+                const cnIntLast = '元';
+                let result = '';
+
+                if (isNaN(num)) {
+                    return '';
+                }
+
+                let integerNum = Math.floor(Number(num));
+                let decimalNum = Math.round((Number(num) - integerNum) * 100); // 兩位小數
+
+                if (decimalNum > 0) {
+                    result += convertDecimal(decimalNum, cnNums, cnDecUnits);
+                } else {
+                    result += cnInteger;
+                }
+
+                if (integerNum > 0) {
+                    let str = '';
+                    let unitPos = 0;
+
+                    while (integerNum > 0) {
+                        let section = integerNum % 10000;
+                        if (section !== 0) {
+                            let sectionStr = '';
+                            let unit = 0;
+                            let zero = false;
+                            while (section > 0) {
+                                let digit = section % 10;
+                                if (digit === 0) {
+                                    if (!zero) {
+                                        zero = true;
+                                        sectionStr = cnNums[0] + sectionStr;
+                                    }
+                                } else {
+                                    zero = false;
+                                    sectionStr = cnNums[digit] + cnIntRadice[unit] + sectionStr;
+                                }
+                                section = Math.floor(section / 10);
+                                unit++;
+                            }
+                            str = sectionStr + cnIntUnits[unitPos] + str;
+                        } else {
+                            if (!str.startsWith(cnNums[0])) {
+                                str = cnNums[0] + str;
+                            }
+                        }
+                        integerNum = Math.floor(integerNum / 10000);
+                        unitPos++;
+                    }
+                    result = str + cnIntLast + (result ? result : cnInteger);
+                }
+
+                return result;
+            }
+
+            function convertDecimal(decimal, cnNums, cnDecUnits) {
+                let str = '';
+                for (let i = 0; i < cnDecUnits.length; i++) {
+                    str += cnNums[Math.floor(decimal / Math.pow(10, cnDecUnits.length - i - 1)) % 10] + cnDecUnits[i];
+                }
+                return str;
+            }
+
+            // 自動轉換金額
+            function convertAmountToChinese() {
+                const amountInput = document.getElementById("amountInDigits");
+                const chineseDisplay = document.getElementById("amountInChinese");
+                const amount = amountInput.value.trim();
+                chineseDisplay.innerText = amount ? convertToChineseNumerals(amount) : "元整";
+            }
+
+            // 提交表單
+            function submitForm() {
+                const submitBtn = document.getElementById("submitBtn");
+                submitBtn.disabled = true; // 禁用按鈕防止重複提交
+
+                // 收集表單資料
+                const formData = collectFormData();
+                if (!formData) {
+                    submitBtn.disabled = false;
+                    return;
+                }
+
+                // 儲存提交紀錄
+                submissions.push(formData);
+                saveSubmissions();
+
+                // 插入新紀錄到表格
+                appendSubmissionToTable(formData);
+
+                // 顯示結果彈窗
+                displayResult(formData);
+
+                // 顯示成功彈窗
+                showModal('successModal');
+
+                // 清空表單
+                resetForm();
+
+                currentSerialNumber++; // 增加流水編號
+                generateSerialNumber(); // 更新顯示流水編號
+
+                submitBtn.disabled = false; // 恢復按鈕
+            }
+
+            // 收集表單資料並驗證
+            function collectFormData() {
+                const serialNumber = document.getElementById("serialNumber").innerText;
+                const payeeName = document.getElementById("payeeName").value.trim();
+                const fillDate = document.getElementById("fillDate").value;
+                const paymentDate = document.getElementById("paymentDate").value;
+                const purposeElement = document.getElementById("purpose");
+                const purposeText = purposeElement.options[purposeElement.selectedIndex].text;
+                const notes = document.getElementById("notes").value.trim();
+                const amountInDigits = document.getElementById("amountInDigits").value.trim();
+                const amountInChinese = convertToChineseNumerals(amountInDigits);
+
+                // 檢查表單填寫完整
+                if (!payeeName || !fillDate || !paymentDate || !purposeElement.value || !amountInDigits) {
+                    alert("請填寫所有必填欄位。");
+                    return null;
+                }
+
+                let additionalInfo = '';
+
+                // 處理請款事由的額外資訊
+                switch (purposeElement.value) {
+                    case "activity":
+                        const activityName = document.getElementById("activityName").value;
+                        const activityDate = document.getElementById("activityDate").value;
+                        if (!activityName || !activityDate) {
+                            alert("請填寫活動費用相關欄位。");
+                            return null;
+                        }
+                        additionalInfo = `(專案)活動名稱：${activityName} 日期：${activityDate}`;
+                        break;
+                    case "scholarship":
+                        const scholarshipCount = document.getElementById("scholarshipCount").value;
+                        const scholarshipProject = document.getElementById("scholarshipProject").value.trim();
+                        const scholarshipTopic = document.getElementById("scholarshipTopic").value.trim();
+                        const scholarshipDate = document.getElementById("scholarshipDate").value;
+                        if (!scholarshipCount || !scholarshipProject || !scholarshipTopic || !scholarshipDate) {
+                            alert("請填寫獎學金相關欄位。");
+                            return null;
+                        }
+                        additionalInfo = `獎助學金 共${scholarshipCount}位，專案名稱：${scholarshipProject}，主題：${scholarshipTopic}，日期：${scholarshipDate}`;
+                        break;
+                    case "assistance":
+                        const assistanceType = document.getElementById("assistanceType").value;
+                        if (!assistanceType) {
+                            alert("請選擇經濟扶助類型。");
+                            return null;
+                        }
+                        additionalInfo = `經濟扶助類型：${assistanceType}`;
+                        break;
+                    case "project":
+                        const projectTypeElement = document.getElementById("projectType");
+                        const projectTypeValue = projectTypeElement.value;
+                        if (!projectTypeValue) {
+                            alert("請選擇事由項目。");
+                            return null;
+                        }
+                        const projectTypeText = projectTypeElement.options[projectTypeElement.selectedIndex].text;
+                        additionalInfo = `事由項目：${projectTypeText}`;
+                        break;
+                    default:
+                        break;
+                }
+
+                // 處理勾選欄位
+                const otherOption = document.getElementById("otherOption").checked ? '其他' : '';
+                const crossDepartmentOption = document.getElementById("crossDepartmentOption").checked ? '跨部門費用歸屬' : '';
+                const crossDepartmentDetails = document.getElementById("crossDepartmentDetails").value.trim();
+
+                let checkboxInfo = '';
+                if (otherOption || crossDepartmentOption) {
+                    checkboxInfo = `勾選項目：${otherOption} ${crossDepartmentOption}`;
+                    if (crossDepartmentDetails) {
+                        checkboxInfo += `，詳細資訊：${crossDepartmentDetails}`;
+                    }
+                }
+
+                // 組合額外資訊
+                if (checkboxInfo) {
+                    additionalInfo += (additionalInfo ? '；' : '') + checkboxInfo;
+                }
+
+                // 處理支付方式
+                let paymentInfo = '';
+                const paymentMethods = [];
+                const paymentDetails = [];
+
+                // 現金
+                if (document.getElementById("cashPayment").checked) {
+                    paymentMethods.push('付現');
+                    const cashAmount = document.getElementById("cashAmount").value;
+                    const cashRecipient = document.getElementById("cashRecipient").value.trim();
+                    const cashReceiptDate = document.getElementById("cashReceiptDate").value;
+                    if (!cashAmount || !cashRecipient || !cashReceiptDate) {
+                        alert("請填寫現金簽收相關欄位。");
+                        return null;
+                    }
+                    paymentDetails.push(`現金簽收：金額：${cashAmount}，簽收人：${cashRecipient}，簽收日：${cashReceiptDate}`);
+                }
+
+                // 轉帳
+                if (document.getElementById("transferPayment").checked) {
+                    paymentMethods.push('轉帳');
+                    const transferBankName = document.getElementById("transferBankName").value.trim();
+                    const transferBankBranch = document.getElementById("transferBankBranch").value.trim();
+                    const transferAccountName = document.getElementById("transferAccountName").value.trim();
+                    const transferAccountNumber = document.getElementById("transferAccountNumber").value.trim();
+                    if (!transferBankName || !transferBankBranch || !transferAccountName || !transferAccountNumber) {
+                        alert("請填寫轉帳相關欄位。");
+                        return null;
+                    }
+                    paymentDetails.push(`轉帳資訊：銀行：${transferBankName}，分行：${transferBankBranch}，戶名：${transferAccountName}，帳號：${transferAccountNumber}`);
+                }
+
+                // 劃撥
+                if (document.getElementById("postalPayment").checked) {
+                    paymentMethods.push('劃撥');
+                    const postalBankName = document.getElementById("postalBankName").value.trim();
+                    const postalBankBranch = document.getElementById("postalBankBranch").value.trim();
+                    const postalAccountName = document.getElementById("postalAccountName").value.trim();
+                    const postalAccountNumber = document.getElementById("postalAccountNumber").value.trim();
+                    if (!postalBankName || !postalBankBranch || !postalAccountName || !postalAccountNumber) {
+                        alert("請填寫劃撥相關欄位。");
+                        return null;
+                    }
+                    paymentDetails.push(`劃撥資訊：銀行：${postalBankName}，分行：${postalBankBranch}，戶名：${postalAccountName}，帳號：${postalAccountNumber}`);
+                }
+
+                // 匯款
+                if (document.getElementById("remittancePayment").checked) {
+                    paymentMethods.push('匯款');
+                    const bankName = document.getElementById("bankName").value.trim();
+                    const bankBranch = document.getElementById("bankBranch").value.trim();
+                    const accountName = document.getElementById("accountName").value.trim();
+                    const accountNumber = document.getElementById("accountNumber").value.trim();
+                    if (!bankName || !bankBranch || !accountName || !accountNumber) {
+                        alert("請填寫匯款相關欄位。");
+                        return null;
+                    }
+                    paymentDetails.push(`匯款資訊：銀行：${bankName}，分行：${bankBranch}，戶名：${accountName}，帳號：${accountNumber}`);
+                }
+
+                // 支票
+                if (document.getElementById("chequePayment").checked) {
+                    paymentMethods.push('支票');
+                    const chequeNumber = document.getElementById("chequeNumber").value.trim();
+                    const chequeDueDate = document.getElementById("chequeDueDate").value;
+                    const advanceAmount = document.getElementById("advanceAmount").value;
+                    if (!chequeNumber || !chequeDueDate || !advanceAmount) {
+                        alert("請填寫支票相關欄位和預支金額。");
+                        return null;
+                    }
+                    paymentDetails.push(`支票資訊：票號：${chequeNumber}，到期日：${chequeDueDate}；預支金額：${advanceAmount}`);
+                }
+
+                if (paymentMethods.length > 0) {
+                    additionalInfo += (additionalInfo ? '；' : '') + `支付方式：${paymentMethods.join('、')}`;
+                    if (paymentDetails.length > 0) {
+                        additionalInfo += '；' + paymentDetails.join('；');
+                    }
+                }
+
+                // 組合「金額」欄位
+                additionalInfo += (additionalInfo ? '；' : '') + `金額：${amountInChinese}`;
+
+                // 建立提交紀錄物件
+                const submission = {
+                    serialNumber,
+                    payeeName,
+                    fillDate,
+                    paymentDate,
+                    purposeText,
+                    additionalInfo,
+                    notes,
+                    amountInChinese,
+                    reviewComment: '' // 初始為空
+                };
+
+                return submission;
+            }
+
+            // 重置表單
+            function resetForm() {
+                document.getElementById("payeeName").value = '';
+                document.getElementById("fillDate").value = '';
+                document.getElementById("paymentDate").value = '';
+                document.getElementById("purpose").value = '';
+                document.getElementById("notes").value = '';
+                document.getElementById("amountInDigits").value = '';
+                document.getElementById("amountInChinese").innerText = "元整";
+                document.getElementById("otherOption").checked = false;
+                document.getElementById("crossDepartmentOption").checked = false;
+                toggleCrossDepartmentInput();
+
+                // 隱藏所有條件式欄位並清空其值
+                document.querySelectorAll(".conditional-group").forEach(group => {
+                    group.style.display = 'none';
+                    group.classList.remove('fade-in', 'fade-out');
+                    clearFields(group);
+                });
+
+                // 清空支付方式欄位
+                document.querySelectorAll(".payment-option input[type='checkbox']").forEach(checkbox => {
+                    checkbox.checked = false;
+                });
+
+                // 重置 advanceAmount 的 required 屬性
+                document.getElementById('advanceAmount').removeAttribute('required');
+            }
+
+            // 插入提交紀錄到表格
+            function appendSubmissionToTable(submission) {
+                const recordsTable = document.getElementById("recordsTable").querySelector("tbody");
+                const newRow = recordsTable.insertRow();
+
+                // 流水編號欄
+                const serialCell = newRow.insertCell(0);
+                const serialButton = document.createElement("button");
+                serialButton.textContent = submission.serialNumber;
+                serialButton.className = "serial-button";
+                serialButton.onclick = () => toggleDetailsRow(newRow, submission, serialButton);
+                serialCell.appendChild(serialButton);
+            }
+
+            // 載入提交紀錄
+            function loadSubmissions() {
+                const savedSubmissions = localStorage.getItem('submissions');
+                if (savedSubmissions) {
+                    submissions = JSON.parse(savedSubmissions);
+                    submissions.forEach(submission => {
+                        appendSubmissionToTable(submission);
+                    });
+                    updateCurrentSerialNumber();
+                } else {
+                    submissions = [];
+                }
+            }
+
+            // 更新 currentSerialNumber
+            function updateCurrentSerialNumber() {
+                if (submissions.length > 0) {
+                    const serialNumbers = submissions.map(sub => {
+                        const serialPart = sub.serialNumber.slice(-5);
+                        return parseInt(serialPart, 10);
+                    });
+                    const maxSerial = Math.max(...serialNumbers);
+                    currentSerialNumber = maxSerial + 1;
+                } else {
+                    currentSerialNumber = 1;
+                }
+            }
+
+            // 切換詳細資訊行的顯示與隱藏
+            function toggleDetailsRow(row, submission, button) {
+                const recordsTable = document.getElementById("recordsTable").querySelector("tbody");
+                const nextRow = row.nextElementSibling;
+                if (nextRow && nextRow.classList.contains('details-row')) {
+                    // 詳細資訊已存在，切換顯示狀態
+                    if (nextRow.style.display === 'none') {
+                        nextRow.style.display = 'table-row';
+                        button.innerText = '▲ ' + submission.serialNumber;
+                    } else {
+                        nextRow.style.display = 'none';
+                        button.innerText = '▼ ' + submission.serialNumber;
+                    }
+                    return;
+                }
+
+                // 建立新的詳細資訊行
+                const detailsRow = document.createElement('tr');
+                detailsRow.className = 'details-row';
+                const detailsCell = document.createElement('td');
+                detailsCell.colSpan = 1; // 因為表格只有一欄
+                detailsCell.className = 'details-cell';
+
+                // 生成詳細資訊的HTML內容
+                detailsCell.innerHTML = `
+                    <strong>受款人：</strong> ${submission.payeeName}<br>
+                    <strong>填表日期：</strong> ${submission.fillDate}<br>
+                    <strong>付款日期：</strong> ${submission.paymentDate}<br>
+                    <strong>請款事由：</strong> ${submission.purposeText}<br>
+                    <strong>額外資訊：</strong> ${submission.additionalInfo}<br>
+                    <strong>說明：</strong> ${submission.notes}<br>
+                    <strong>金額：</strong> ${submission.amountInChinese}<br>
+                    <strong>審核意見：</strong> ${submission.reviewComment || '待審核'}
+                `;
+                detailsRow.appendChild(detailsCell);
+                recordsTable.insertBefore(detailsRow, row.nextSibling);
+                detailsRow.style.display = 'table-row'; // 顯示詳細資訊行
+                button.innerText = '▲ ' + submission.serialNumber; // 更新按鈕文字
+            }
+
+            // 更新條件式欄位顯示
+            function updateConditionalFields() {
+                document.querySelectorAll(".conditional-group").forEach(group => {
+                    group.style.display = 'none';
+                    group.classList.remove('fade-in', 'fade-out');
+                    clearFields(group);
+                });
+                const selectedValue = document.getElementById("purpose").value;
+                if (selectedValue) {
+                    const targetGroup = document.getElementById(`${selectedValue}Fields`);
+                    targetGroup.style.display = 'block';
+                    targetGroup.classList.add('fade-in');
+                }
+            }
+
+            // 彈窗控制函數
+            function showModal(modalId) {
+                const modal = document.getElementById(modalId);
+                modal.style.display = "block";
+            }
+
+            function closeModal(modalId) {
+                const modal = document.getElementById(modalId);
+                modal.style.display = "none";
+            }
+
+            // 點擊彈窗外部關閉彈窗
+            window.onclick = function(event) {
+                const successModal = document.getElementById("successModal");
+                const resultModal = document.getElementById("resultModal");
+                if (event.target == successModal) {
+                    successModal.style.display = "none";
+                }
+                if (event.target == resultModal) {
+                    resultModal.style.display = "none";
+                }
+            }
+
+            // 儲存提交紀錄到 localStorage
+            function saveSubmissions() {
+                localStorage.setItem('submissions', JSON.stringify(submissions));
+            }
+
+            // 添加事件監聽器
+            function addEventListeners() {
+                document.getElementById("crossDepartmentOption").addEventListener('change', toggleCrossDepartmentInput);
+                document.getElementById("amountInDigits").addEventListener('input', convertAmountToChinese);
+            }
+
+            // 顯示結果彈窗
+            function displayResult(submission) {
+                document.getElementById("resultSerialNumber").innerText = submission.serialNumber;
+                document.getElementById("resultPayeeName").innerText = submission.payeeName;
+                document.getElementById("resultFillDate").innerText = submission.fillDate;
+                document.getElementById("resultPaymentDate").innerText = submission.paymentDate;
+                document.getElementById("resultPurpose").innerText = submission.purposeText;
+                document.getElementById("resultAdditionalInfo").innerText = submission.additionalInfo;
+                document.getElementById("resultNotes").innerText = submission.notes;
+                document.getElementById("resultAmount").innerText = submission.amountInChinese;
+                showModal('resultModal');
+            }
+
+            // 初始化
+            window.onload = init;
+
+            // 暴露必要的函數到全域
+            window.toggleCrossDepartmentInput = toggleCrossDepartmentInput;
+            window.togglePaymentFields = togglePaymentFields;
+            window.updateConditionalFields = updateConditionalFields;
+            window.submitForm = submitForm;
+            window.closeModal = closeModal;
+            window.displayResult = displayResult;
+        })();
+    </script>
+</body>
+</html>
