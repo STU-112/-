@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>台北市失親兒福利基金會支出報帳審核系統</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: url('Logo圖檔_財團法人台北市失親兒福利基金會_20200624143523.jpg') no-repeat center center fixed;
+            background-size: 50%; /* 調整背景圖片大小 */
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .button-container {
+            display: flex;
+            flex-direction: column;
+            gap: 20px; /* 按鈕之間的間距 */
+        }
+
+        button {
+            width: 300px; /* 統一按鈕寬度 */
+            height: 50px; /* 統一按鈕高度 */
+            font-size: 18px; /* 字體大小 */
+            background-color: #6B4226; /* 深棕色背景 */
+            color: #F9E0C3; /* 按鈕字體顏色 */
+            border: none;
+            border-radius: 50px; /* 圓角 */
+            box-shadow: 3px 3px 8px rgba(0, 0, 0, 0.3); /* 按鈕陰影 */
+            cursor: pointer;
+            transition: all 0.3s ease-in-out;
+        }
+
+        button:hover {
+            background-color: #8C5637; /* 懸停時背景顏色 */
+            transform: translateY(-3px); /* 上浮效果 */
+            box-shadow: 5px 5px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        button:active {
+            background-color: #5A2E1D; /* 點擊時背景顏色 */
+            transform: translateY(1px); /* 壓下效果 */
+            box-shadow: 2px 2px 6px rgba(0, 0, 0, 0.2);
+        }
+    </style>
+</head>
+<body>
+    <div class="button-container">
+        <button>經辦人</button>
+        <button>部門主管(督導)</button>
+        <button>主任</button>
+        <button>執行長</button>
+        <button>會計</button>
+        <button>出納</button>
+        <button>董事長</button>
+    </div>
+</body>
+</html>
