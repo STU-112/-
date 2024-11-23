@@ -21,7 +21,7 @@ if ($db_link_review->connect_error) {
 }
 
 // 查詢 預支 資料庫中符合條件的 pay_table 資料
-$sql = "SELECT count,受款人,支出項目,金額,填表日期,國字金額,國字金額_hidden FROM pay_table WHERE 國字金額 >= 1000";
+$sql = "SELECT count,受款人,支出項目,填表日期,國字金額,國字金額_hidden FROM pay_table WHERE 國字金額 >= 5001";
 $result = $db_link_預支->query($sql);
 
 // 顯示資料

@@ -22,41 +22,31 @@ if ($db_link_review->connect_error) {
 }
 
 // 查詢 op2 資料庫中的 pay_table 資料 
-$sql = "SELECT count,受款人,支出項目,金額,填表日期,國字金額,國字金額_hidden FROM pay_table";
+$sql = "SELECT `count`, 受款人, 支出項目, 填表日期, 國字金額, 國字金額_hidden 
+        FROM pay_table WHERE 國字金額 IS NOT NULL";
 $result = $db_link_預支->query($sql);
 
 // 顯示資料
 if ($result && $result->num_rows > 0) {
     echo "
     <style>
-	
-	
-	.header {
+        .header {
             display: flex;
-            /* 位置 */
             background-color: rgb(220, 236, 245);
-
-
         }
-
         .header nav {
             text-align: right;
             width: 100%;
             font-size: 100%;
             text-indent: 10px;
-            /* 縮排 */
-
         }
-
         .header nav a {
             font-size: 30px;
             color: rgb(39, 160, 130);
             text-decoration: none;
             display: inline-block;
             line-height: 52px;
-
         }
-
         .header nav a:hover {
              background-color: #ffaa00;
         }
@@ -88,24 +78,17 @@ if ($result && $result->num_rows > 0) {
             margin: 10px;
             font-weight: bold;
         }
-    </style>
-    ";
-	
-	
+    </style>";
+
     echo "
-	<div class='header' style='float: left;box-shadow:3px 1px 7px #000; background-color: rgb(220, 236, 245);height: 50px; width: 100%;padding='0 25px'>
-	<nav>
-	<a href='./督導紀錄.php' style='padding: 0 25px;'><b>歷史紀錄</b></a>
-	</nav>	
-	</div>";
-	
-	
-	
-	
+    <div class='header' style='float: left;box-shadow:3px 1px 7px #000; background-color: rgb(220, 236, 245);height: 50px; width: 100%;padding='0 25px'>
+    <nav>
+    <a href='./督導紀錄.php' style='padding: 0 25px;'><b>歷史紀錄</b></a>
+    </nav>    
+    </div>";
+
     echo "<table>";
     echo "<caption>督導審核</caption>";
-    
-    // 顯示欄位名稱
     echo "<tr>";
     echo "<th>單號</th><th>受款人</th><th>金額</th><th>填表日期</th><th>支出項目</th><th>審核狀態</th><th>操作</th>";
     echo "</tr>";
@@ -118,8 +101,9 @@ if ($result && $result->num_rows > 0) {
         $sql_review_opinion = "SELECT 審核意見 FROM 督導審核意見 WHERE 單號 = '$serial_count' LIMIT 1";
         $review_result = $db_link_review->query($sql_review_opinion);
         
-        // 若該筆資料已有審核意見，跳過該資料
+        // 若該筆資料已有審核意見，跳過顯示
         if ($review_result && $review_result->num_rows > 0) {
+            $review_result->free();
             continue;
         }
 
@@ -149,9 +133,6 @@ if ($result && $result->num_rows > 0) {
 // 釋放結果集
 if ($result) {
     $result->free();
-}
-if (isset($review_result) && $review_result instanceof mysqli_result) {
-    $review_result->free();
 }
 
 // 關閉資料庫連線
