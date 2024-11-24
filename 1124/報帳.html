@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>上傳圖檔和 CSV 檔</title>
+</head>
+
+<body>
+    <form action="報帳.php" method="post" enctype="multipart/form-data">
+        <h1>上傳檔案</h1>
+
+        <label for="csv_file">選擇 CSV 檔:</label>
+        <input type="file" name="csv_file" id="csv_file" accept=".csv" required>
+
+        <label for="image">選擇圖檔:</label>
+        <input type="file" name="image" id="image" accept="image/*" required>
+
+        <input type="submit" value="上傳">
+    </form>
+</body>
+
+</html>
