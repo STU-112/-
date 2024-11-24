@@ -2,7 +2,7 @@
 // 連接資料庫
 $server = 'localhost:3307'; // 伺服器名稱
 $用戶名 = 'root'; // 用戶名
-$密碼 = ' '; // 密碼 (設為空字串)
+$密碼 = '3307'; // 密碼 (設為空字串)
 $資料庫 = '支出報帳'; // 資料庫名稱
 
 // 連接到 MySQL
@@ -180,7 +180,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         mysqli_commit($連接);
 
         echo "表單已成功提交!!<br>";
-        header("Location: 登入.html");
+        header("Location: 支出報帳.html");
         exit(); // 確保停止執行後續代碼
 
     } catch (Exception $e) {

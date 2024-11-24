@@ -22,13 +22,34 @@ if ($db_link_review->connect_error) {
 }
 
 // 查詢 op2 資料庫中的 pay_table 資料 
-$sql = "SELECT count,受款人,支出項目,填表日期,國字金額,國字金額_hidden FROM pay_table WHERE 國字金額 ";
+$sql = "SELECT `count`, 受款人, 支出項目, 填表日期, 國字金額, 國字金額_hidden 
+        FROM pay_table WHERE 國字金額 IS NOT NULL";
 $result = $db_link_預支->query($sql);
 
 // 顯示資料
 if ($result && $result->num_rows > 0) {
     echo "
     <style>
+        .header {
+            display: flex;
+            background-color: rgb(220, 236, 245);
+        }
+        .header nav {
+            text-align: right;
+            width: 100%;
+            font-size: 100%;
+            text-indent: 10px;
+        }
+        .header nav a {
+            font-size: 30px;
+            color: rgb(39, 160, 130);
+            text-decoration: none;
+            display: inline-block;
+            line-height: 52px;
+        }
+        .header nav a:hover {
+             background-color: #ffaa00;
+        }
         table {
             width: 80%;
             margin: 20px auto;
@@ -57,79 +78,52 @@ if ($result && $result->num_rows > 0) {
             margin: 10px;
             font-weight: bold;
         }
-    </style>
-    ";
-    
+    </style>";
+
+   
+
     echo "<table>";
-    echo "<caption>出納審核</caption>";
-    
-    // 顯示欄位名稱<th>主任意見</th><th>執行長意見</th>
+    echo "<caption>申請紀錄</caption>";
     echo "<tr>";
-    echo "<th>單號</th><th>受款人</th><th>金額</th><th>督導意見</th><th>審核狀態</th><th>操作</th>";
+    echo "<th>單號</th><th>受款人</th><th>金額</th><th>填表日期</th><th>支出項目</th><th>審核狀態</th><th>操作</th>";
     echo "</tr>";
-	
-   // 顯示每一行資料 
-while ($row = $result->fetch_assoc()) {
-    $serial_count = $row["count"];
 
-		// 查詢督導審核意見是否存在於 Review_comments 資料庫
-		$sql_review_opinion1 = "SELECT 審核意見 FROM 督導審核意見 WHERE 單號 = '$serial_count' LIMIT 1";
-		$review_result = $db_link_review->query($sql_review_opinion1);
+    // 顯示每一行資料 
+    while ($row = $result->fetch_assoc()) {
+        $serial_count = $row["count"];
 
-
-		// 查詢主任審核意見是否存在
-        $sql_director_opinion4 = "SELECT 審核意見 FROM 出納審核意見 WHERE 單號 = '$serial_count' LIMIT 1";
-        $execution_cashier = $db_link_review->query($sql_director_opinion4);
-
-
-
-    // 檢查督導是否有審核意見，且主任尚未審核
-    if ($review_result && $review_result->num_rows > 0) {
-        $review_row = $review_result->fetch_assoc();
-        $opinion1 = $review_row["審核意見"];
-		
-		
-        // 如果尚未有出納的審核意見，則顯示這筆資料
-        if ($execution_cashier && $execution_cashier->num_rows > 0) {
-			continue;
-        }
-			$opinion4 = "<span style='color: orange;'>未審核</span>";
-            
+        // 查詢 Review_comments 資料庫中的督導審核意見
+        $sql_review_opinion = "SELECT 審核意見 FROM 督導審核意見 WHERE 單號 = '$serial_count' LIMIT 1";
+        $review_result = $db_link_review->query($sql_review_opinion);
         
+        // 若該筆資料已有審核意見，跳過顯示
+        if ($review_result && $review_result->num_rows > 0) {
+            $review_result->free();
+            continue;
+        }
+
+        // 顯示沒有審核意見的資料
+        $opinion = "<span style='color: orange;'>未審核</span>";
 
         echo "<tr>";
         echo "<td>" . $row["count"] . "</td>";
         echo "<td>" . $row["受款人"] . "</td>";
         echo "<td>" . $row["國字金額"] . "</td>";
-		echo "<td>" . $opinion1 . "</td>";
-        // echo "<td>" . $opinion2 . "</td>";
-        // echo "<td>" . $opinion3 . "</td>";
-        echo "<td>" . $opinion4 . "</td>";
+        echo "<td>" . $row["填表日期"] . "</td>";
+        echo "<td>" . $row["支出項目"] . "</td>";
+        echo "<td>" . $opinion . "</td>"; // 顯示審核意見
         echo "<td>
-            <form method='post' action='出納審查處理.php'>
+            <form method='post' action='查看.php'>
                 <input type='hidden' name='count' value='" . $row["count"] . "'>
-                <button type='submit' name='review'>審查</button>
+                <button type='submit' name='review'>查看</button>
             </form>
         </td>";
         echo "</tr>";
-
-        // 釋放主任審核意見結果集
-        // if ($director_result) {
-            // $director_result->free();
-        // }
     }
-
-    // 釋放督導審核意見結果集
-    if ($review_result) {
-        $review_result->free();
-    }
-
-}
     echo "</table>";
 } else {
     echo "<p style='text-align:center;'>無資料顯示</p>";
 }
-
 
 // 釋放結果集
 if ($result) {

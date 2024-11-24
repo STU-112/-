@@ -1,11 +1,28 @@
-<?php
-session_start();
-if (!isset($_SESSION['db_id'])) {
-    header("Location: 登入.html");
-    exit();
+<?php 
+$db_host = "localhost:3307"; // 指定主機和端口
+$db_id = "root";             // 資料庫用戶名
+$db_pw = "3307";             // 資料庫密碼
+$db_name = "註冊";           // 資料庫名稱
+
+// 建立資料庫連線
+$db_link = new mysqli($db_host, $db_id, $db_pw, $db_name);
+
+// 檢查連線
+if ($db_link->connect_error) {
+    die("連線失敗: " . $db_link->connect_error);
 }
-$db_id = $_SESSION['db_id'];
+
+// SQL 查詢語句
+$sql = "SELECT * FROM 帳號"; // 修改 '帳號' 為資料表名稱
+$result = $db_link->query($sql);
+
+
+
+// 關閉資料庫連線
+$db_link->close();
 ?>
+
+
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
@@ -99,15 +116,15 @@ $db_id = $_SESSION['db_id'];
 </head>
 <body>
 <div class="banner">
-    <span>歡迎, <?php echo htmlspecialchars($db_id); ?></span> <!-- 顯示使用者名稱 -->
-    <a href="申請紀錄.html">申請紀錄</a>
+    <span>歡迎, <?php echo htmlspecialchars($帳號); ?></span> <!-- 顯示使用者名稱 -->
+    
 </div>
     <div class="container">
         <h1>線上申請表單</h1>
         <a href="支出報帳.html" class="btn">支出報帳</a>
         <a href="支出核銷.html" class="btn">支出核銷</a>
         <a href="ll1.html" class="btn">預支申請</a>
-        <a href="search.php" class="btn">申請紀錄查詢</a>
+        <a href="申請紀錄.php" class="btn">查看申請紀錄</a>
         <div class="footer">
             &copy; 2024 財團法人台北市失親兒福利基金會
         </div>
