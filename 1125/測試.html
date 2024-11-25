@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>同時上傳圖檔和 CSV 檔</title>
+</head>
+<body>
+    <h1>上傳圖檔和 CSV 檔</h1>
+    <form action="測試.php" method="post" enctype="multipart/form-data">
+        <label for="image">選擇圖檔 (JPEG, PNG, GIF)：</label>
+        <input type="file" name="image" id="image" accept="image/jpeg, image/png, image/gif" required>
+        <br><br>
+        <label for="csv">選擇 CSV 檔：</label>
+        <input type="file" name="csv" id="csv" accept=".csv" required>
+        <br><br>
+        <button type="submit" name="upload">上傳</button>
+    </form>
+</body>
+</html>
