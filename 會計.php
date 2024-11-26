@@ -61,11 +61,11 @@ if ($result && $result->num_rows > 0) {
     ";
     
     echo "<table>";
-    echo "<caption>出納審核</caption>";
+    echo "<caption>會計審核</caption>";
     
     // 顯示欄位名稱
     echo "<tr>";
-    echo "<th>單號</th><th>受款人</th><th>金額</th><th>督導意見</th><th>主任意見</th><th>執行長意見</th><th>董事長意見</th><th>審核狀態</th><th>操作</th>";
+    echo "<th>單號</th><th>受款人</th><th>金額</th><th>督導意見</th><th>主任意見</th><th>執行長意見</th><th>董事長意見</th><th>出納意見</th><th>審核狀態</th><th>操作</th>";
     echo "</tr>";
 	
    // 顯示每一行資料 
@@ -95,6 +95,13 @@ while ($row = $result->fetch_assoc()) {
         $execution_cashier = $db_link_review->query($sql_director_opinion5);
 
 
+// 查詢會計審核意見是否存在
+        $sql_director_opinion6 = "SELECT 審核意見 FROM 出納審核意見 WHERE 單號 = '$serial_count' LIMIT 1";
+        $execution_Accounting = $db_link_review->query($sql_director_opinion6);
+
+
+
+
     // 檢查督導是否有審核意見，且主任尚未審核
     if ($review_result && $review_result->num_rows > 0) {
         $review_row = $review_result->fetch_assoc();
@@ -117,12 +124,17 @@ while ($row = $result->fetch_assoc()) {
         $review_row = $execution_Chairman->fetch_assoc();
         $opinion4 = $review_row["審核意見"];
 		
+		// 檢查董事長是否有審核意見，且執行長尚未審核
+    if ($execution_cashier && $execution_cashier->num_rows > 0) {
+        $review_row = $execution_cashier->fetch_assoc();
+        $opinion5 = $review_row["審核意見"];
+		
 		
         // 如果尚未有出納的審核意見，則顯示這筆資料
-        if ($execution_cashier && $execution_cashier->num_rows > 0) {
+        if ($execution_Accounting && $execution_Accounting->num_rows > 0) {
 			continue;
         }
-			$opinion5 = "<span style='color: orange;'>未審核</span>";
+			$opinion6 = "<span style='color: orange;'>未審核</span>";
             
         
 
@@ -135,8 +147,9 @@ while ($row = $result->fetch_assoc()) {
         echo "<td>" . $opinion3 . "</td>";
         echo "<td>" . $opinion4 . "</td>";
 		echo "<td>" . $opinion5 . "</td>";
+		echo "<td>" . $opinion6 . "</td>";
         echo "<td>
-            <form method='post' action='出納審查處理.php'>
+            <form method='post' action='會計審查處理.php'>
                 <input type='hidden' name='count' value='" . $row["count"] . "'>
                 <button type='submit' name='review'>審查</button>
             </form>
@@ -155,6 +168,7 @@ while ($row = $result->fetch_assoc()) {
     }
 }
 }
+	}
 	}
 }
     echo "</table>";
