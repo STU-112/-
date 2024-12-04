@@ -1,28 +1,3 @@
-<?php 
-$db_host = "localhost:3307"; // 指定主機和端口
-$db_id = "root";             // 資料庫用戶名
-$db_pw = "3307";             // 資料庫密碼
-$db_name = "註冊";           // 資料庫名稱
-
-// 建立資料庫連線
-$db_link = new mysqli($db_host, $db_id, $db_pw, $db_name);
-
-// 檢查連線
-if ($db_link->connect_error) {
-    die("連線失敗: " . $db_link->connect_error);
-}
-
-// SQL 查詢語句
-$sql = "SELECT * FROM 帳號"; // 修改 '帳號' 為資料表名稱
-$result = $db_link->query($sql);
-
-
-
-// 關閉資料庫連線
-$db_link->close();
-?>
-
-
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
@@ -35,7 +10,8 @@ $db_link->close();
             padding: 0;
             box-sizing: border-box;
         }
-        html, body {
+         body {
+		 
             height: 100%;
             width: 100%;
             font-family: "Noto Sans TC", Arial, sans-serif;
@@ -49,7 +25,7 @@ $db_link->close();
             align-items: center;
             height: 100%;
             text-align: center;
-            padding: 20px;
+            padding: 70px;
         }
         h1 {
             font-size: 2.5rem;
@@ -115,8 +91,11 @@ $db_link->close();
     </style>
 </head>
 <body>
-<div class="banner">
-    <span>歡迎, <?php echo htmlspecialchars($帳號); ?></span> <!-- 顯示使用者名稱 -->
+<div class="banner" style="">
+
+    <a style="align-items: right;" href="登入.html">登出</a>
+
+    
     
 </div>
     <div class="container">

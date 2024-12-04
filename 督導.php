@@ -30,6 +30,12 @@ $result = $db_link_預支->query($sql);
 if ($result && $result->num_rows > 0) {
     echo "
     <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: linear-gradient(to bottom, #e8dff2, #f5e8fc); /* 淡紫色漸層 */
+            color: #333;
+        }
         .header {
             display: flex;
             background-color: rgb(220, 236, 245);
@@ -67,6 +73,9 @@ if ($result && $result->num_rows > 0) {
             background-color: #f2f2f2;
             color: #333;
         }
+		tr.second-row {
+    background-color: white; /* 固定背景顏色 */
+}
         tr:nth-child(even) {
             background-color: #f9f9f9;
         }
@@ -78,13 +87,29 @@ if ($result && $result->num_rows > 0) {
             margin: 10px;
             font-weight: bold;
         }
+        .banner {
+            width: 1495px;
+            background: linear-gradient(to bottom, #e8dff2, #f5e8fc); /* 淡紫色漸層 */
+            color: #333;
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            padding: 10px 20px;
+            box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.2); /* 陰影效果 */
+        }
+        .banner a {
+            color: #5a3d2b;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 1.2em;
+        }
+        .banner a:hover {
+            color: #007bff; /* 當滑鼠懸停時變換顏色 */
+        }
     </style>";
-
     echo "
-    <div class='header' style='float: left;box-shadow:3px 1px 7px #000; background-color: rgb(220, 236, 245);height: 50px; width: 100%;padding='0 25px'>
-    <nav>
-    <a href='./督導紀錄.php' style='padding: 0 25px;'><b>歷史紀錄</b></a>
-    </nav>    
+    <div class='banner'>
+        <a style='align-items: right;' href='申請紀錄.php'>審查紀錄</a>
     </div>";
 
     echo "<table>";
@@ -93,30 +118,22 @@ if ($result && $result->num_rows > 0) {
     echo "<th>單號</th><th>受款人</th><th>金額</th><th>填表日期</th><th>支出項目</th><th>審核狀態</th><th>操作</th>";
     echo "</tr>";
 
-    // 顯示每一行資料 
     while ($row = $result->fetch_assoc()) {
         $serial_count = $row["count"];
-
-        // 查詢 Review_comments 資料庫中的督導審核意見
         $sql_review_opinion = "SELECT 審核意見 FROM 督導審核意見 WHERE 單號 = '$serial_count' LIMIT 1";
         $review_result = $db_link_review->query($sql_review_opinion);
-        
-        // 若該筆資料已有審核意見，跳過顯示
         if ($review_result && $review_result->num_rows > 0) {
             $review_result->free();
             continue;
         }
-
-        // 顯示沒有審核意見的資料
         $opinion = "<span style='color: orange;'>未審核</span>";
-
-        echo "<tr>";
+        echo "<tr class='second-row'>";
         echo "<td>" . $row["count"] . "</td>";
         echo "<td>" . $row["受款人"] . "</td>";
         echo "<td>" . $row["國字金額"] . "</td>";
         echo "<td>" . $row["填表日期"] . "</td>";
         echo "<td>" . $row["支出項目"] . "</td>";
-        echo "<td>" . $opinion . "</td>"; // 顯示審核意見
+        echo "<td>" . $opinion . "</td>";
         echo "<td>
             <form method='post' action='督導審查處理.php'>
                 <input type='hidden' name='count' value='" . $row["count"] . "'>
@@ -130,12 +147,10 @@ if ($result && $result->num_rows > 0) {
     echo "<p style='text-align:center;'>無資料顯示</p>";
 }
 
-// 釋放結果集
 if ($result) {
     $result->free();
 }
 
-// 關閉資料庫連線
 $db_link_預支->close();
 $db_link_review->close();
 ?>

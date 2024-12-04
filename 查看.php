@@ -57,7 +57,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['status']) && isset($_P
 
     // 完成後的跳轉或訊息
     if ($stmt_update->affected_rows > 0) {
-        echo "<script>alert('審核已完成，資料已轉交給出納。'); window.location.href = '督導審核處理.php';</script>";
+        echo "<script>alert('審核已完成，資料已轉交給出納。'); window.location.href = '督導.php';</script>";
     } else {
         echo "<script>alert('更新失敗，請重試。');</script>";
     }
@@ -96,7 +96,7 @@ if ($result && $result->num_rows > 0) {
         "帳戶" => "帳戶",
         "票號" => "票號",
         "到期日" => "到期日",
-        "預收金額" => "預收金額"
+        "預收金額" => "預支金額"
     ];
     echo "
     <form method='post' action='督導審核意見.php'>
@@ -189,15 +189,16 @@ if ($result && $result->num_rows > 0) {
                 </tr>";
             }
         }
-
-        
-       
     }
-    echo "</table>
-    </form>";
+    echo "</table> 
+	</form>";
 } else {
     echo "<p>無法找到相關資料。</p>";
 }
+
+
+
+
 
 $db_link->close();
 ?>

@@ -102,41 +102,8 @@
         .form-group input[type="radio"] {
             margin-right: 10px;
         }
-		
-    .banner .overlay {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(0, 0, 0, 0.3); /* 使背景更加暗淡 */
-    z-index: -1;
-}
 
-		
-		
-		 .banner {
-		 width:97.3%;
-            background: linear-gradient(to bottom, #fbe3c9, #f5d3ab); /* 漸層效果 */
-            color: #5a3d2b;
-            display: flex;
-            justify-content: flex-end;
-            align-items: center;
-            padding: 10px 20px;
-            box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.2); /* 陰影效果 */
-        }
-
-        .banner a {
-            color: #5a3d2b;
-            text-decoration: none;
-            font-weight: bold;
-            font-size: 1.2em;
-        }
-
-        .banner a:hover {
-    color: #007bff; /* 當滑鼠懸停時變換顏色 */
-}
-		
+       
 	
     
     </style>
@@ -144,11 +111,6 @@
 
 
 <body>
-<div class="banner">
-    <a href="申請紀錄.html">申請紀錄</a>
-</div>
-
-
   <div class="container">
   <div class="form-container" aria-labelledby="formTitle">
  <form action="agg.php" method="POST" onsubmit="return validateForm()">
@@ -363,12 +325,6 @@
 </div>
 
 <script>
-
-
-
-
-
-
     function validateForm() {
         
         const 填表日期 = document.getElementById('填表日期').value;

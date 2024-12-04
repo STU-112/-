@@ -4,57 +4,24 @@ $username = "root";
 $password = "3307"; 
 $dbname = "報帳"; 
 
-
-
 // 創建連接 
 $conn = new mysqli($servername, $username, $password); 
 if ($conn->connect_error) { 
     die("連接失敗: " . $conn->connect_error); 
 } 
 
-
-// 連接到 報帳 資料庫
-$dbname_報帳 = "報帳";
-$db_link_報帳 = new mysqli($servername, $username, $password, $dbname_報帳);
-
-// 檢查資料庫連線
-if ($db_link_報帳->connect_error) {
-    die("連線到 _報帳 資料庫失敗: " . $db_link_報帳->connect_error);
-}
 // 建立資料庫 
 $conn->query("CREATE DATABASE IF NOT EXISTS $dbname"); 
 $conn->select_db($dbname); 
 
-
-// 查詢 報帳資料庫中的 報帳 資料 
-$sql = "SELECT `count` FORM 支出報帳";
-$result = $db_link_報帳->query($sql);
-
-
-
-
 // 建立資料表（用來存儲上傳的檔案資訊） 
 $conn->query("DROP TABLE IF EXISTS 報帳資料表");
 $conn->query("CREATE TABLE IF NOT EXISTS 報帳資料表 ( 
-    count INT(11) PRIMARY KEY, 
+    `count` INT(11) AUTO_INCREMENT PRIMARY KEY, 
     檔案名稱 VARCHAR(255) NOT NULL, 
     檔案路徑 VARCHAR(255) NOT NULL, 
     上傳時間 TIMESTAMP DEFAULT CURRENT_TIMESTAMP 
 )"); 
-
-// 選擇我的成績表設定的欄位，最後from我的成績表
-$選擇顯示欄位="Select count FORM 報帳";
-$result=mysqli_query($db_link_報帳,$選擇顯示欄位);
-echo "<TABLE BORDER='1'><TR ALIGN='CENTER'>";
-for ($i=0; $i<mysqli_num_fields($result); $i++)             
-	{
-		$row_result = mysqli_fetch_field($result);
-		echo "<TD>"."第一個流水號".$row_result[0]."</TD>";
-		//取得欄位名稱
-	}
-echo "</TR>";
-
-$count=$row_result[0];
 
 // 處理 CSV 上傳 
 $csv_success = false; 
@@ -174,7 +141,7 @@ if (isset($_FILES['image'])) {
         <?php endif; ?>
 
         <p>將在 <span id="countdown">5</span> 秒內返回。</p>
-        <a href="報帳.html" class="button">立即返回</a>
+        <a href="申請.html" class="button">立即返回</a>
     </div>
 
     <script>
