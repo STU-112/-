@@ -20,15 +20,18 @@
             --font-family: Arial, sans-serif;
             --text-color: #495057;
         }
-
-        body {
-            font-family: var(--font-family);
-            padding: 0px 0px;
+* {
             margin: 0;
-			background-color:#f5d3ab;
-            color: var(--text-color);
+            padding: 0;
+            box-sizing: border-box;
         }
-
+	 body {
+            height: 100%;
+            width: 100%;
+            font-family: 'Noto Sans TC', Arial, sans-serif;
+            background-color: #f5d3ab;
+            color: #5a4a3f;
+        }
         .container {
             max-width: 800px;
             margin: 30px auto;
@@ -102,6 +105,27 @@
         .form-group input[type="radio"] {
             margin-right: 10px;
         }
+		.banner {
+		 width:100%;
+            background: linear-gradient(to bottom, #fbe3c9, #f5d3ab); /* 漸層效果 */
+            color: #5a3d2b;
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            padding: 10px 20px;
+            box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.2); /* 陰影效果 */
+        }
+
+        .banner a {
+            color: #5a3d2b;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 1.2em;
+        }
+
+        .banner a:hover {
+    color: #007bff; /* 當滑鼠懸停時變換顏色 */
+}   
 
        
 	
@@ -111,6 +135,12 @@
 
 
 <body>
+
+    <div class='banner'>
+        <a style='align-items: left;' href='申請.html'>◀</a>
+    </div>;
+
+
   <div class="container">
   <div class="form-container" aria-labelledby="formTitle">
  <form action="agg.php" method="POST" onsubmit="return validateForm()">

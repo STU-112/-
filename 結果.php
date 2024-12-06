@@ -65,7 +65,13 @@ if ($serial_count) {
         th {
             background-color: #f2c94c;
         }
+		
+		
+		
+
     </style>";
+
+	
 
     echo "<div class='result'>";
     echo "<h2>單號: $serial_count</h2>";

@@ -19,10 +19,34 @@ if ($db_link_review->connect_error) {
     die("連線到 review_comments 資料庫失敗: " . $db_link_review->connect_error);
 }
 
-// 查詢 op2 資料庫中的 pay_table 資料 
-$sql = "SELECT `count`, 受款人, 支出項目, 填表日期, 國字金額, 國字金額_hidden 
+
+
+
+
+
+// 初始化搜尋條件
+$search_serial = isset($_GET['search_serial']) ? $_GET['search_serial'] : '';
+$search_item = isset($_GET['search_item']) ? $_GET['search_item'] : '';
+
+// 查詢 pay_table 資料
+$sql = "SELECT `count`, 受款人, 支出項目, 填表日期, 國字金額 
         FROM pay_table WHERE 國字金額 IS NOT NULL";
+
+// 加入搜尋條件
+if (!empty($search_serial)) {
+    $sql .= " AND `count` LIKE '%$search_serial%'";
+}
+if (!empty($search_item)) {
+    $sql .= " AND `支出項目` = '$search_item'";
+}
+
 $result = $db_link_預支->query($sql);
+
+
+
+
+
+
 
 // 顯示資料
 if ($result && $result->num_rows > 0) {
@@ -111,20 +135,39 @@ if ($result && $result->num_rows > 0) {
 
         .banner a:hover {
     color: #007bff; /* 當滑鼠懸停時變換顏色 */
-}
-		
+}   
     </style>";
 		
  echo "
     <div class='banner'>
-        <a style='align-items: right;' href='search.php'>搜尋紀錄</a>
+        <a style='align-items: left;' href='申請.html'>◀</a>
     </div>";
+	
+	
+	
 
     echo "<table>";
     echo "<caption>申請紀錄</caption>";
     echo "<tr>";
     echo "<th>單號</th><th>受款人</th><th>金額</th><th>填表日期</th><th>支出項目</th><th>審核狀態</th><th>操作</th>";
     echo "</tr>";
+	
+	// 顯示搜尋表單
+echo "
+<form method='get' style='text-align: center; margin-bottom: 20px;'>
+    <label>單號: <input type='text' name='search_serial' value='$search_serial'></label>
+    <label>支出項目:
+        <select name='search_item'>
+            <option value=''>-- 全部 --</option>
+            <option value='活動費用'" . ($search_item == '活動費用' ? " selected" : "") . ">活動費用</option>
+            <option value='獎助學金'" . ($search_item == '獎助學金' ? " selected" : "") . ">獎助學金</option>
+            <option value='經濟扶助'" . ($search_item == '經濟扶助' ? " selected" : "") . ">經濟扶助</option>
+            <option value='其他'" . ($search_item == '其他' ? " selected" : "") . ">其他</option>
+        </select>
+    </label>
+    <button type='submit'>搜尋</button>
+</form>
+";
 
     // 顯示每一行資料 
     while ($row = $result->fetch_assoc()) {

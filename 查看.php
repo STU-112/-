@@ -101,6 +101,18 @@ if ($result && $result->num_rows > 0) {
     echo "
     <form method='post' action='督導審核意見.php'>
     <style>
+	* {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+	 body {
+            height: 100%;
+            width: 100%;
+            font-family: 'Noto Sans TC', Arial, sans-serif;
+            background-color: #f5d3ab;
+            color: #5a4a3f;
+        }
         /* 表格樣式 */
         table {
             width: 50%;
@@ -173,7 +185,33 @@ if ($result && $result->num_rows > 0) {
         button[type='button']:hover {
             background-color: #666;
         }
+		.banner {
+		 width:100%;
+            background: linear-gradient(to bottom, #fbe3c9, #f5d3ab); /* 漸層效果 */
+            color: #5a3d2b;
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            padding: 10px 20px;
+            box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.2); /* 陰影效果 */
+        }
+
+        .banner a {
+            color: #5a3d2b;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 1.2em;
+        }
+
+        .banner a:hover {
+    color: #007bff; /* 當滑鼠懸停時變換顏色 */
+}   
     </style>
+	
+    <div class='banner'>
+        <a style='align-items: left;' href='申請紀錄.php'>◀</a>
+    </div>
+	
     
     <table>
     <caption>檢視申請項目</caption>";
