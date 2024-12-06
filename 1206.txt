@@ -1,4 +1,4 @@
-<!DOCTYPE html> 
+<!DOCTYPE html>   
 <html lang="zh-Hant">
 <head>
     <meta charset="UTF-8">
@@ -289,13 +289,19 @@
     .success-modal {
         /* 與一般模態框相同樣式 */
     }
+
+    /* 新增錯誤邊框樣式 */
+    .input-error {
+        border-color: var(--error-color) !important;
+        box-shadow: 0 0 8px rgba(255, 0, 0, 0.2);
+    }
     </style>
 </head>
 <body>
 
   <div class="container">
     <div class="form-container" aria-labelledby="formTitle">
-      <form id="paymentForm" action="agg.php" method="POST">
+      <form id="paymentForm" action="agg.php" method="POST" novalidate>
         <h1>財團法人台北市失親兒福利基金會</h1>
 
         <!-- 受款人姓名 -->
@@ -334,65 +340,73 @@
 
         <!-- 活動費用欄位 -->
         <div id="活動費用欄位" class="conditional-group">
-          <div class="form-group">
-            <label for="專案活動">(專案)活動名稱：</label>
-            <select id="專案活動" name="專案活動">
-              <option value="">請選擇</option>
-              <option value="半日/一日型">半日/一日型：EX:方案活動</option>
-              <option value="過夜型">過夜型：EX:方案活動</option>
-              <option value="企業贊助活動">企業贊助活動:Happy Go</option>
-              <option value="多次型">多次型：EX:成長團體、領袖小組</option>
-              <option value="其他：體驗活動">其他：體驗活動(10萬元預算以上)</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label for="活動名稱">活動名稱：</label>
-            <input type="text" id="活動名稱" name="活動名稱">
-          </div>
-          <div class="form-group">
-            <label for="專案日期">日期：</label>
-            <input type="date" id="專案日期" name="專案日期">
-          </div>
-        </div>
+  <div class="form-group">
+    <label for="專案活動">(專案)活動名稱：<span class="required-star">*</span></label>
+    <select id="專案活動" name="專案活動" required>
+      <option value="">請選擇</option>
+      <option value="半日/一日型">半日/一日型：EX:方案活動</option>
+      <option value="過夜型">過夜型：EX:方案活動</option>
+      <option value="企業贊助活動">企業贊助活動:Happy Go</option>
+      <option value="多次型">多次型：EX:成長團體、領袖小組</option>
+      <option value="其他：體驗活動">其他：體驗活動(10萬元預算以上)</option>
+    </select>
+    <span class="error-message" id="專案活動-error"></span>
+  </div>
+  <div class="form-group">
+    <label for="活動名稱">活動名稱：<span class="required-star">*</span></label>
+    <input type="text" id="活動名稱" name="活動名稱" required>
+    <span class="error-message" id="活動名稱-error"></span>
+  </div>
+  <div class="form-group">
+    <label for="專案日期">日期：<span class="required-star">*</span></label>
+    <input type="date" id="專案日期" name="專案日期" required>
+    <span class="error-message" id="專案日期-error"></span>
+  </div>
+</div>
 
         <!-- 獎學金欄位 -->
         <div id="獎學金欄位" class="conditional-group">
           <div class="form-group">
-            <label for="獎學金人數">獎助學金共幾位：</label>
-            <input type="text" id="獎學金人數" name="獎學金人數">
+            <label for="獎學金人數">獎助學金共幾位：<span class="required-star">*</span></label>
+            <input type="number" id="獎學金人數" name="獎學金人數" min="1" required>
+            <span class="error-message" id="獎學金人數-error"></span>
           </div>
           <div class="form-group">
-            <label for="專案名稱">專案名稱：</label>
-            <input type="text" id="專案名稱" name="專案名稱">
+            <label for="專案名稱">專案名稱：<span class="required-star">*</span></label>
+            <input type="text" id="專案名稱" name="專案名稱" required>
+            <span class="error-message" id="專案名稱-error"></span>
           </div>
           <div class="form-group">
-            <label for="主題">主題：</label>
-            <input type="text" id="主題" name="主題">
+            <label for="主題">主題：<span class="required-star">*</span></label>
+            <input type="text" id="主題" name="主題" required>
+            <span class="error-message" id="主題-error"></span>
           </div>
           <div class="form-group">
-            <label for="獎學金日期">日期：</label>
-            <input type="date" id="獎學金日期" name="獎學金日期">
+            <label for="獎學金日期">日期：<span class="required-star">*</span></label>
+            <input type="date" id="獎學金日期" name="獎學金日期" required>
+            <span class="error-message" id="獎學金日期-error"></span>
           </div>
         </div>
 
         <!-- 經濟扶助欄位 -->
         <div id="經濟扶助欄位" class="conditional-group">
           <div class="form-group">
-            <label for="經濟扶助">經濟扶助：</label>
-            <select id="經濟扶助" name="經濟扶助">
+            <label for="經濟扶助">經濟扶助：<span class="required-star">*</span></label>
+            <select id="經濟扶助" name="經濟扶助" required>
               <option value="">請選擇</option>
               <option value="急難救助">急難救助</option>
               <option value="醫療補助">醫療補助</option>
               <option value="生活扶助">生活扶助</option>
               <option value="其他專案">其他專案</option>
             </select>
+            <span class="error-message" id="經濟扶助-error"></span>
           </div>
         </div>
 
         <!-- 其他欄位 -->
         <div id="其他欄位" class="conditional-group">
           <div class="form-group">
-            <label for="其他項目">其他項目：</label>
+            <label for="其他項目">其他項目：<span class="required-star">*</span></label>
             <div id="其他項目">
               <label><input type="checkbox" name="其他項目[]" value="天使關懷專案"> 天使關懷專案：禮金</label><br>
               <label><input type="checkbox" name="其他項目[]" value="修繕費"> 修繕費</label><br>
@@ -409,6 +423,7 @@
               <label><input type="checkbox" name="其他項目[]" value="教育訓練"> 教育訓練</label><br>
               <label><input type="checkbox" name="其他項目[]" value="雜項購置"> 雜項購置</label><br>
             </div>
+            <span class="error-message" id="其他項目-error"></span>
           </div>
         </div>
 
@@ -446,18 +461,18 @@
         <!-- 現金簽收欄位 -->
         <div id="現金簽收欄位" class="conditional-group">
           <div class="form-group">
-            <label for="簽收金額">金額：</label>
-            <input type="number" id="簽收金額" name="簽收金額" min="0">
+            <label for="簽收金額">金額：<span class="required-star">*</span></label>
+            <input type="number" id="簽收金額" name="簽收金額" min="0" required>
             <span class="error-message" id="簽收金額-error"></span>
           </div>
           <div class="form-group">
-            <label for="簽收人">簽收人：</label>
-            <input type="text" id="簽收人" name="簽收人" placeholder="請輸入簽收人">
+            <label for="簽收人">簽收人：<span class="required-star">*</span></label>
+            <input type="text" id="簽收人" name="簽收人" placeholder="請輸入簽收人" required>
             <span class="error-message" id="簽收人-error"></span>
           </div>
           <div class="form-group">
-            <label for="簽收日">簽收日：</label>
-            <input type="date" id="簽收日" name="簽收日">
+            <label for="簽收日">簽收日：<span class="required-star">*</span></label>
+            <input type="date" id="簽收日" name="簽收日" required>
             <span class="error-message" id="簽收日-error"></span>
           </div>
         </div>
@@ -465,23 +480,23 @@
         <!-- 轉帳欄位 -->
         <div id="郵局欄" class="conditional-group" aria-live="polite">
           <div class="form-group">
-            <label for="銀行">銀行(郵局)：</label>
-            <input type="text" id="銀行" name="銀行郵局" placeholder="請輸入銀行名稱">
+            <label for="銀行">銀行(郵局)：<span class="required-star">*</span></label>
+            <input type="text" id="銀行" name="銀行郵局" placeholder="請輸入銀行名稱" required>
             <span class="error-message" id="銀行-error"></span>
           </div>
           <div class="form-group">
-            <label for="transferBankBranch">分行：</label>
-            <input type="text" id="transferBankBranch" name="分行" placeholder="請輸入分行名稱">
+            <label for="transferBankBranch">分行：<span class="required-star">*</span></label>
+            <input type="text" id="transferBankBranch" name="分行" placeholder="請輸入分行名稱" required>
             <span class="error-message" id="transferBankBranch-error"></span>
           </div>
           <div class="form-group">
-            <label for="transferAccountName">戶名：</label>
-            <input type="text" id="transferAccountName" name="戶名" placeholder="請輸入戶名">
+            <label for="transferAccountName">戶名：<span class="required-star">*</span></label>
+            <input type="text" id="transferAccountName" name="戶名" placeholder="請輸入戶名" required>
             <span class="error-message" id="transferAccountName-error"></span>
           </div>
           <div class="form-group">
-            <label for="transferAccountNumber">帳號：</label>
-            <input type="text" id="transferAccountNumber" name="帳號" placeholder="請輸入帳號">
+            <label for="transferAccountNumber">帳號：<span class="required-star">*</span></label>
+            <input type="text" id="transferAccountNumber" name="帳號" placeholder="請輸入帳號" required>
             <span class="error-message" id="transferAccountNumber-error"></span>
           </div>
         </div>
@@ -489,25 +504,25 @@
         <!-- 支票欄位 -->
         <div id="支票欄位" class="conditional-group" aria-live="polite">
           <div class="form-group">
-            <label for="票號">票號：</label>
-            <input type="text" id="票號" name="票號" placeholder="請輸入票號">
+            <label for="票號">票號：<span class="required-star">*</span></label>
+            <input type="text" id="票號" name="票號" placeholder="請輸入票號" required>
             <span class="error-message" id="票號-error"></span>
           </div>
           <div class="form-group">
-            <label for="到期日">到期日：</label>
-            <input type="date" id="到期日" name="到期日">
+            <label for="到期日">到期日：<span class="required-star">*</span></label>
+            <input type="date" id="到期日" name="到期日" required>
             <span class="error-message" id="到期日-error"></span>
           </div>
           <!-- 新增「請輸入預支金額」欄位 -->
           <div class="form-group">
-            <label for="預支金額">請輸入預支金額：</label>
-            <input type="number" id="預支金額" name="預支金額" min="0">
+            <label for="預支金額">請輸入預支金額：<span class="required-star">*</span></label>
+            <input type="number" id="預支金額" name="預支金額" min="0" required>
             <span class="error-message" id="預支金額-error"></span>
           </div>
         </div>
 
        <!-- 提交按鈕 -->
-        <button type="submit">提交表單</button>
+        <button type="submit" id="submitBtn">提交表單</button>
       </form>
     </div>
   </div>
@@ -525,6 +540,14 @@
 
   <script>
     /* 修改後的JavaScript代碼 */
+
+    // 定義一個通用的特殊符號檢查函式
+    function containsSpecialChars(str) {
+        // 允許的字符：中文、英文、數字、空格
+        const regex = /^[a-zA-Z0-9\u4e00-\u9fa5\s]+$/;
+        return !regex.test(str);
+    }
+
     function validateForm() {
         let isValid = true;
 
@@ -554,7 +577,7 @@
             受款人Error.style.display = 'block';
             受款人.classList.add('input-error');
             isValid = false;
-        } else if (/[^a-zA-Z0-9\u4e00-\u9fa5\s]/.test(受款人.value)) {
+        } else if (containsSpecialChars(受款人.value)) {
             受款人Error.textContent = "姓名中不可包含特殊符號。";
             受款人Error.style.display = 'block';
             受款人.classList.add('input-error');
@@ -598,7 +621,7 @@
             isValid = false;
         }
 
-        // 驗證說明
+        // 驗證說明（不檢查特殊符號）
         const 說明 = document.getElementById('說明');
         const 說明Error = document.getElementById('說明-error');
         if (!說明.value.trim()) {
@@ -628,12 +651,121 @@
             isValid = false;
         }
 
+        // 根據支出項目進行額外驗證
+        if (支出項目.value === '活動費用') {
+            const 專案活動 = document.getElementById('專案活動');
+            const 專案活動Error = document.getElementById('專案活動-error');
+            if (!專案活動.value) {
+                專案活動Error.textContent = "請選擇專案活動。";
+                專案活動Error.style.display = 'block';
+                專案活動.classList.add('input-error');
+                isValid = false;
+            }
+
+            const 活動名稱 = document.getElementById('活動名稱');
+            const 活動名稱Error = document.getElementById('活動名稱-error');
+            if (!活動名稱.value.trim()) {
+                活動名稱Error.textContent = "活動名稱不能空白。";
+                活動名稱Error.style.display = 'block';
+                活動名稱.classList.add('input-error');
+                isValid = false;
+            } else if (containsSpecialChars(活動名稱.value)) {
+                活動名稱Error.textContent = "活動名稱中不可包含特殊符號。";
+                活動名稱Error.style.display = 'block';
+                活動名稱.classList.add('input-error');
+                isValid = false;
+            }
+
+            const 專案日期 = document.getElementById('專案日期');
+            const 專案日期Error = document.getElementById('專案日期-error');
+            if (!專案日期.value) {
+                專案日期Error.textContent = "請選擇專案日期。";
+                專案日期Error.style.display = 'block';
+                專案日期.classList.add('input-error');
+                isValid = false;
+            }
+        } else if (支出項目.value === '獎學金') {
+            const 獎學金人數 = document.getElementById('獎學金人數');
+            const 獎學金人數Error = document.getElementById('獎學金人數-error');
+            if (!獎學金人數.value || parseInt(獎學金人數.value) < 1) {
+                獎學金人數Error.textContent = "獎助學金人數必須至少為 1。";
+                獎學金人數Error.style.display = 'block';
+                獎學金人數.classList.add('input-error');
+                isValid = false;
+            }
+
+            const 專案名稱 = document.getElementById('專案名稱');
+            const 專案名稱Error = document.getElementById('專案名稱-error');
+            if (!專案名稱.value.trim()) {
+                專案名稱Error.textContent = "專案名稱不能空白。";
+                專案名稱Error.style.display = 'block';
+                專案名稱.classList.add('input-error');
+                isValid = false;
+            } else if (containsSpecialChars(專案名稱.value)) {
+                專案名稱Error.textContent = "專案名稱中不可包含特殊符號。";
+                專案名稱Error.style.display = 'block';
+                專案名稱.classList.add('input-error');
+                isValid = false;
+            }
+
+            const 主題 = document.getElementById('主題');
+            const 主題Error = document.getElementById('主題-error');
+            if (!主題.value.trim()) {
+                主題Error.textContent = "主題不能空白。";
+                主題Error.style.display = 'block';
+                主題.classList.add('input-error');
+                isValid = false;
+            } else if (containsSpecialChars(主題.value)) {
+                主題Error.textContent = "主題中不可包含特殊符號。";
+                主題Error.style.display = 'block';
+                主題.classList.add('input-error');
+                isValid = false;
+            }
+
+            const 獎學金日期 = document.getElementById('獎學金日期');
+            const 獎學金日期Error = document.getElementById('獎學金日期-error');
+            if (!獎學金日期.value) {
+                獎學金日期Error.textContent = "請選擇獎學金日期。";
+                獎學金日期Error.style.display = 'block';
+                獎學金日期.classList.add('input-error');
+                isValid = false;
+            }
+        } else if (支出項目.value === '經濟扶助') {
+            const 經濟扶助 = document.getElementById('經濟扶助');
+            const 經濟扶助Error = document.getElementById('經濟扶助-error');
+            if (!經濟扶助.value) {
+                經濟扶助Error.textContent = "請選擇經濟扶助項目。";
+                經濟扶助Error.style.display = 'block';
+                經濟扶助.classList.add('input-error');
+                isValid = false;
+            }
+        } else if (支出項目.value === '其他') {
+            const 其他項目 = document.querySelectorAll('input[name="其他項目[]"]');
+            const 其他項目Error = document.getElementById('其他項目-error');
+            let checked = false;
+            其他項目.forEach(checkbox => {
+                if (checkbox.checked) {
+                    checked = true;
+                }
+            });
+            if (!checked) {
+                其他項目Error.textContent = "請至少選擇一項其他項目。";
+                其他項目Error.style.display = 'block';
+                isValid = false;
+            }
+        }
+
         // 根據支付方式進行額外驗證
         if (支付方式.value === '支票') {
             const 票號 = document.getElementById('票號');
             const 票號Error = document.getElementById('票號-error');
             if (!票號.value.trim()) {
                 票號Error.textContent = "請填寫票號。";
+                票號Error.style.display = 'block';
+                票號.classList.add('input-error');
+                isValid = false;
+            } else if (containsSpecialChars(票號.value)) {
+                票號Error.textContent = "票號中不可包含特殊符號。";
                 票號Error.style.display = 'block';
                 票號.classList.add('input-error');
                 isValid = false;
@@ -673,6 +805,11 @@
                 簽收人Error.style.display = 'block';
                 簽收人.classList.add('input-error');
                 isValid = false;
+            } else if (containsSpecialChars(簽收人.value)) {
+                簽收人Error.textContent = "簽收人中不可包含特殊符號。";
+                簽收人Error.style.display = 'block';
+                簽收人.classList.add('input-error');
+                isValid = false;
             }
 
             const 簽收日 = document.getElementById('簽收日');
@@ -691,12 +828,22 @@
                 銀行Error.style.display = 'block';
                 銀行.classList.add('input-error');
                 isValid = false;
+            } else if (containsSpecialChars(銀行.value)) {
+                銀行Error.textContent = "銀行名稱中不可包含特殊符號。";
+                銀行Error.style.display = 'block';
+                銀行.classList.add('input-error');
+                isValid = false;
             }
 
             const 分行 = document.getElementById('transferBankBranch');
             const 分行Error = document.getElementById('transferBankBranch-error');
             if (!分行.value.trim()) {
                 分行Error.textContent = "請填寫分行名稱。";
+                分行Error.style.display = 'block';
+                分行.classList.add('input-error');
+                isValid = false;
+            } else if (containsSpecialChars(分行.value)) {
+                分行Error.textContent = "分行名稱中不可包含特殊符號。";
                 分行Error.style.display = 'block';
                 分行.classList.add('input-error');
                 isValid = false;
@@ -709,12 +856,22 @@
                 戶名Error.style.display = 'block';
                 戶名.classList.add('input-error');
                 isValid = false;
+            } else if (containsSpecialChars(戶名.value)) {
+                戶名Error.textContent = "戶名中不可包含特殊符號。";
+                戶名Error.style.display = 'block';
+                戶名.classList.add('input-error');
+                isValid = false;
             }
 
             const 帳號 = document.getElementById('transferAccountNumber');
             const 帳號Error = document.getElementById('transferAccountNumber-error');
             if (!帳號.value.trim()) {
                 帳號Error.textContent = "請填寫帳號。";
+                帳號Error.style.display = 'block';
+                帳號.classList.add('input-error');
+                isValid = false;
+            } else if (containsSpecialChars(帳號.value)) {
+                帳號Error.textContent = "帳號中不可包含特殊符號。";
                 帳號Error.style.display = 'block';
                 帳號.classList.add('input-error');
                 isValid = false;
@@ -747,16 +904,33 @@
                 } else {
                     input.value = '';
                 }
+                input.removeAttribute('required');
+            });
+            Array.from(field.querySelectorAll('select')).forEach(select => {
+                select.value = '';
+                select.removeAttribute('required');
             });
         });
 
         // 根據選擇的支付方式顯示對應的欄位
         if (selectedItem === '現金') {
-            document.getElementById("現金簽收欄位").style.display = 'block';
+            const 現金簽收欄位 = document.getElementById("現金簽收欄位");
+            現金簽收欄位.style.display = 'block';
+            Array.from(現金簽收欄位.querySelectorAll('input')).forEach(input => {
+                input.setAttribute('required', 'required');
+            });
         } else if (['轉帳', '劃撥', '匯款'].includes(selectedItem)) {
-            document.getElementById("郵局欄").style.display = 'block';
+            const 郵局欄 = document.getElementById("郵局欄");
+            郵局欄.style.display = 'block';
+            Array.from(郵局欄.querySelectorAll('input')).forEach(input => {
+                input.setAttribute('required', 'required');
+            });
         } else if (selectedItem === '支票') {
-            document.getElementById("支票欄位").style.display = 'block';
+            const 支票欄位 = document.getElementById("支票欄位");
+            支票欄位.style.display = 'block';
+            Array.from(支票欄位.querySelectorAll('input')).forEach(input => {
+                input.setAttribute('required', 'required');
+            });
         }
     }
 
@@ -774,18 +948,37 @@
                 } else {
                     input.value = '';
                 }
+                input.removeAttribute('required');
+            });
+            // 如果是select，移除required
+            Array.from(field.querySelectorAll('select')).forEach(select => {
+                select.removeAttribute('required');
             });
         });
 
         // 根據選擇的支出項目顯示對應的欄位
         if (selectedItem === '活動費用') {
-            document.getElementById("活動費用欄位").style.display = 'block';
+            const 活動費用欄位 = document.getElementById("活動費用欄位");
+            活動費用欄位.style.display = 'block';
+            Array.from(活動費用欄位.querySelectorAll('input, select')).forEach(input => {
+                input.setAttribute('required', 'required');
+            });
         } else if (selectedItem === '獎學金') {
-            document.getElementById("獎學金欄位").style.display = 'block';
+            const 獎學金欄位 = document.getElementById("獎學金欄位");
+            獎學金欄位.style.display = 'block';
+            Array.from(獎學金欄位.querySelectorAll('input')).forEach(input => {
+                input.setAttribute('required', 'required');
+            });
         } else if (selectedItem === '經濟扶助') {
-            document.getElementById("經濟扶助欄位").style.display = 'block';
+            const 經濟扶助欄位 = document.getElementById("經濟扶助欄位");
+            經濟扶助欄位.style.display = 'block';
+            Array.from(經濟扶助欄位.querySelectorAll('select')).forEach(select => {
+                select.setAttribute('required', 'required');
+            });
         } else if (selectedItem === '其他') {
-            document.getElementById("其他欄位").style.display = 'block';
+            const 其他欄位 = document.getElementById("其他欄位");
+            其他欄位.style.display = 'block';
+            // 對於checkboxes，不設定required，但在驗證時檢查至少選擇一項
         }
     }
 
@@ -801,18 +994,24 @@
 
     // 簡單的數字轉中文函式（僅支援整數）
     function numberToChinese(num) {
+        if (!num) return "零";
         const digits = "零一二三四五六七八九";
         const units = ["", "十", "百", "千", "萬", "十萬", "百萬", "千萬", "億"];
         let str = num.toString();
         let result = "";
+        let zeroCount = 0;
+
         for (let i = 0; i < str.length; i++) {
             const n = parseInt(str[i]);
+            const unit = units[str.length - i - 1];
             if (n !== 0) {
-                result += digits[n] + units[str.length - i - 1];
-            } else {
-                if (!result.endsWith(digits[0])) {
+                if (zeroCount > 0) {
                     result += digits[0];
+                    zeroCount = 0;
                 }
+                result += digits[n] + unit;
+            } else {
+                zeroCount++;
             }
         }
         // 處理結尾的零
@@ -837,6 +1036,11 @@
         event.preventDefault(); // 阻止表單的預設提交行為
 
         if (validateForm()) {
+            // 禁用提交按鈕以防止重複提交
+            const submitBtn = document.getElementById('submitBtn');
+            submitBtn.disabled = true;
+            submitBtn.textContent = "提交中...";
+
             // 準備表單數據
             const formData = new FormData(this);
 
@@ -854,10 +1058,16 @@
                 // 重置條件欄位顯示
                 updateConditionalFields();
                 togglePaymentFields();
+                // 重置提交按鈕狀態
+                submitBtn.disabled = false;
+                submitBtn.textContent = "提交表單";
             })
             .catch(error => {
                 console.error('Error:', error);
                 alert('提交失敗，請稍後再試。');
+                // 重置提交按鈕狀態
+                submitBtn.disabled = false;
+                submitBtn.textContent = "提交表單";
             });
         }
     });
@@ -876,8 +1086,256 @@
             // 清除提交狀態以防止下次載入時再次顯示
             sessionStorage.removeItem('formSubmitted');
         }
+
+        // 即時驗證部分欄位
+        const requiredFields = document.querySelectorAll('input[required], select[required], textarea[required]');
+        requiredFields.forEach(field => {
+            field.addEventListener('blur', function() {
+                validateField(field);
+            });
+        });
     };
-</script>
+
+    // 即時驗證函式
+    function validateField(field) {
+        const fieldId = field.id;
+        const errorElement = document.getElementById(`${fieldId}-error`);
+        let errorMessage = "";
+
+        if (field.type === 'text') {
+            if (!field.value.trim()) {
+                errorMessage = "此欄位不能空白。";
+            } else if (fieldId !== '說明' && containsSpecialChars(field.value)) {
+                // 「說明」欄位不檢查特殊符號
+                if (['受款人', '活動名稱', '專案名稱', '主題', '簽收人', '銀行', 'transferBankBranch', 'transferAccountName', 'transferAccountNumber', '票號'].includes(fieldId)) {
+                    errorMessage = "此欄位不可包含特殊符號。";
+                }
+            }
+        } else if (field.type === 'date') {
+            if (!field.value) {
+                errorMessage = "此欄位不能空白。";
+            } else if (fieldId === '填表日期') {
+                const today = new Date();
+                const year = today.getFullYear();
+                const month = String(today.getMonth() + 1).padStart(2, '0');
+                const day = String(today.getDate()).padStart(2, '0');
+                const todayString = `${year}-${month}-${day}`;
+                if (field.value !== todayString) {
+                    errorMessage = "填表日期必須是今天。";
+                }
+            }
+        } else if (field.type === 'number') {
+            if (!field.value || parseFloat(field.value) <= 0) {
+                errorMessage = "此欄位必須大於 0。";
+            }
+        } else if (field.tagName.toLowerCase() === 'select') {
+            if (!field.value) {
+                errorMessage = "請選擇一個選項。";
+            }
+        } else if (field.tagName.toLowerCase() === 'textarea') {
+            if (!field.value.trim()) {
+                errorMessage = "此欄位不能空白。";
+            }
+        }
+
+        if (errorMessage) {
+            errorElement.textContent = errorMessage;
+            errorElement.style.display = 'block';
+            field.classList.add('input-error');
+        } else {
+            errorElement.textContent = "";
+            errorElement.style.display = 'none';
+            field.classList.remove('input-error');
+        }
+    }
+  </script>
 
 </body>
 </html>
+--------------------------------------------------
+
+<?php   
+// 連接資料庫
+$server = 'localhost:3307'; // 伺服器名稱
+$用戶名 = 'root'; // 用戶名
+$密碼 = ' '; // 密碼 (設為空字串)
+$資料庫 = '預支'; // 資料庫名稱
+
+// 連接到 MySQL
+$連接 = mysqli_connect($server, $用戶名, $密碼);
+
+// 檢查連接
+if (!$連接) {
+    die("連接失敗: " . mysqli_connect_error());
+}
+
+// 檢查資料庫是否已存在，若不存在則創建
+$sql = "CREATE DATABASE IF NOT EXISTS `$資料庫`";
+if (mysqli_query($連接, $sql)) {
+    // 資料庫已存在或創建成功
+} else {
+    die("創建資料庫失敗: " . mysqli_error($連接) . "<br>");
+}
+
+// 選擇資料庫
+if (!mysqli_select_db($連接, $資料庫)) {
+    die("選擇資料庫失敗: " . mysqli_error($連接) . "<br>");
+}
+
+// 創建資料表（根據修改後的結構）
+$create_table_sql = "CREATE TABLE IF NOT EXISTS pay_table (
+    `count` VARCHAR(50) NOT NULL UNIQUE,
+    受款人 VARCHAR(50),
+    填表日期 DATE DEFAULT NULL,
+    付款日期 DATE DEFAULT NULL,
+    支出項目 VARCHAR(50),
+    活動名稱 VARCHAR(50) DEFAULT NULL,
+    專案日期 DATE DEFAULT NULL,
+    獎學金人數 INT DEFAULT NULL,
+    專案名稱 CHAR(10) DEFAULT NULL,
+    主題 CHAR(50) DEFAULT NULL,
+    獎學金日期 DATE DEFAULT NULL,
+    經濟扶助 CHAR(10) DEFAULT NULL,
+    其他項目 CHAR(50) DEFAULT NULL,
+    說明 CHAR(100) DEFAULT NULL,
+    支付方式 CHAR(10),
+    國字金額 DECIMAL(10,2),
+    國字金額_hidden CHAR(50),
+    簽收金額 DECIMAL(10,2) DEFAULT NULL,
+    簽收人 CHAR(10) DEFAULT NULL,
+    簽收日 DATE DEFAULT NULL,
+    銀行郵局 CHAR(10) DEFAULT NULL,
+    分行 CHAR(10) DEFAULT NULL,
+    戶名 CHAR(10) DEFAULT NULL,
+    帳號 CHAR(10) DEFAULT NULL, /* 修改此處，將帳戶改為帳號 */
+    票號 CHAR(10) DEFAULT NULL,
+    到期日 DATE DEFAULT NULL,
+    預支金額 DECIMAL(10,2) DEFAULT NULL,
+    PRIMARY KEY (`count`)
+) ENGINE=InnoDB"; // 使用 InnoDB 以支援事務
+
+if (mysqli_query($連接, $create_table_sql)) {
+    // 資料表創建成功或已存在
+} else {
+    die("創建支用資料表失敗: " . mysqli_error($連接) . "<br>");
+}
+
+// 生成帶有 'A' + 民國年 + 月 + 5位數序號的流水號函數
+function generateSerialNumber($連接) {
+    // 取得當前時間
+    $now = new DateTime();
+    $year = $now->format('Y') - 1911; // 民國年
+    $month = str_pad($now->format('m'), 2, '0', STR_PAD_LEFT); // 月份，兩位數
+    $prefix = "A{$year}{$month}"; // 前綴，如 A11311
+
+    // 查詢當前月份的最大流水號
+    $sql = "SELECT MAX(`count`) AS max_count FROM pay_table WHERE `count` LIKE '{$prefix}%'";
+    $result = mysqli_query($連接, $sql);
+    if (!$result) {
+        die("查詢最大流水號失敗: " . mysqli_error($連接) . "<br>");
+    }
+    $row = mysqli_fetch_assoc($result);
+    if ($row['max_count']) {
+        // 取得當前最大的序號並加一
+        $last_serial = intval(substr($row['max_count'], strlen($prefix)));
+        $new_serial = $last_serial + 1;
+    } else {
+        // 如果沒有紀錄，從 1 開始
+        $new_serial = 1;
+    }
+
+    // 生成新的流水號，填充到 5 位數
+    $serialNumber = $prefix . str_pad($new_serial, 5, '0', STR_PAD_LEFT);
+    return $serialNumber;
+}
+
+// 處理表單提交
+if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+    // 驗證必填字段
+    $必填字段 = ['填表日期', '受款人', '支出項目'];
+    foreach ($必填字段 as $field) {
+        if (empty($_POST[$field])) {
+            die("請填寫所有必填字段。");
+        }
+    }
+
+    // 取得表單數據並進行轉義
+    $受款人 = mysqli_real_escape_string($連接, $_POST['受款人']);
+    $填表日期 = mysqli_real_escape_string($連接, $_POST['填表日期']);
+    $付款日期 = !empty($_POST['付款日期']) ? "'" . mysqli_real_escape_string($連接, $_POST['付款日期']) . "'" : "NULL";
+    $支出項目 = mysqli_real_escape_string($連接, $_POST['支出項目']);
+    $活動名稱 = !empty($_POST['活動名稱']) ? "'" . mysqli_real_escape_string($連接, $_POST['活動名稱']) . "'" : "NULL";
+    $專案日期 = !empty($_POST['專案日期']) ? "'" . mysqli_real_escape_string($連接, $_POST['專案日期']) . "'" : "NULL";
+    $獎學金人數 = !empty($_POST['獎學金人數']) ? intval($_POST['獎學金人數']) : "NULL";
+    $專案名稱 = !empty($_POST['專案名稱']) ? "'" . mysqli_real_escape_string($連接, $_POST['專案名稱']) . "'" : "NULL";
+    $主題 = !empty($_POST['主題']) ? "'" . mysqli_real_escape_string($連接, $_POST['主題']) . "'" : "NULL";
+    $獎學金日期 = !empty($_POST['獎學金日期']) ? "'" . mysqli_real_escape_string($連接, $_POST['獎學金日期']) . "'" : "NULL";
+    $經濟扶助 = !empty($_POST['經濟扶助']) ? "'" . mysqli_real_escape_string($連接, $_POST['經濟扶助']) . "'" : "NULL";
+    $其他項目 = isset($_POST['其他項目']) ? "'" . mysqli_real_escape_string($連接, implode(", ", $_POST['其他項目'])) . "'" : "NULL"; // 將選中的項目轉為字串
+    $說明 = mysqli_real_escape_string($連接, $_POST['說明']);
+    $支付方式 = mysqli_real_escape_string($連接, $_POST['支付方式']);
+    $國字金額 = isset($_POST['國字金額']) ? mysqli_real_escape_string($連接, $_POST['國字金額']) : '';
+    $國字金額_hidden = isset($_POST['國字金額_hidden']) ? mysqli_real_escape_string($連接, $_POST['國字金額_hidden']) : '';
+
+    $簽收金額 = !empty($_POST['簽收金額']) ? "'" . mysqli_real_escape_string($連接, $_POST['簽收金額']) . "'" : "NULL";
+    $簽收人 = !empty($_POST['簽收人']) ? "'" . mysqli_real_escape_string($連接, $_POST['簽收人']) . "'" : "NULL";
+    $簽收日 = !empty($_POST['簽收日']) ? "'" . mysqli_real_escape_string($連接, $_POST['簽收日']) . "'" : "NULL";
+    $銀行郵局 = !empty($_POST['銀行郵局']) ? "'" . mysqli_real_escape_string($連接, $_POST['銀行郵局']) . "'" : "NULL";
+    $分行 = !empty($_POST['分行']) ? "'" . mysqli_real_escape_string($連接, $_POST['分行']) . "'" : "NULL";
+    $戶名 = !empty($_POST['戶名']) ? "'" . mysqli_real_escape_string($連接, $_POST['戶名']) . "'" : "NULL";
+    $帳號 = !empty($_POST['帳號']) ? "'" . mysqli_real_escape_string($連接, $_POST['帳號']) . "'" : "NULL"; // 修改此處，將帳戶改為帳號
+    $票號 = !empty($_POST['票號']) ? "'" . mysqli_real_escape_string($連接, $_POST['票號']) . "'" : "NULL";
+    $到期日 = !empty($_POST['到期日']) ? "'" . mysqli_real_escape_string($連接, $_POST['到期日']) . "'" : "NULL";
+    $預支金額 = !empty($_POST['預支金額']) ? "'" . mysqli_real_escape_string($連接, $_POST['預支金額']) . "'" : "NULL";
+
+    // 開始事務處理
+    mysqli_begin_transaction($連接);
+
+    try {
+        // 生成新的流水號
+        $流水號 = generateSerialNumber($連接);
+
+        // 插入資料，包括 `count`
+        $insert_record_sql = "INSERT INTO pay_table 
+            (`count`, 受款人, 填表日期, 付款日期, 支出項目, 活動名稱, 專案日期, 獎學金人數, 專案名稱, 主題, 獎學金日期, 經濟扶助, 其他項目, 說明, 支付方式, 國字金額, 國字金額_hidden, 簽收金額, 簽收人, 簽收日, 銀行郵局, 分行, 戶名, 帳號, 票號, 到期日, 預支金額)
+            VALUES 
+            ('$流水號', '$受款人', '$填表日期', $付款日期, '$支出項目', $活動名稱, $專案日期, $獎學金人數, $專案名稱, $主題, $獎學金日期, $經濟扶助, $其他項目, '$說明', '$支付方式', '$國字金額', '$國字金額_hidden', $簽收金額, $簽收人, $簽收日, $銀行郵局, $分行, $戶名, $帳號, $票號, $到期日, $預支金額)";
+
+        if (!mysqli_query($連接, $insert_record_sql)) {
+            // 如果插入失敗且是因為重複的 `count`，則重試
+            if (mysqli_errno($連接) == 1062) { // 1062 是 Duplicate entry 錯誤碼
+                // 重新生成流水號並重試
+                mysqli_rollback($連接);
+                // 開始新的事務
+                mysqli_begin_transaction($連接);
+                $流水號 = generateSerialNumber($連接);
+                $insert_record_sql = "INSERT INTO pay_table 
+                    (`count`, 受款人, 填表日期, 付款日期, 支出項目, 活動名稱, 專案日期, 獎學金人數, 專案名稱, 主題, 獎學金日期, 經濟扶助, 其他項目, 說明, 支付方式, 國字金額, 國字金額_hidden, 簽收金額, 簽收人, 簽收日, 銀行郵局, 分行, 戶名, 帳號, 票號, 到期日, 預支金額)
+                    VALUES 
+                    ('$流水號', '$受款人', '$填表日期', $付款日期, '$支出項目', $活動名稱, $專案日期, $獎學金人數, $專案名稱, $主題, $獎學金日期, $經濟扶助, $其他項目, '$說明', '$支付方式', '$國字金額', '$國字金額_hidden', $簽收金額, $簽收人, $簽收日, $銀行郵局, $分行, $戶名, $帳號, $票號, $到期日, $預支金額)";
+
+                if (!mysqli_query($連接, $insert_record_sql)) {
+                    throw new Exception("插入資料失敗: " . mysqli_error($連接));
+                }
+            } else {
+                throw new Exception("插入資料失敗: " . mysqli_error($連接));
+            }
+        }
+
+        // 提交事務
+        mysqli_commit($連接);
+
+        echo "表單已成功提交!!<br>";
+        header("Location: ll1.html");
+        exit(); // 確保停止執行後續代碼
+
+    } catch (Exception $e) {
+        // 發生錯誤時回滾事務
+        mysqli_rollback($連接);
+        die($e->getMessage());
+    }
+}
+
+// 關閉資料庫連接
+mysqli_close($連接);
+?>
