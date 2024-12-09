@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>預表單</title>
+     <style>
+    :root {
+        /* 色彩定義 */
+        --primary-color: #4A90E2; /* 天藍色 */
+        --secondary-color: #50E3C2; /* 淺綠色 */
+        --accent-color-1: #F5A623; /* 橙色 */
+        --accent-color-2: #9013FE; /* 紫色 */
+        --background-color: #F0F4F8; /* 淺灰背景 */
+        --card-background-color: rgba(255, 255, 255, 0.95); /* 半透明白色 */
+        --input-border-color: #CCCCCC; /* 淺灰邊框 */
+        --input-focus-border-color: var(--primary-color); /* 聚焦邊框 */
+        --button-background-color: var(--primary-color); /* 按鈕主色 */
+        --button-hover-background-color: #357ABD; /* 按鈕懸停色 */
+        --label-color: #333333; /* 深灰標籤 */
+        --text-color: #333333; /* 深灰文字 */
+        --border-color: #DDDDDD; /* 淺灰邊框 */
+        --error-color: red; /* 錯誤訊息紅色 */
+        --transition-speed: 0.3s;
+        --font-family: 'Poppins', sans-serif;
+    }
+
+    * {
+        box-sizing: border-box;
+    }
+
+    body {
+        font-family: var(--font-family);
+        background-color: var(--background-color);
+        background-image: url('background-pattern.png'); /* 背景圖案 */
+        background-size: cover;
+        background-repeat: no-repeat;
+        background-position: center;
+        padding: 20px;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 100vh;
+        color: var(--text-color);
+    }
+
+    .container {
+        width: 100%;
+        max-width: 800px;
+        padding: 60px;
+        background: var(--card-background-color);
+        border-radius: 20px;
+        box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+        border: 1px solid var(--border-color);
+        backdrop-filter: blur(10px);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .container::before {
+        content: '';
+        position: absolute;
+        top: -50px;
+        right: -50px;
+        width: 150px;
+        height: 150px;
+        background: var(--accent-color-1);
+        border-radius: 50%;
+        opacity: 0.2;
+    }
+
+    .container::after {
+        content: '';
+        position: absolute;
+        bottom: -50px;
+        left: -50px;
+        width: 150px;
+        height: 150px;
+        background: var(--accent-color-2);
+        border-radius: 50%;
+        opacity: 0.2;
+    }
+
+    h1 {
+        text-align: center;
+        color: var(--primary-color);
+        margin-bottom: 40px;
+        font-size: 2.5rem; /* 增大標題字體大小 */
+        font-weight: 700;
+    }
+
+    form {
+        display: flex;
+        flex-direction: column;
+        gap: 30px;
+    }
+
+    .form-group {
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+    }
+
+    .form-group label {
+        margin-bottom: 10px;
+        font-weight: 600;
+        color: var(--label-color); /* 保持標籤顏色為深灰 */
+        font-size: 1.1rem;
+    }
+
+    input,
+    select,
+    textarea {
+        padding: 16px 18px;
+        font-size: 1rem;
+        border-radius: 10px;
+        border: 1px solid var(--input-border-color);
+        background-color: #FFFFFF;
+        transition: border-color var(--transition-speed), box-shadow var(--transition-speed);
+        width: 100%;
+    }
+
+    input::placeholder,
+    select option,
+    textarea::placeholder {
+        color: #AAAAAA;
+    }
+
+    input:focus,
+    select:focus,
+    textarea:focus {
+        border-color: var(--input-focus-border-color);
+        box-shadow: 0 0 8px rgba(74, 144, 226, 0.5);
+        outline: none;
+    }
+
+    input[type="checkbox"],
+    input[type="radio"] {
+        width: auto;
+        margin-right: 10px;
+    }
+
+    .form-group .option-group {
+        display: flex;
+        align-items: center;
+    }
+
+    .form-group .option-group label {
+        margin-right: 20px;
+        font-weight: 500;
+    }
+
+    .conditional-group {
+        display: none;
+        padding: 25px;
+        border: 1px solid var(--border-color);
+        border-radius: 10px;
+        background-color: #FFFFFF;
+        margin-top: 20px;
+        transition: all var(--transition-speed) ease;
+    }
+
+    button {
+        padding: 16px 18px;
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: #FFFFFF;
+        background-color: var(--button-background-color);
+        border: none;
+        border-radius: 10px;
+        cursor: pointer;
+        transition: background-color var(--transition-speed), transform 0.2s;
+        width: 100%;
+    }
+
+    button:hover {
+        background-color: var(--button-hover-background-color);
+        transform: translateY(-3px);
+    }
+
+    /* 統一勾選欄位的樣式 */
+    .form-group input[type="checkbox"],
+    .form-group input[type="radio"] {
+        margin-right: 10px;
+    }
+
+    .form-group .option-group {
+        display: flex;
+        align-items: center;
+    }
+
+    .form-group .option-group label {
+        margin-right: 20px;
+        font-weight: 500;
+    }
+
+    /* 錯誤訊息樣式 */
+    .error-message {
+        color: var(--error-color);
+        font-size: 0.9rem;
+        margin-top: 5px;
+        display: none;
+    }
+
+    /* 響應式設計 */
+    @media (max-width: 768px) {
+        .container {
+            padding: 40px 30px;
+        }
+
+        h1 {
+            font-size: 2rem; /* 調整小螢幕下的標題字體大小 */
+        }
+    }
+
+    @media (max-width: 480px) {
+        .container {
+            padding: 30px 20px;
+        }
+
+        h1 {
+            font-size: 1.8rem; /* 進一步調整標題字體大小 */
+        }
+    }
+
+  
+	/* 模態框的樣式 */
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 1000;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+      justify-content: center;
+      align-items: center;
+    }
+    .modal-content {
+      background: #fff;
+      padding: 20px;
+      border-radius: 10px;
+      text-align: center;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    }
+    .modal-buttons button {
+      padding: 10px 20px;
+      margin-top: 20px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    .modal-buttons button:hover {
+      background-color: #0056b3;
+    }
+	
+	 .hidden {
+            display: none;
+        }
+    </style>
+	
+	
+</head>
+<body>
+<div class="container">
+    <h1>財團法人台北市失親兒福利基金會</h1>
+    <form id="mainForm">
+        <!-- 選擇表單 -->
+        <div class="form-group">
+             <label for="選擇表單">選擇表單：<span class="required-star">*</span></label>
+          <select id="選擇表單" name="選擇表單" onchange="toggleFormSections()" required>
+                <option value="">請選擇</option>
+                <option value="支出核銷">支出核銷</option>
+                <option value="報帳表單">支出報帳</option>
+            </select>
+        </div>
+		
+
+        <!-- 支出核銷區域 -->
+        <div id="支出核銷區域" class="hidden">
+            <div class="form-group">
+                <label for="單號">單號查詢：</label>
+                <input type="text" id="單號" name="單號" placeholder="請輸入單號">
+            </div>
+        </div>
+
+        <!-- 報帳表單區域 -->
+        <div id="報帳表單區域" class="hidden">
+            <div class="form-group">
+                <label for="受款人">受款人姓名：</label>
+                <input type="text" id="受款人" name="受款人" placeholder="請輸入受款人姓名">
+            </div>
+
+            <div class="form-group">
+                <label for="填表日期">填表日期：</label>
+                <input type="date" id="填表日期" name="填表日期">
+            </div>
+
+            <div class="form-group">
+                <label for="金額">金額：</label>
+                <input type="number" id="金額" name="金額" placeholder="請輸入金額">
+            </div>
+
+            <div class="form-group">
+                <label for="說明">說明：</label>
+                <textarea id="說明" name="說明" placeholder="請輸入說明"></textarea>
+            </div>
+			
+			
+
+        </div>
+
+        <button type="submit">提交</button>
+    </form>
+</div>
+
+<script>
+    function toggleFormSections() {
+        const formSelection = document.getElementById('選擇表單').value;
+        const 支出核銷區域 = document.getElementById('支出核銷區域');
+        const 報帳表單區域 = document.getElementById('報帳表單區域');
+
+        // 顯示對應的表單區域，隱藏其他區域
+        支出核銷區域.classList.toggle('hidden', formSelection !== '支出核銷');
+        報帳表單區域.classList.toggle('hidden', formSelection !== '報帳表單');
+    }
+
+    document.getElementById('mainForm').addEventListener('submit', function (event) {
+        event.preventDefault();
+        alert('表單提交成功！');
+        this.reset();
+        toggleFormSections();
+    });
+</script>
+</body>
+</html>
