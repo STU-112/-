@@ -30,12 +30,21 @@ $result = $db_link_預支->query($sql);
 if ($result && $result->num_rows > 0) {
     echo "
     <style>
-        body {
+	
+	* {
             margin: 0;
-            font-family: Arial, sans-serif;
-            background: linear-gradient(to bottom, #e8dff2, #f5e8fc); /* 淡紫色漸層 */
+            padding: 0;
+            box-sizing: border-box;
+        }
+	 body {
+            height: 100%;
+            width: 100%;
+            font-family: 'Noto Sans TC', Arial, sans-serif;
+			background: linear-gradient(to bottom, #e8dff2, #f5e8fc); /* 淡紫色漸層 */
             color: #333;
         }
+	
+        
         .header {
             display: flex;
             background-color: rgb(220, 236, 245);
@@ -88,7 +97,7 @@ if ($result && $result->num_rows > 0) {
             font-weight: bold;
         }
         .banner {
-            width: 1495px;
+            width: 100%;
             background: linear-gradient(to bottom, #e8dff2, #f5e8fc); /* 淡紫色漸層 */
             color: #333;
             display: flex;
@@ -107,9 +116,10 @@ if ($result && $result->num_rows > 0) {
             color: #007bff; /* 當滑鼠懸停時變換顏色 */
         }
     </style>";
-    echo "
-    <div class='banner'>
-        <a style='align-items: right;' href='申請紀錄.php'>審查紀錄</a>
+   echo "
+    <div class='banner' style='gap: 20px;'>
+		<a href='督導審查紀錄.php'>審查紀錄</a>
+		<a href='登入.html'>登出</a>
     </div>";
 
     echo "<table>";

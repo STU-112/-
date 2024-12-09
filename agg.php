@@ -1,4 +1,5 @@
-<?php 
+
+<?php   
 // 連接資料庫
 $server = 'localhost:3307'; // 伺服器名稱
 $用戶名 = 'root'; // 用戶名
@@ -16,7 +17,7 @@ if (!$連接) {
 // 檢查資料庫是否已存在，若不存在則創建
 $sql = "CREATE DATABASE IF NOT EXISTS `$資料庫`";
 if (mysqli_query($連接, $sql)) {
-    //echo "資料庫已存在或創建成功!!<br>";
+    // 資料庫已存在或創建成功
 } else {
     die("創建資料庫失敗: " . mysqli_error($連接) . "<br>");
 }
@@ -26,18 +27,14 @@ if (!mysqli_select_db($連接, $資料庫)) {
     die("選擇資料庫失敗: " . mysqli_error($連接) . "<br>");
 }
 
-// 創建資料表（根據上述修改後的結構）
+// 創建資料表（根據修改後的結構）
 $create_table_sql = "CREATE TABLE IF NOT EXISTS pay_table (
     `count` VARCHAR(50) NOT NULL UNIQUE,
     受款人 VARCHAR(50),
     填表日期 DATE DEFAULT NULL,
     付款日期 DATE DEFAULT NULL,
     支出項目 VARCHAR(50),
-	
-	其他 CHAR(10) DEFAULT NULL,
-	跨部門費用歸屬 CHAR(50) DEFAULT NULL,
-    
-	活動名稱 VARCHAR(50) DEFAULT NULL,
+    活動名稱 VARCHAR(50) DEFAULT NULL,
     專案日期 DATE DEFAULT NULL,
     獎學金人數 INT DEFAULT NULL,
     專案名稱 CHAR(10) DEFAULT NULL,
@@ -55,15 +52,15 @@ $create_table_sql = "CREATE TABLE IF NOT EXISTS pay_table (
     銀行郵局 CHAR(10) DEFAULT NULL,
     分行 CHAR(10) DEFAULT NULL,
     戶名 CHAR(10) DEFAULT NULL,
-    帳戶 CHAR(10) DEFAULT NULL,
+    帳號 CHAR(10) DEFAULT NULL, /* 修改此處，將帳戶改為帳號 */
     票號 CHAR(10) DEFAULT NULL,
     到期日 DATE DEFAULT NULL,
-    預收金額 DECIMAL(10,2) DEFAULT NULL,
+    預支金額 DECIMAL(10,2) DEFAULT NULL,
     PRIMARY KEY (`count`)
 ) ENGINE=InnoDB"; // 使用 InnoDB 以支援事務
 
 if (mysqli_query($連接, $create_table_sql)) {
-    //echo "支用資料表創建成功或已存在!!<br>";
+    // 資料表創建成功或已存在
 } else {
     die("創建支用資料表失敗: " . mysqli_error($連接) . "<br>");
 }
@@ -112,9 +109,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $填表日期 = mysqli_real_escape_string($連接, $_POST['填表日期']);
     $付款日期 = !empty($_POST['付款日期']) ? "'" . mysqli_real_escape_string($連接, $_POST['付款日期']) . "'" : "NULL";
     $支出項目 = mysqli_real_escape_string($連接, $_POST['支出項目']);
-	$其他 = !empty($_POST['其他']) ? "'" . mysqli_real_escape_string($連接, $_POST['其他']) . "'" : "NULL";
-	$跨部門費用歸屬 = !empty($_POST['跨部門費用歸屬']) ? "'" . mysqli_real_escape_string($連接, $_POST['跨部門費用歸屬']) . "'" : "NULL";
-	$活動名稱 = !empty($_POST['活動名稱']) ? "'" . mysqli_real_escape_string($連接, $_POST['活動名稱']) . "'" : "NULL";
+    $活動名稱 = !empty($_POST['活動名稱']) ? "'" . mysqli_real_escape_string($連接, $_POST['活動名稱']) . "'" : "NULL";
     $專案日期 = !empty($_POST['專案日期']) ? "'" . mysqli_real_escape_string($連接, $_POST['專案日期']) . "'" : "NULL";
     $獎學金人數 = !empty($_POST['獎學金人數']) ? intval($_POST['獎學金人數']) : "NULL";
     $專案名稱 = !empty($_POST['專案名稱']) ? "'" . mysqli_real_escape_string($連接, $_POST['專案名稱']) . "'" : "NULL";
@@ -126,16 +121,17 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $支付方式 = mysqli_real_escape_string($連接, $_POST['支付方式']);
     $國字金額 = isset($_POST['國字金額']) ? mysqli_real_escape_string($連接, $_POST['國字金額']) : '';
     $國字金額_hidden = isset($_POST['國字金額_hidden']) ? mysqli_real_escape_string($連接, $_POST['國字金額_hidden']) : '';
+
     $簽收金額 = !empty($_POST['簽收金額']) ? "'" . mysqli_real_escape_string($連接, $_POST['簽收金額']) . "'" : "NULL";
     $簽收人 = !empty($_POST['簽收人']) ? "'" . mysqli_real_escape_string($連接, $_POST['簽收人']) . "'" : "NULL";
     $簽收日 = !empty($_POST['簽收日']) ? "'" . mysqli_real_escape_string($連接, $_POST['簽收日']) . "'" : "NULL";
     $銀行郵局 = !empty($_POST['銀行郵局']) ? "'" . mysqli_real_escape_string($連接, $_POST['銀行郵局']) . "'" : "NULL";
     $分行 = !empty($_POST['分行']) ? "'" . mysqli_real_escape_string($連接, $_POST['分行']) . "'" : "NULL";
     $戶名 = !empty($_POST['戶名']) ? "'" . mysqli_real_escape_string($連接, $_POST['戶名']) . "'" : "NULL";
-    $帳戶 = !empty($_POST['帳戶']) ? "'" . mysqli_real_escape_string($連接, $_POST['帳戶']) . "'" : "NULL";
+    $帳號 = !empty($_POST['帳號']) ? "'" . mysqli_real_escape_string($連接, $_POST['帳號']) . "'" : "NULL"; // 修改此處，將帳戶改為帳號
     $票號 = !empty($_POST['票號']) ? "'" . mysqli_real_escape_string($連接, $_POST['票號']) . "'" : "NULL";
     $到期日 = !empty($_POST['到期日']) ? "'" . mysqli_real_escape_string($連接, $_POST['到期日']) . "'" : "NULL";
-    $預收金額 = !empty($_POST['預收金額']) ? "'" . mysqli_real_escape_string($連接, $_POST['預收金額']) . "'" : "NULL";
+    $預支金額 = !empty($_POST['預支金額']) ? "'" . mysqli_real_escape_string($連接, $_POST['預支金額']) . "'" : "NULL";
 
     // 開始事務處理
     mysqli_begin_transaction($連接);
@@ -146,9 +142,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
         // 插入資料，包括 `count`
         $insert_record_sql = "INSERT INTO pay_table 
-            (`count`, 受款人, 填表日期, 付款日期, 支出項目,其他,跨部門費用歸屬, 活動名稱, 專案日期, 獎學金人數, 專案名稱, 主題, 獎學金日期, 經濟扶助, 其他項目, 說明, 支付方式, 國字金額, 國字金額_hidden, 簽收金額, 簽收人, 簽收日, 銀行郵局, 分行, 戶名, 帳戶, 票號, 到期日, 預收金額)
+            (`count`, 受款人, 填表日期, 付款日期, 支出項目, 活動名稱, 專案日期, 獎學金人數, 專案名稱, 主題, 獎學金日期, 經濟扶助, 其他項目, 說明, 支付方式, 國字金額, 國字金額_hidden, 簽收金額, 簽收人, 簽收日, 銀行郵局, 分行, 戶名, 帳號, 票號, 到期日, 預支金額)
             VALUES 
-            ('$流水號', '$受款人', '$填表日期', $付款日期, '$支出項目',$其他,$跨部門費用歸屬, $活動名稱, $專案日期, $獎學金人數, $專案名稱, $主題, $獎學金日期, $經濟扶助, $其他項目, '$說明', '$支付方式', '$國字金額', '$國字金額_hidden', $簽收金額, $簽收人, $簽收日, $銀行郵局, $分行, $戶名, $帳戶, $票號, $到期日, $預收金額)";
+            ('$流水號', '$受款人', '$填表日期', $付款日期, '$支出項目', $活動名稱, $專案日期, $獎學金人數, $專案名稱, $主題, $獎學金日期, $經濟扶助, $其他項目, '$說明', '$支付方式', '$國字金額', '$國字金額_hidden', $簽收金額, $簽收人, $簽收日, $銀行郵局, $分行, $戶名, $帳號, $票號, $到期日, $預支金額)";
 
         if (!mysqli_query($連接, $insert_record_sql)) {
             // 如果插入失敗且是因為重複的 `count`，則重試
@@ -159,12 +155,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 mysqli_begin_transaction($連接);
                 $流水號 = generateSerialNumber($連接);
                 $insert_record_sql = "INSERT INTO pay_table 
-                    (`count`, 受款人, 填表日期, 付款日期, 支出項目,其他,跨部門費用歸屬, 活動名稱, 專案日期, 獎學金人數, 專案名稱, 主題, 獎學金日期, 經濟扶助, 其他項目, 說明, 支付方式, 國字金額, 國字金額_hidden, 簽收金額, 簽收人, 簽收日, 銀行郵局, 分行, 戶名, 帳戶, 票號, 到期日, 預收金額)
+                    (`count`, 受款人, 填表日期, 付款日期, 支出項目, 活動名稱, 專案日期, 獎學金人數, 專案名稱, 主題, 獎學金日期, 經濟扶助, 其他項目, 說明, 支付方式, 國字金額, 國字金額_hidden, 簽收金額, 簽收人, 簽收日, 銀行郵局, 分行, 戶名, 帳號, 票號, 到期日, 預支金額)
                     VALUES 
-                    ('$流水號', '$受款人', '$填表日期', $付款日期, '$支出項目',$其他,$跨部門費用歸屬, $活動名稱, $專案日期, $獎學金人數, $專案名稱, $主題, $獎學金日期, $經濟扶助, $其他項目, '$說明', '$支付方式', '$國字金額', '$國字金額_hidden', $簽收金額, $簽收人, $簽收日, $銀行郵局, $分行, $戶名, $帳戶, $票號, $到期日, $預收金額)";
-                
-				
-				
+                    ('$流水號', '$受款人', '$填表日期', $付款日期, '$支出項目', $活動名稱, $專案日期, $獎學金人數, $專案名稱, $主題, $獎學金日期, $經濟扶助, $其他項目, '$說明', '$支付方式', '$國字金額', '$國字金額_hidden', $簽收金額, $簽收人, $簽收日, $銀行郵局, $分行, $戶名, $帳號, $票號, $到期日, $預支金額)";
+
                 if (!mysqli_query($連接, $insert_record_sql)) {
                     throw new Exception("插入資料失敗: " . mysqli_error($連接));
                 }
@@ -177,7 +171,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         mysqli_commit($連接);
 
         echo "表單已成功提交!!<br>";
-        header("Location: 申請.html");
+        header("Location: ll1.html");
         exit(); // 確保停止執行後續代碼
 
     } catch (Exception $e) {

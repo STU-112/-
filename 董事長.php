@@ -29,7 +29,38 @@ $result = $db_link_預支->query($sql);
 if ($result && $result->num_rows > 0) {
     echo "
     <style>
-	
+	* {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+	 body {
+            height: 100%;
+            width: 100%;
+            font-family: 'Noto Sans TC', Arial, sans-serif;
+			background: linear-gradient(to bottom, #e8dff2, #f5e8fc); /* 淡紫色漸層 */
+            color: #333;
+        }
+        .header {
+            display: flex;
+            background-color: rgb(220, 236, 245);
+        }
+        .header nav {
+            text-align: right;
+            width: 100%;
+            font-size: 100%;
+            text-indent: 10px;
+        }
+        .header nav a {
+            font-size: 30px;
+            color: rgb(39, 160, 130);
+            text-decoration: none;
+            display: inline-block;
+            line-height: 52px;
+        }
+        .header nav a:hover {
+             background-color: #ffaa00;
+        }
         table {
             width: 80%;
             margin: 20px auto;
@@ -47,6 +78,9 @@ if ($result && $result->num_rows > 0) {
             background-color: #f2f2f2;
             color: #333;
         }
+		tr.second-row {
+    background-color: white; /* 固定背景顏色 */
+}
         tr:nth-child(even) {
             background-color: #f9f9f9;
         }
@@ -58,8 +92,32 @@ if ($result && $result->num_rows > 0) {
             margin: 10px;
             font-weight: bold;
         }
-    </style>
-    ";
+		.banner {
+            width: 100%;
+            background: linear-gradient(to bottom, #e8dff2, #f5e8fc); /* 淡紫色漸層 */
+            color: #333;
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            padding: 10px 20px;
+            box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.2); /* 陰影效果 */
+        }
+        .banner a {
+            color: #5a3d2b;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 1.2em;
+        }
+        .banner a:hover {
+            color: #007bff; /* 當滑鼠懸停時變換顏色 */
+        }
+
+    </style>";
+	echo "
+    <div class='banner' style='gap: 20px;'>
+		<a href='董事長審查紀錄.php'>審查紀錄</a>
+		<a href='登入.html'>登出</a>
+    </div>";
     
     echo "<table>";
     echo "<caption>董事長審核</caption>";
@@ -87,7 +145,7 @@ while ($row = $result->fetch_assoc()) {
         $sql_director_opinion3 = "SELECT 審核意見 FROM 執行長審核意見 WHERE 單號 = '$serial_count' LIMIT 1";
         $execution_result = $db_link_review->query($sql_director_opinion3);
 
-		// 查詢主任審核意見是否存在
+		// 查詢董事長審核意見是否存在
         $sql_director_opinion4 = "SELECT 審核意見 FROM 董事長審核意見 WHERE 單號 = '$serial_count' LIMIT 1";
         $execution_cashier = $db_link_review->query($sql_director_opinion4);
 
@@ -98,20 +156,18 @@ while ($row = $result->fetch_assoc()) {
         $review_row = $review_result->fetch_assoc();
         $opinion1 = $review_row["審核意見"];
 		
-		
-		
 		// 檢查主任是否有審核意見，且執行長尚未審核
     if ($director_result && $director_result->num_rows > 0) {
         $review_row = $director_result->fetch_assoc();
         $opinion2 = $review_row["審核意見"];
 		
-		// 檢查執行長是否有審核意見，且執行長尚未審核
+		// 檢查執行長是否有審核意見，且董事長尚未審核
     if ($execution_result && $execution_result->num_rows > 0) {
         $review_row = $execution_result->fetch_assoc();
         $opinion3 = $review_row["審核意見"];
 		
 		
-        // 如果尚未有出納的審核意見，則顯示這筆資料
+        // 如果尚未有董事長的審核意見，則顯示這筆資料
         if ($execution_cashier && $execution_cashier->num_rows > 0) {
 			continue;
         }
@@ -119,7 +175,7 @@ while ($row = $result->fetch_assoc()) {
             
         
 
-        echo "<tr>";
+        echo "<tr class='second-row'>";
         echo "<td>" . $row["count"] . "</td>";
         echo "<td>" . $row["受款人"] . "</td>";
         echo "<td>" . $row["國字金額"] . "</td>";

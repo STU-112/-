@@ -27,8 +27,40 @@ $result = $db_link_預支->query($sql);
 
 // 顯示資料
 if ($result && $result->num_rows > 0) {
-    echo "
+   echo "
     <style>
+	* {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+	 body {
+            height: 100%;
+            width: 100%;
+            font-family: 'Noto Sans TC', Arial, sans-serif;
+			background: linear-gradient(to bottom, #e8dff2, #f5e8fc); /* 淡紫色漸層 */
+            color: #333;
+        }
+        .header {
+            display: flex;
+            background-color: rgb(220, 236, 245);
+        }
+        .header nav {
+            text-align: right;
+            width: 100%;
+            font-size: 100%;
+            text-indent: 10px;
+        }
+        .header nav a {
+            font-size: 30px;
+            color: rgb(39, 160, 130);
+            text-decoration: none;
+            display: inline-block;
+            line-height: 52px;
+        }
+        .header nav a:hover {
+             background-color: #ffaa00;
+        }
         table {
             width: 80%;
             margin: 20px auto;
@@ -46,6 +78,9 @@ if ($result && $result->num_rows > 0) {
             background-color: #f2f2f2;
             color: #333;
         }
+		tr.second-row {
+    background-color: white; /* 固定背景顏色 */
+}
         tr:nth-child(even) {
             background-color: #f9f9f9;
         }
@@ -57,8 +92,31 @@ if ($result && $result->num_rows > 0) {
             margin: 10px;
             font-weight: bold;
         }
-    </style>
-    ";
+		.banner {
+            width: 100%;
+            background: linear-gradient(to bottom, #e8dff2, #f5e8fc); /* 淡紫色漸層 */
+            color: #333;
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            padding: 10px 20px;
+            box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.2); /* 陰影效果 */
+        }
+        .banner a {
+            color: #5a3d2b;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 1.2em;
+        }
+        .banner a:hover {
+            color: #007bff; /* 當滑鼠懸停時變換顏色 */
+        }
+    </style>";
+	echo "
+    <div class='banner' style='gap: 20px;'>
+		<a href='主任審查紀錄.php'>審查紀錄</a>
+		<a href='登入.html'>登出</a>
+    </div>";
     
     echo "<table>";
     echo "<caption>主任審核</caption>";
@@ -99,7 +157,7 @@ while ($row = $result->fetch_assoc()) {
            
         
 
-        echo "<tr>";
+        echo "<tr class='second-row'>";
         echo "<td>" . $row["count"] . "</td>";
         echo "<td>" . $row["受款人"] . "</td>";
         echo "<td>" . $row["國字金額"] . "</td>";

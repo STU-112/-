@@ -35,8 +35,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
    // 執行 SQL 語句
 if (mysqli_query($db_link, $insert_record_sql)) {
-    echo "<p style='color: green;'>記錄已成功提交！3 秒後將返回督導頁面。</p>";
-    echo "<script>setTimeout(function(){ window.location.href = '督導.php'; }, 3000);</script>";
+    echo "<p style='color: green;'>記錄已成功提交！3 秒後將返回主任頁面。</p>";
+    echo "<script>setTimeout(function(){ window.location.href = '主任.php'; }, 3000);</script>";
 } else {
     if (mysqli_errno($db_link) == 1062) {
         // 1062 是重複鍵的錯誤代碼

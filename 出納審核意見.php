@@ -13,7 +13,7 @@ if ($db_link->connect_error) {
 }
 
 // 創建資料表（如果表不存在）
-$create_table_sql = "CREATE TABLE IF NOT EXISTS 董事長審核意見 (
+$create_table_sql = "CREATE TABLE IF NOT EXISTS 出納審核意見 (
     流水號 INT AUTO_INCREMENT PRIMARY KEY,
     單號 VARCHAR(20) UNIQUE,
     審核意見 TEXT NOT NULL,
@@ -30,23 +30,21 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $status = mysqli_real_escape_string($db_link, $_POST['status']);
 
     // 插入資料 SQL 語句
-    $insert_record_sql = "INSERT INTO 董事長審核意見 (單號, 審核意見, 狀態) 
+    $insert_record_sql = "INSERT INTO 出納審核意見 (單號, 審核意見, 狀態) 
                           VALUES ('$number', '$opinion', '$status')";
 
-    // 執行 SQL 語句
-    if (mysqli_query($db_link, $insert_record_sql)) {
-        echo "<p style='color: green;'>記錄已成功提交！3 秒後將返回上一頁。</p>";
-        echo "<script>setTimeout(function(){ history.back(); }, 3000);</script>";
+   // 執行 SQL 語句
+if (mysqli_query($db_link, $insert_record_sql)) {
+    echo "<p style='color: green;'>記錄已成功提交！3 秒後將返回出納頁面。</p>";
+    echo "<script>setTimeout(function(){ window.location.href = '出納.php'; }, 3000);</script>";
+} else {
+    if (mysqli_errno($db_link) == 1062) {
+        // 1062 是重複鍵的錯誤代碼
+        echo "<p style='color: orange;'>插入失敗：該單號已存在。3 秒後將返回出納頁面。</p>";
+        echo "<script>setTimeout(function(){ window.location.href = '出納.php'; }, 3000);</script>";
     } else {
-        if (mysqli_errno($db_link) == 1062) {
-            // 1062 是重複鍵的錯誤代碼
-			
-			echo "<p style='color: orange;'>插入失敗：該單號已存在。3 秒後將返回上一頁。</p>";
-        echo "<script>setTimeout(function(){ history.back(); }, 3000);</script>";
-           
-        } else {
-            echo "插入記錄失敗: " . mysqli_error($db_link);
-        }
+        echo "插入記錄失敗: " . mysqli_error($db_link);
+    }
     }
 }
 

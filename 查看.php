@@ -19,16 +19,20 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["count"])) {
     $search_count = $_POST["count"];
 }
 
+
 // 查詢資料
 if (!empty($search_count)) {
-    $sql ="SELECT count,受款人,填表日期,付款日期,支出項目,其他,跨部門費用歸屬,活動名稱,專案日期,獎學金人數,專案名稱,主題,獎學金日期,經濟扶助,其他項目,說明,支付方式,國字金額,國字金額_hidden,簽收金額,簽收人,簽收日,銀行郵局,分行,戶名,帳戶,票號,到期日,預收金額 FROM pay_table WHERE count = ?";
-    $stmt = $db_link->prepare($sql);
-    $stmt->bind_param("s", $search_count);
-    $stmt->execute();
-    $result = $stmt->get_result();
-} else {
-    $result = false;
+    $sql = "SELECT count, 受款人, 填表日期, 付款日期, 支出項目, 活動名稱, 專案日期, 獎學金人數, 專案名稱, 主題, 獎學金日期, 經濟扶助, 其他項目, 說明, 支付方式, 國字金額, 國字金額_hidden, 簽收金額, 簽收人, 簽收日, 銀行郵局, 分行, 戶名, 帳號, 票號, 到期日, 預支金額 FROM pay_table WHERE count = ?";
+    
+    if ($stmt = $db_link->prepare($sql)) {
+        $stmt->bind_param("s", $search_count);
+        $stmt->execute();
+        $result = $stmt->get_result();
+    } else {
+        die("SQL 錯誤: " . $db_link->error);
+    }
 }
+
 
 // 處理表單提交（通過或不通過）
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['status']) && isset($_POST['serial_count'])) {
@@ -73,9 +77,6 @@ if ($result && $result->num_rows > 0) {
         "填表日期" => "填表日期",
         "付款日期" => "付款日期",
         "支出項目" => "支出項目",
-        "其他" => "其他",
-        "跨部門費用歸屬" => "跨部門費用歸屬",
-        "活動名稱" => "活動名稱",
         "專案日期" => "專案日期",
         "獎學金人數" => "獎學金人數",
         "專案名稱" => "專案名稱",
@@ -93,10 +94,10 @@ if ($result && $result->num_rows > 0) {
         "銀行郵局" => "銀行/郵局",
         "分行" => "分行",
         "戶名" => "戶名",
-        "帳戶" => "帳戶",
+        "帳號" => "帳號",
         "票號" => "票號",
         "到期日" => "到期日",
-        "預收金額" => "預支金額"
+        "預支金額" => "預支金額"
     ];
     echo "
     <form method='post' action='督導審核意見.php'>
@@ -186,26 +187,27 @@ if ($result && $result->num_rows > 0) {
             background-color: #666;
         }
 		.banner {
-		 width:100%;
-            background: linear-gradient(to bottom, #fbe3c9, #f5d3ab); /* 漸層效果 */
-            color: #5a3d2b;
-            display: flex;
-            justify-content: flex-end;
-            align-items: center;
-            padding: 10px 20px;
-            box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.2); /* 陰影效果 */
-        }
+    width: 100%;
+    background: linear-gradient(to bottom, #fbe3c9, #f5d3ab); /* 漸層效果 */
+    color: #5a3d2b;
+    display: flex;
+    justify-content: flex-start; /* 改為靠左對齊 */
+    align-items: center;
+    padding: 10px 20px;
+    box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.2); /* 陰影效果 */
+}
 
-        .banner a {
-            color: #5a3d2b;
-            text-decoration: none;
-            font-weight: bold;
-            font-size: 1.2em;
-        }
+.banner a {
+    color: #5a3d2b;
+    text-decoration: none;
+    font-weight: bold;
+    font-size: 1.2em;
+}
 
-        .banner a:hover {
+.banner a:hover {
     color: #007bff; /* 當滑鼠懸停時變換顏色 */
-}   
+}
+
     </style>
 	
     <div class='banner'>
@@ -235,8 +237,7 @@ if ($result && $result->num_rows > 0) {
 }
 
 
-
-
-
+$stmt->close();
 $db_link->close();
+
 ?>

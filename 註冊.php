@@ -66,8 +66,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 <meta name="viewport" content="width=device-width, initial-scale=1.0">
                 <title>註冊成功</title>
                 <style>
-				
-				
                     body {
                         font-family: Arial, sans-serif;
                         background-color: #f4f4f4;
@@ -108,7 +106,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                         countdown.textContent = seconds;
                         if (seconds <= 0) {
                             clearInterval(interval);
-                            window.location.href = "登入.html";
+                            window.location.href = "系統管理員.html";
                         }
                     }, 1000);
                 </script>
