@@ -20,10 +20,6 @@ if ($db_link_review->connect_error) {
 }
 
 
-
-
-
-
 // 初始化搜尋條件
 $search_serial = isset($_GET['search_serial']) ? $_GET['search_serial'] : '';
 $search_item = isset($_GET['search_item']) ? $_GET['search_item'] : '';
@@ -42,12 +38,6 @@ if (!empty($search_item)) {
 
 $result = $db_link_預支->query($sql);
 
-
-
-
-
-
-
 // 顯示資料
 if ($result && $result->num_rows > 0) {
     echo "
@@ -64,26 +54,7 @@ if ($result && $result->num_rows > 0) {
 			background: linear-gradient(to bottom, #e8dff2, #f5e8fc); /* 淡紫色漸層 */
             color: #333;
         }
-        .header {
-            display: flex;
-            background-color: rgb(220, 236, 245);
-        }
-        .header nav {
-            text-align: right;
-            width: 100%;
-            font-size: 100%;
-            text-indent: 10px;
-        }
-        .header nav a {
-            font-size: 30px;
-            color: rgb(39, 160, 130);
-            text-decoration: none;
-            display: inline-block;
-            line-height: 52px;
-        }
-        .header nav a:hover {
-             background-color: #ffaa00;
-        }
+       
         table {
             width: 80%;
             margin: 20px auto;
@@ -139,7 +110,7 @@ if ($result && $result->num_rows > 0) {
 		
  echo "
     <div class='banner'>
-        <a style='align-items: left;' href='執行長.php'>◀</a>
+        <a style='align-items: left;' href='董事長.php'>◀</a>
     </div>";
 	
 	

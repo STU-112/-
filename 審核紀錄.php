@@ -20,10 +20,6 @@ if ($db_link_review->connect_error) {
 }
 
 
-
-
-
-
 // 初始化搜尋條件
 $search_serial = isset($_GET['search_serial']) ? $_GET['search_serial'] : '';
 $search_item = isset($_GET['search_item']) ? $_GET['search_item'] : '';
@@ -64,7 +60,26 @@ if ($result && $result->num_rows > 0) {
 			background: linear-gradient(to bottom, #e8dff2, #f5e8fc); /* 淡紫色漸層 */
             color: #333;
         }
-        
+        .header {
+            display: flex;
+            background-color: rgb(220, 236, 245);
+        }
+        .header nav {
+            text-align: right;
+            width: 100%;
+            font-size: 100%;
+            text-indent: 10px;
+        }
+        .header nav a {
+            font-size: 30px;
+            color: rgb(39, 160, 130);
+            text-decoration: none;
+            display: inline-block;
+            line-height: 52px;
+        }
+        .header nav a:hover {
+             background-color: #ffaa00;
+        }
         table {
             width: 80%;
             margin: 20px auto;
@@ -83,8 +98,8 @@ if ($result && $result->num_rows > 0) {
             color: #333;
         }
 		tr.second-row {
-    background-color: white; /* 固定背景顏色 */
-}
+			background-color: white; /* 固定背景顏色 */
+		}
         tr:nth-child(even) {
             background-color: #f9f9f9;
         }
@@ -101,7 +116,7 @@ if ($result && $result->num_rows > 0) {
             background: linear-gradient(to bottom, #e8dff2, #f5e8fc); /* 淡紫色漸層 */
             color: #333;
             display: flex;
-           justify-content: flex-start;
+            justify-content: flex-end;
             align-items: center;
             padding: 10px 20px;
             box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.2); /* 陰影效果 */
@@ -116,18 +131,16 @@ if ($result && $result->num_rows > 0) {
             color: #007bff; /* 當滑鼠懸停時變換顏色 */
         }
 
+		
     </style>";
 		
- echo "
-    <div class='banner'>
-        <a style='align-items: left;' href='督導.php'>◀</a>
+echo "<div class='banner'>
+        <a style='align-items: left;' href='申請紀錄.php'>◀</a>
     </div>";
-	
-	
 	
 
     echo "<table>";
-    echo "<caption>督導已審查紀錄</caption>";
+    echo "<caption>申請紀錄</caption>";
     echo "<tr>";
     echo "<th>單號</th><th>受款人</th><th>金額</th><th>填表日期</th><th>支出項目</th><th>審核狀態</th><th>操作</th>";
     echo "</tr>";
@@ -258,13 +271,12 @@ echo "
         </td>";
         echo "</tr>";
 
-        // 釋放結果集
-        $review_result->free();
+        
     }
     echo "</table>";
 } else {
     echo "<p style='text-align:center;'>沒有資料可顯示。</p>";
-}
+}	
 
 // 關閉資料庫連線
 $db_link_預支->close();

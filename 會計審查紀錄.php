@@ -20,17 +20,13 @@ if ($db_link_review->connect_error) {
 }
 
 
-
-
-
-
 // 初始化搜尋條件
 $search_serial = isset($_GET['search_serial']) ? $_GET['search_serial'] : '';
 $search_item = isset($_GET['search_item']) ? $_GET['search_item'] : '';
 
 // 查詢 pay_table 資料
 $sql = "SELECT `count`, 受款人, 支出項目, 填表日期, 國字金額 
-        FROM pay_table WHERE 國字金額 IS NOT NULL";
+        FROM pay_table";
 
 // 加入搜尋條件
 if (!empty($search_serial)) {
@@ -41,12 +37,6 @@ if (!empty($search_item)) {
 }
 
 $result = $db_link_預支->query($sql);
-
-
-
-
-
-
 
 // 顯示資料
 if ($result && $result->num_rows > 0) {
@@ -64,7 +54,7 @@ if ($result && $result->num_rows > 0) {
 			background: linear-gradient(to bottom, #e8dff2, #f5e8fc); /* 淡紫色漸層 */
             color: #333;
         }
-        
+       
         table {
             width: 80%;
             margin: 20px auto;
@@ -120,16 +110,16 @@ if ($result && $result->num_rows > 0) {
 		
  echo "
     <div class='banner'>
-        <a style='align-items: left;' href='督導.php'>◀</a>
+        <a style='align-items: left;' href='會計.php'>◀</a>
     </div>";
 	
 	
 	
 
     echo "<table>";
-    echo "<caption>督導已審查紀錄</caption>";
+    echo "<caption>會計已審查紀錄</caption>";
     echo "<tr>";
-    echo "<th>單號</th><th>受款人</th><th>金額</th><th>填表日期</th><th>支出項目</th><th>審核狀態</th><th>操作</th>";
+    echo"<th>單號</th><th>受款人</th><th>金額</th><th>填表日期</th><th>支出項目</th><th>審核狀態</th><th>操作</th>";
     echo "</tr>";
 	
 	// 顯示搜尋表單
@@ -270,3 +260,4 @@ echo "
 $db_link_預支->close();
 $db_link_review->close();
 ?>
+
