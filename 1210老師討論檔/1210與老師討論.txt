@@ -1,0 +1,1207 @@
+<!DOCTYPE html>   
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>預表單</title>
+    <style>
+    :root {
+        /* 色彩定義 */
+        --primary-color: #4A90E2; /* 天藍色 */
+        --secondary-color: #50E3C2; /* 淺綠色 */
+        --accent-color-1: #F5A623; /* 橙色 */
+        --accent-color-2: #9013FE; /* 紫色 */
+        --background-color: #F0F4F8; /* 淺灰背景 */
+        --card-background-color: rgba(255, 255, 255, 0.95); /* 半透明白色 */
+        --input-border-color: #CCCCCC; /* 淺灰邊框 */
+        --input-focus-border-color: var(--primary-color); /* 聚焦邊框 */
+        --button-background-color: var(--primary-color); /* 按鈕主色 */
+        --button-hover-background-color: #357ABD; /* 按鈕懸停色 */
+        --label-color: #333333; /* 深灰標籤 */
+        --text-color: #333333; /* 深灰文字 */
+        --border-color: #DDDDDD; /* 淺灰邊框 */
+        --error-color: red; /* 錯誤訊息紅色 */
+        --transition-speed: 0.3s;
+        --font-family: 'Poppins', sans-serif;
+    }
+
+    * {
+        box-sizing: border-box;
+    }
+
+    body {
+        font-family: var(--font-family);
+        background-color: var(--background-color);
+        background-image: url('background-pattern.png'); /* 背景圖案 */
+        background-size: cover;
+        background-repeat: no-repeat;
+        background-position: center;
+        padding: 20px;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 100vh;
+        color: var(--text-color);
+    }
+
+    .container {
+        width: 100%;
+        max-width: 800px;
+        padding: 60px;
+        background: var(--card-background-color);
+        border-radius: 20px;
+        box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+        border: 1px solid var(--border-color);
+        backdrop-filter: blur(10px);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .container::before {
+        content: '';
+        position: absolute;
+        top: -50px;
+        right: -50px;
+        width: 150px;
+        height: 150px;
+        background: var(--accent-color-1);
+        border-radius: 50%;
+        opacity: 0.2;
+    }
+
+    .container::after {
+        content: '';
+        position: absolute;
+        bottom: -50px;
+        left: -50px;
+        width: 150px;
+        height: 150px;
+        background: var(--accent-color-2);
+        border-radius: 50%;
+        opacity: 0.2;
+    }
+
+    h1 {
+        text-align: center;
+        color: var(--primary-color);
+        margin-bottom: 40px;
+        font-size: 2.5rem; /* 增大標題字體大小 */
+        font-weight: 700;
+    }
+
+    form {
+        display: flex;
+        flex-direction: column;
+        gap: 30px;
+    }
+
+    .form-group {
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+    }
+
+    .form-group label {
+        margin-bottom: 10px;
+        font-weight: 600;
+        color: var(--label-color); /* 保持標籤顏色為深灰 */
+        font-size: 1.1rem;
+    }
+
+    input,
+    select,
+    textarea {
+        padding: 16px 18px;
+        font-size: 1rem;
+        border-radius: 10px;
+        border: 1px solid var(--input-border-color);
+        background-color: #FFFFFF;
+        transition: border-color var(--transition-speed), box-shadow var(--transition-speed);
+        width: 100%;
+    }
+
+    input::placeholder,
+    select option,
+    textarea::placeholder {
+        color: #AAAAAA;
+    }
+
+    input:focus,
+    select:focus,
+    textarea:focus {
+        border-color: var(--input-focus-border-color);
+        box-shadow: 0 0 8px rgba(74, 144, 226, 0.5);
+        outline: none;
+    }
+
+    input[type="checkbox"],
+    input[type="radio"] {
+        width: auto;
+        margin-right: 10px;
+    }
+
+    .form-group .option-group {
+        display: flex;
+        align-items: center;
+    }
+
+    .form-group .option-group label {
+        margin-right: 20px;
+        font-weight: 500;
+    }
+
+    .conditional-group {
+        display: none;
+        padding: 25px;
+        border: 1px solid var(--border-color);
+        border-radius: 10px;
+        background-color: #FFFFFF;
+        margin-top: 20px;
+        transition: all var(--transition-speed) ease;
+    }
+
+    button {
+        padding: 16px 18px;
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: #FFFFFF;
+        background-color: var(--button-background-color);
+        border: none;
+        border-radius: 10px;
+        cursor: pointer;
+        transition: background-color var(--transition-speed), transform 0.2s;
+        width: 100%;
+    }
+
+    button:hover {
+        background-color: var(--button-hover-background-color);
+        transform: translateY(-3px);
+    }
+
+    /* 統一勾選欄位的樣式 */
+    .form-group input[type="checkbox"],
+    .form-group input[type="radio"] {
+        margin-right: 10px;
+    }
+
+    .form-group .option-group {
+        display: flex;
+        align-items: center;
+    }
+
+    .form-group .option-group label {
+        margin-right: 20px;
+        font-weight: 500;
+    }
+
+    /* 錯誤訊息樣式 */
+    .error-message {
+        color: var(--error-color);
+        font-size: 0.9rem;
+        margin-top: 5px;
+        display: none;
+    }
+
+    /* 響應式設計 */
+    @media (max-width: 768px) {
+        .container {
+            padding: 40px 30px;
+        }
+
+        h1 {
+            font-size: 2rem; /* 調整小螢幕下的標題字體大小 */
+        }
+    }
+
+    @media (max-width: 480px) {
+        .container {
+            padding: 30px 20px;
+        }
+
+        h1 {
+            font-size: 1.8rem; /* 進一步調整標題字體大小 */
+        }
+    }
+
+    /* 模態框樣式 */
+    .modal {
+        display: none; /* 隱藏模態框 */
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        overflow: auto;
+        background-color: rgba(0,0,0,0.5); /* 半透明背景 */
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .modal-content {
+        background-color: #fff;
+        padding: 20px;
+        border-radius: 10px;
+        width: 90%;
+        max-width: 400px;
+        text-align: center;
+        position: relative;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    }
+
+    .modal-content h2 {
+        margin-top: 0;
+        color: var(--primary-color);
+        font-size: 1.5rem;
+    }
+
+    .modal-content p {
+        color: var(--text-color);
+        margin: 20px 0;
+        font-size: 1rem;
+    }
+
+    .modal-content .modal-buttons {
+        display: flex;
+        justify-content: center;
+    }
+
+    .modal-content button {
+        padding: 10px 20px;
+        font-size: 1rem;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        margin: 0 10px;
+    }
+
+    .modal-content .close-btn {
+        background-color: var(--button-background-color);
+        color: #fff;
+    }
+
+    .modal-content .close-btn:hover {
+        background-color: var(--button-hover-background-color);
+    }
+
+    .success-modal {
+        /* 與一般模態框相同樣式 */
+    }
+
+    /* 新增錯誤邊框樣式 */
+    .input-error {
+        border-color: var(--error-color) !important;
+        box-shadow: 0 0 8px rgba(255, 0, 0, 0.2);
+    }
+    </style>
+</head>
+<body>
+
+  <div class="container">
+    <div class="form-container" aria-labelledby="formTitle">
+      <form id="paymentForm" action="agg.php" method="POST" enctype="multipart/form-data" novalidate>
+        <h1>財團法人台北市失親兒福利基金會</h1>
+
+        <!-- 受款人姓名 -->
+        <div class="form-group">
+          <label for="受款人">受款人姓名：<span class="required-star">*</span></label>
+          <input type="text" id="受款人" name="受款人" placeholder="請輸入受款人姓名" required>
+          <span class="error-message" id="受款人-error"></span>
+        </div>
+
+        <!-- 填表日期 -->
+        <div class="form-group">
+          <label for="填表日期">填表日期：<span class="required-star">*</span></label>
+          <input type="date" id="填表日期" name="填表日期" required>
+          <span class="error-message" id="填表日期-error"></span>
+        </div>
+
+        <!-- 付款日期 -->
+        <div class="form-group">
+          <label for="付款日期">付款日期：<span class="required-star">*</span></label>
+          <input type="date" id="付款日期" name="付款日期" required>
+          <span class="error-message" id="付款日期-error"></span>
+        </div>
+
+        <!-- 支出項目選擇 -->
+        <div class="form-group">
+          <label for="支出項目">請選擇支出項目：<span class="required-star">*</span></label>
+          <select id="支出項目" name="支出項目" onchange="updateConditionalFields()" required>
+            <option value="">請選擇</option>
+            <option value="活動費用">活動費用</option>
+            <option value="獎學金">獎學金</option>
+            <option value="經濟扶助">經濟扶助</option>
+            <option value="其他">其他</option>
+          </select>
+          <span class="error-message" id="支出項目-error"></span>
+        </div>
+
+        <!-- 活動費用欄位 -->
+        <div id="活動費用欄位" class="conditional-group" style="display:none;">
+          <div class="form-group">
+            <label for="專案活動">(專案)活動名稱：<span class="required-star">*</span></label>
+            <select id="專案活動" name="專案活動" required>
+              <option value="">請選擇</option>
+              <option value="半日/一日型">半日/一日型：EX:方案活動</option>
+              <option value="過夜型">過夜型：EX:方案活動</option>
+              <option value="企業贊助活動">企業贊助活動:Happy Go</option>
+              <option value="多次型">多次型：EX:成長團體、領袖小組</option>
+              <option value="其他：體驗活動">其他：體驗活動(10萬元預算以上)</option>
+            </select>
+            <span class="error-message" id="專案活動-error"></span>
+          </div>
+          <div class="form-group">
+            <label for="活動名稱">活動名稱：<span class="required-star">*</span></label>
+            <input type="text" id="活動名稱" name="活動名稱" required>
+            <span class="error-message" id="活動名稱-error"></span>
+          </div>
+          <div class="form-group">
+            <label for="專案日期">日期：<span class="required-star">*</span></label>
+            <input type="date" id="專案日期" name="專案日期" required>
+            <span class="error-message" id="專案日期-error"></span>
+          </div>
+        </div>
+
+        <!-- 獎學金欄位 -->
+        <div id="獎學金欄位" class="conditional-group" style="display:none;">
+          <div class="form-group">
+            <label for="獎學金人數">獎助學金共幾位：<span class="required-star">*</span></label>
+            <input type="number" id="獎學金人數" name="獎學金人數" min="1" required>
+            <span class="error-message" id="獎學金人數-error"></span>
+          </div>
+          <div class="form-group">
+            <label for="專案名稱">專案名稱：<span class="required-star">*</span></label>
+            <input type="text" id="專案名稱" name="專案名稱" required>
+            <span class="error-message" id="專案名稱-error"></span>
+          </div>
+          <div class="form-group">
+            <label for="主題">主題：<span class="required-star">*</span></label>
+            <input type="text" id="主題" name="主題" required>
+            <span class="error-message" id="主題-error"></span>
+          </div>
+          <div class="form-group">
+            <label for="獎學金日期">日期：<span class="required-star">*</span></label>
+            <input type="date" id="獎學金日期" name="獎學金日期" required>
+            <span class="error-message" id="獎學金日期-error"></span>
+          </div>
+        </div>
+
+        <!-- 經濟扶助欄位 -->
+        <div id="經濟扶助欄位" class="conditional-group" style="display:none;">
+          <div class="form-group">
+            <label for="經濟扶助">經濟扶助：<span class="required-star">*</span></label>
+            <select id="經濟扶助" name="經濟扶助" required>
+              <option value="">請選擇</option>
+              <option value="急難救助">急難救助</option>
+              <option value="醫療補助">醫療補助</option>
+              <option value="生活扶助">生活扶助</option>
+              <option value="其他專案">其他專案</option>
+            </select>
+            <span class="error-message" id="經濟扶助-error"></span>
+          </div>
+        </div>
+
+        <!-- 其他欄位 -->
+        <div id="其他欄位" class="conditional-group" style="display:none;">
+          <div class="form-group">
+            <label for="其他項目">其他項目：<span class="required-star">*</span></label>
+            <div id="其他項目">
+              <label><input type="checkbox" name="其他項目[]" value="天使關懷專案"> 天使關懷專案：禮金</label><br>
+              <label><input type="checkbox" name="其他項目[]" value="修繕費"> 修繕費</label><br>
+              <label><input type="checkbox" name="其他項目[]" value="探訪交通差旅"> 探訪交通差旅</label><br>
+              <label><input type="checkbox" name="其他項目[]" value="郵電費"> 郵電費</label><br>
+              <label><input type="checkbox" name="其他項目[]" value="慰問關懷"> 慰問關懷</label><br>
+              <label><input type="checkbox" name="其他項目[]" value="電信費"> 電信費</label><br>
+              <label><input type="checkbox" name="其他項目[]" value="課輔鐘點費"> 課輔鐘點費</label><br>
+              <label><input type="checkbox" name="其他項目[]" value="文具印刷"> 文具印刷</label><br>
+              <label><input type="checkbox" name="其他項目[]" value="心輔諮商"> 心輔諮商</label><br>
+              <label><input type="checkbox" name="其他項目[]" value="電腦用品"> 電腦用品</label><br>
+              <label><input type="checkbox" name="其他項目[]" value="關懷站連結"> 關懷站連結</label><br>
+              <label><input type="checkbox" name="其他項目[]" value="慶典福利"> 慶典福利</label><br>
+              <label><input type="checkbox" name="其他項目[]" value="教育訓練"> 教育訓練</label><br>
+              <label><input type="checkbox" name="其他項目[]" value="雜項購置"> 雜項購置</label><br>
+            </div>
+            <span class="error-message" id="其他項目-error"></span>
+          </div>
+        </div>
+
+        <!-- 說明 -->
+        <div class="form-group">
+          <label for="說明">說明：<span class="required-star">*</span></label>
+          <textarea id="說明" name="說明" placeholder="輸入您的備註或註解..." required></textarea>
+          <span class="error-message" id="說明-error"></span>
+        </div>
+
+        <!-- 支付方式 -->
+        <div class="form-group">
+          <label for="支付方式">支付方式：<span class="required-star">*</span></label>
+          <select id="支付方式" name="支付方式" onchange="togglePaymentFields()" required>
+            <option value="">請選擇</option>
+            <option value="現金">現金</option>
+            <option value="轉帳">轉帳</option>
+            <option value="劃撥">劃撥</option>
+            <option value="匯款">匯款</option>
+            <option value="支票">支票</option>
+          </select>
+          <span class="error-message" id="支付方式-error"></span>
+        </div>
+
+        <!-- 金額 -->
+        <div class="form-group">
+          <label for="國字金額">金額：<span class="required-star">*</span></label>
+          <input type="number" id="國字金額" name="國字金額" placeholder="請輸入金額" min="0" required aria-required="true" oninput="convertAmountToChinese()">
+          <span class="currency-unit" id="元整" name="元整金額">元整</span>
+          <!-- 隱藏欄位用來儲存國字金額 -->
+          <input type="hidden" id="國字金額_hidden" name="國字金額_hidden">
+          <span class="error-message" id="國字金額-error"></span>
+        </div>
+
+        <!-- 現金簽收欄位 -->
+        <div id="現金簽收欄位" class="conditional-group" style="display:none;">
+          <div class="form-group">
+            <label for="簽收金額">金額：<span class="required-star">*</span></label>
+            <input type="number" id="簽收金額" name="簽收金額" min="0" required>
+            <span class="error-message" id="簽收金額-error"></span>
+          </div>
+          <div class="form-group">
+            <label for="簽收人">簽收人：<span class="required-star">*</span></label>
+            <input type="text" id="簽收人" name="簽收人" placeholder="請輸入簽收人" required>
+            <span class="error-message" id="簽收人-error"></span>
+          </div>
+          <div class="form-group">
+            <label for="簽收日">簽收日：<span class="required-star">*</span></label>
+            <input type="date" id="簽收日" name="簽收日" required>
+            <span class="error-message" id="簽收日-error"></span>
+          </div>
+        </div>
+
+        <!-- 轉帳欄位 -->
+        <div id="郵局欄" class="conditional-group" style="display:none;" aria-live="polite">
+          <div class="form-group">
+            <label for="銀行">銀行(郵局)：<span class="required-star">*</span></label>
+            <input type="text" id="銀行" name="銀行郵局" placeholder="請輸入銀行名稱" required>
+            <span class="error-message" id="銀行-error"></span>
+          </div>
+          <div class="form-group">
+            <label for="transferBankBranch">分行：<span class="required-star">*</span></label>
+            <input type="text" id="transferBankBranch" name="分行" placeholder="請輸入分行名稱" required>
+            <span class="error-message" id="transferBankBranch-error"></span>
+          </div>
+          <div class="form-group">
+            <label for="transferAccountName">戶名：<span class="required-star">*</span></label>
+            <input type="text" id="transferAccountName" name="戶名" placeholder="請輸入戶名" required>
+            <span class="error-message" id="transferAccountName-error"></span>
+          </div>
+          <div class="form-group">
+            <label for="transferAccountNumber">帳號：<span class="required-star">*</span></label>
+            <input type="text" id="transferAccountNumber" name="帳號" placeholder="請輸入帳號" required>
+            <span class="error-message" id="transferAccountNumber-error"></span>
+          </div>
+        </div>
+
+        <!-- 支票欄位 -->
+        <div id="支票欄位" class="conditional-group" style="display:none;" aria-live="polite">
+          <div class="form-group">
+            <label for="票號">票號：<span class="required-star">*</span></label>
+            <input type="text" id="票號" name="票號" placeholder="請輸入票號" required>
+            <span class="error-message" id="票號-error"></span>
+          </div>
+          <div class="form-group">
+            <label for="到期日">到期日：<span class="required-star">*</span></label>
+            <input type="date" id="到期日" name="到期日" required>
+            <span class="error-message" id="到期日-error"></span>
+          </div>
+          <!-- 新增「請輸入預支金額」欄位 -->
+          <div class="form-group">
+            <label for="預支金額">請輸入預支金額：<span class="required-star">*</span></label>
+            <input type="number" id="預支金額" name="預支金額" min="0" required>
+            <span class="error-message" id="預支金額-error"></span>
+          </div>
+        </div>
+
+        <!-- 檔案上傳欄位 -->
+        <div class="form-group">
+          <label for="上傳檔案">上傳檔案：<span class="required-star">*</span></label>
+          <input type="file" id="上傳檔案" name="上傳檔案" accept=".jpg,.jpeg,.png,.pdf" required>
+          <span class="error-message" id="上傳檔案-error"></span>
+        </div>
+
+        <!-- 提交按鈕 -->
+        <button type="submit" id="submitBtn">提交表單</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- 提交成功模態框 -->
+  <div id="successModal" class="modal" style="display:none;">
+    <div class="modal-content">
+      <h2>提交成功</h2>
+      <p>您的表單已成功提交，我們將盡快處理。</p>
+      <div class="modal-buttons">
+        <button class="close-btn" onclick="closeSuccessModal()">確定</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    /* 修改後的JavaScript代碼 */
+
+    // 定義一個通用的特殊符號檢查函式
+    function containsSpecialChars(str) {
+        // 允許的字符：中文、英文、數字、空格
+        const regex = /^[a-zA-Z0-9\u4e00-\u9fa5\s]+$/;
+        return !regex.test(str);
+    }
+
+    function validateForm() {
+        let isValid = true;
+
+        // 清除所有之前的錯誤訊息
+        const errorElements = document.querySelectorAll('.error-message');
+        errorElements.forEach(elem => {
+            elem.textContent = "";
+            elem.style.display = 'none';
+        });
+        const inputElements = document.querySelectorAll('.form-group input, .form-group select, .form-group textarea');
+        inputElements.forEach(input => {
+            input.classList.remove('input-error');
+        });
+
+        // 取得當前本地日期，格式為 YYYY-MM-DD
+        const today = new Date();
+        const year = today.getFullYear();
+        const month = String(today.getMonth() + 1).padStart(2, '0');
+        const day = String(today.getDate()).padStart(2, '0');
+        const todayString = `${year}-${month}-${day}`;
+
+        // 驗證受款人姓名
+        const 受款人 = document.getElementById('受款人');
+        const 受款人Error = document.getElementById('受款人-error');
+        if (!受款人.value.trim()) {
+            受款人Error.textContent = "受款人姓名不能空白。";
+            受款人Error.style.display = 'block';
+            受款人.classList.add('input-error');
+            isValid = false;
+        } else if (containsSpecialChars(受款人.value)) {
+            受款人Error.textContent = "姓名中不可包含特殊符號。";
+            受款人Error.style.display = 'block';
+            受款人.classList.add('input-error');
+            isValid = false;
+        }
+
+        // 驗證填表日期
+        const 填表日期 = document.getElementById('填表日期');
+        const 填表日期Error = document.getElementById('填表日期-error');
+        if (!填表日期.value.trim()) {
+            填表日期Error.textContent = "請填寫填表日期。";
+            填表日期Error.style.display = 'block';
+            填表日期.classList.add('input-error');
+            isValid = false;
+        } else {
+            if (填表日期.value !== todayString) {
+                填表日期Error.textContent = "填表日期必須是今天。";
+                填表日期Error.style.display = 'block';
+                填表日期.classList.add('input-error');
+                isValid = false;
+            }
+        }
+
+        // 驗證付款日期
+        const 付款日期 = document.getElementById('付款日期');
+        const 付款日期Error = document.getElementById('付款日期-error');
+        if (!付款日期.value.trim()) {
+            付款日期Error.textContent = "請填寫付款日期。";
+            付款日期Error.style.display = 'block';
+            付款日期.classList.add('input-error');
+            isValid = false;
+        }
+
+        // 驗證支出項目
+        const 支出項目 = document.getElementById('支出項目');
+        const 支出項目Error = document.getElementById('支出項目-error');
+        if (!支出項目.value) {
+            支出項目Error.textContent = "請選擇支出項目。";
+            支出項目Error.style.display = 'block';
+            支出項目.classList.add('input-error');
+            isValid = false;
+        }
+
+        // 驗證說明（不檢查特殊符號）
+        const 說明 = document.getElementById('說明');
+        const 說明Error = document.getElementById('說明-error');
+        if (!說明.value.trim()) {
+            說明Error.textContent = "說明不能空白。";
+            說明Error.style.display = 'block';
+            說明.classList.add('input-error');
+            isValid = false;
+        }
+
+        // 驗證支付方式
+        const 支付方式 = document.getElementById('支付方式');
+        const 支付方式Error = document.getElementById('支付方式-error');
+        if (!支付方式.value) {
+            支付方式Error.textContent = "請選擇支付方式。";
+            支付方式Error.style.display = 'block';
+            支付方式.classList.add('input-error');
+            isValid = false;
+        }
+
+        // 驗證金額
+        const 金額 = document.getElementById('國字金額');
+        const 金額Error = document.getElementById('國字金額-error');
+        if (!金額.value || parseFloat(金額.value) <= 0) {
+            金額Error.textContent = "金額必須大於 0。";
+            金額Error.style.display = 'block';
+            金額.classList.add('input-error');
+            isValid = false;
+        }
+
+        // 根據支出項目進行額外驗證
+        if (支出項目.value === '活動費用') {
+            const 專案活動 = document.getElementById('專案活動');
+            const 專案活動Error = document.getElementById('專案活動-error');
+            if (!專案活動.value) {
+                專案活動Error.textContent = "請選擇專案活動。";
+                專案活動Error.style.display = 'block';
+                專案活動.classList.add('input-error');
+                isValid = false;
+            }
+
+            const 活動名稱 = document.getElementById('活動名稱');
+            const 活動名稱Error = document.getElementById('活動名稱-error');
+            if (!活動名稱.value.trim()) {
+                活動名稱Error.textContent = "活動名稱不能空白。";
+                活動名稱Error.style.display = 'block';
+                活動名稱.classList.add('input-error');
+                isValid = false;
+            } else if (containsSpecialChars(活動名稱.value)) {
+                活動名稱Error.textContent = "活動名稱中不可包含特殊符號。";
+                活動名稱Error.style.display = 'block';
+                活動名稱.classList.add('input-error');
+                isValid = false;
+            }
+
+            const 專案日期 = document.getElementById('專案日期');
+            const 專案日期Error = document.getElementById('專案日期-error');
+            if (!專案日期.value) {
+                專案日期Error.textContent = "請選擇專案日期。";
+                專案日期Error.style.display = 'block';
+                專案日期.classList.add('input-error');
+                isValid = false;
+            }
+        } else if (支出項目.value === '獎學金') {
+            const 獎學金人數 = document.getElementById('獎學金人數');
+            const 獎學金人數Error = document.getElementById('獎學金人數-error');
+            if (!獎學金人數.value || parseInt(獎學金人數.value) < 1) {
+                獎學金人數Error.textContent = "獎助學金人數必須至少為 1。";
+                獎學金人數Error.style.display = 'block';
+                獎學金人數.classList.add('input-error');
+                isValid = false;
+            }
+
+            const 專案名稱 = document.getElementById('專案名稱');
+            const 專案名稱Error = document.getElementById('專案名稱-error');
+            if (!專案名稱.value.trim()) {
+                專案名稱Error.textContent = "專案名稱不能空白。";
+                專案名稱Error.style.display = 'block';
+                專案名稱.classList.add('input-error');
+                isValid = false;
+            } else if (containsSpecialChars(專案名稱.value)) {
+                專案名稱Error.textContent = "專案名稱中不可包含特殊符號。";
+                專案名稱Error.style.display = 'block';
+                專案名稱.classList.add('input-error');
+                isValid = false;
+            }
+
+            const 主題 = document.getElementById('主題');
+            const 主題Error = document.getElementById('主題-error');
+            if (!主題.value.trim()) {
+                主題Error.textContent = "主題不能空白。";
+                主題Error.style.display = 'block';
+                主題.classList.add('input-error');
+                isValid = false;
+            } else if (containsSpecialChars(主題.value)) {
+                主題Error.textContent = "主題中不可包含特殊符號。";
+                主題Error.style.display = 'block';
+                主題.classList.add('input-error');
+                isValid = false;
+            }
+
+            const 獎學金日期 = document.getElementById('獎學金日期');
+            const 獎學金日期Error = document.getElementById('獎學金日期-error');
+            if (!獎學金日期.value) {
+                獎學金日期Error.textContent = "請選擇獎學金日期。";
+                獎學金日期Error.style.display = 'block';
+                獎學金日期.classList.add('input-error');
+                isValid = false;
+            }
+        } else if (支出項目.value === '經濟扶助') {
+            const 經濟扶助 = document.getElementById('經濟扶助');
+            const 經濟扶助Error = document.getElementById('經濟扶助-error');
+            if (!經濟扶助.value) {
+                經濟扶助Error.textContent = "請選擇經濟扶助項目。";
+                經濟扶助Error.style.display = 'block';
+                經濟扶助.classList.add('input-error');
+                isValid = false;
+            }
+        } else if (支出項目.value === '其他') {
+            const 其他項目 = document.querySelectorAll('input[name="其他項目[]"]');
+            const 其他項目Error = document.getElementById('其他項目-error');
+            let checked = false;
+            其他項目.forEach(checkbox => {
+                if (checkbox.checked) {
+                    checked = true;
+                }
+            });
+            if (!checked) {
+                其他項目Error.textContent = "請至少選擇一項其他項目。";
+                其他項目Error.style.display = 'block';
+                其他項目Error.parentElement.classList.add('input-error'); // 標示整個其他項目區塊
+                isValid = false;
+            }
+        }
+
+        // 根據支付方式進行額外驗證
+        if (支付方式.value === '支票') {
+            const 票號 = document.getElementById('票號');
+            const 票號Error = document.getElementById('票號-error');
+            if (!票號.value.trim()) {
+                票號Error.textContent = "請填寫票號。";
+                票號Error.style.display = 'block';
+                票號.classList.add('input-error');
+                isValid = false;
+            } else if (containsSpecialChars(票號.value)) {
+                票號Error.textContent = "票號中不可包含特殊符號。";
+                票號Error.style.display = 'block';
+                票號.classList.add('input-error');
+                isValid = false;
+            }
+
+            const 到期日 = document.getElementById('到期日');
+            const 到期日Error = document.getElementById('到期日-error');
+            if (!到期日.value) {
+                到期日Error.textContent = "請選擇到期日。";
+                到期日Error.style.display = 'block';
+                到期日.classList.add('input-error');
+                isValid = false;
+            }
+
+            const 預支金額 = document.getElementById('預支金額');
+            const 預支金額Error = document.getElementById('預支金額-error');
+            if (!預支金額.value || parseFloat預支金額.value <= 0) {
+                預支金額Error.textContent = "預支金額必須大於 0。";
+                預支金額Error.style.display = 'block';
+                預支金額.classList.add('input-error');
+                isValid = false;
+            }
+        } else if (支付方式.value === '現金') {
+            const 簽收金額 = document.getElementById('簽收金額');
+            const 簽收金額Error = document.getElementById('簽收金額-error');
+            if (!簽收金額.value || parseFloat(簽收金額.value) <= 0) {
+                簽收金額Error.textContent = "簽收金額必須大於 0。";
+                簽收金額Error.style.display = 'block';
+                簽收金額.classList.add('input-error');
+                isValid = false;
+            }
+
+            const 簽收人 = document.getElementById('簽收人');
+            const 簽收人Error = document.getElementById('簽收人-error');
+            if (!簽收人.value.trim()) {
+                簽收人Error.textContent = "請填寫簽收人。";
+                簽收人Error.style.display = 'block';
+                簽收人.classList.add('input-error');
+                isValid = false;
+            } else if (containsSpecialChars(簽收人.value)) {
+                簽收人Error.textContent = "簽收人中不可包含特殊符號。";
+                簽收人Error.style.display = 'block';
+                簽收人.classList.add('input-error');
+                isValid = false;
+            }
+
+            const 簽收日 = document.getElementById('簽收日');
+            const 簽收日Error = document.getElementById('簽收日-error');
+            if (!簽收日.value) {
+                簽收日Error.textContent = "請選擇簽收日。";
+                簽收日Error.style.display = 'block';
+                簽收日.classList.add('input-error');
+                isValid = false;
+            }
+        } else if (['轉帳', '劃撥', '匯款'].includes(支付方式.value)) {
+            const 銀行 = document.getElementById('銀行');
+            const 銀行Error = document.getElementById('銀行-error');
+            if (!銀行.value.trim()) {
+                銀行Error.textContent = "請填寫銀行名稱。";
+                銀行Error.style.display = 'block';
+                銀行.classList.add('input-error');
+                isValid = false;
+            } else if (containsSpecialChars(銀行.value)) {
+                銀行Error.textContent = "銀行名稱中不可包含特殊符號。";
+                銀行Error.style.display = 'block';
+                銀行.classList.add('input-error');
+                isValid = false;
+            }
+
+            const 分行 = document.getElementById('transferBankBranch');
+            const 分行Error = document.getElementById('transferBankBranch-error');
+            if (!分行.value.trim()) {
+                分行Error.textContent = "請填寫分行名稱。";
+                分行Error.style.display = 'block';
+                分行.classList.add('input-error');
+                isValid = false;
+            } else if (containsSpecialChars(分行.value)) {
+                分行Error.textContent = "分行名稱中不可包含特殊符號。";
+                分行Error.style.display = 'block';
+                分行.classList.add('input-error');
+                isValid = false;
+            }
+
+            const 戶名 = document.getElementById('transferAccountName');
+            const 戶名Error = document.getElementById('transferAccountName-error');
+            if (!戶名.value.trim()) {
+                戶名Error.textContent = "請填寫戶名。";
+                戶名Error.style.display = 'block';
+                戶名.classList.add('input-error');
+                isValid = false;
+            } else if (containsSpecialChars(戶名.value)) {
+                戶名Error.textContent = "戶名中不可包含特殊符號。";
+                戶名Error.style.display = 'block';
+                戶名.classList.add('input-error');
+                isValid = false;
+            }
+
+            const 帳號 = document.getElementById('transferAccountNumber');
+            const 帳號Error = document.getElementById('transferAccountNumber-error');
+            if (!帳號.value.trim()) {
+                帳號Error.textContent = "請填寫帳號。";
+                帳號Error.style.display = 'block';
+                帳號.classList.add('input-error');
+                isValid = false;
+            } else if (containsSpecialChars(帳號.value)) {
+                帳號Error.textContent = "帳號中不可包含特殊符號。";
+                帳號Error.style.display = 'block';
+                帳號.classList.add('input-error');
+                isValid = false;
+            }
+        }
+
+        // 驗證檔案上傳
+        const 上傳檔案 = document.getElementById('上傳檔案');
+        const 上傳檔案Error = document.getElementById('上傳檔案-error');
+        const allowedFileTypes = ['image/jpeg', 'image/png', 'application/pdf'];
+        const maxFileSize = 5 * 1024 * 1024; // 5MB
+
+        if (!上傳檔案.value) {
+            上傳檔案Error.textContent = "請上傳檔案。";
+            上傳檔案Error.style.display = 'block';
+            上傳檔案.classList.add('input-error');
+            isValid = false;
+        } else {
+            const file = 上傳檔案.files[0];
+            if (!allowedFileTypes.includes(file.type)) {
+                上傳檔案Error.textContent = "僅允許上傳 JPEG、PNG 或 PDF 檔案。";
+                上傳檔案Error.style.display = 'block';
+                上傳檔案.classList.add('input-error');
+                isValid = false;
+            }
+            if (file.size > maxFileSize) {
+                上傳檔案Error.textContent = "檔案大小不得超過 5MB。";
+                上傳檔案Error.style.display = 'block';
+                上傳檔案.classList.add('input-error');
+                isValid = false;
+            }
+        }
+
+        // 如果有錯誤，滾動到第一個錯誤訊息
+        if (!isValid) {
+            const firstErrorElement = document.querySelector('.error-message[style*="block"]');
+            if (firstErrorElement) {
+                firstErrorElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+            return false;
+        }
+
+        return true;
+    }
+
+    function togglePaymentFields() {
+        const selectedItem = document.getElementById('支付方式').value;
+
+        // 隱藏所有支付方式相關的條件欄位
+        const fields = ["現金簽收欄位", "郵局欄", "支票欄位"];
+        fields.forEach(fieldId => {
+            const field = document.getElementById(fieldId);
+            field.style.display = 'none';
+            Array.from(field.querySelectorAll('input')).forEach(input => {
+                if (input.type === 'checkbox' || input.type === 'radio') {
+                    input.checked = false;
+                } else {
+                    input.value = '';
+                }
+                input.removeAttribute('required');
+            });
+            Array.from(field.querySelectorAll('select')).forEach(select => {
+                select.value = '';
+                select.removeAttribute('required');
+            });
+        });
+
+        // 根據選擇的支付方式顯示對應的欄位
+        if (selectedItem === '現金') {
+            const 現金簽收欄位 = document.getElementById("現金簽收欄位");
+            現金簽收欄位.style.display = 'block';
+            Array.from(現金簽收欄位.querySelectorAll('input')).forEach(input => {
+                input.setAttribute('required', 'required');
+            });
+        } else if (['轉帳', '劃撥', '匯款'].includes(selectedItem)) {
+            const 郵局欄 = document.getElementById("郵局欄");
+            郵局欄.style.display = 'block';
+            Array.from(郵局欄.querySelectorAll('input')).forEach(input => {
+                input.setAttribute('required', 'required');
+            });
+        } else if (selectedItem === '支票') {
+            const 支票欄位 = document.getElementById("支票欄位");
+            支票欄位.style.display = 'block';
+            Array.from(支票欄位.querySelectorAll('input')).forEach(input => {
+                input.setAttribute('required', 'required');
+            });
+        }
+    }
+
+    function updateConditionalFields() {
+        const selectedItem = document.getElementById('支出項目').value;
+
+        // 隱藏所有支出項目相關的條件欄位
+        const fields = ["活動費用欄位", "獎學金欄位", "經濟扶助欄位", "其他欄位"];
+        fields.forEach(fieldId => {
+            const field = document.getElementById(fieldId);
+            field.style.display = 'none';
+            Array.from(field.querySelectorAll('input, select, textarea')).forEach(input => {
+                if (input.type === 'checkbox' || input.type === 'radio') {
+                    input.checked = false;
+                } else {
+                    input.value = '';
+                }
+                input.removeAttribute('required');
+            });
+            // 如果是select，移除required
+            Array.from(field.querySelectorAll('select')).forEach(select => {
+                select.removeAttribute('required');
+            });
+        });
+
+        // 根據選擇的支出項目顯示對應的欄位
+        if (selectedItem === '活動費用') {
+            const 活動費用欄位 = document.getElementById("活動費用欄位");
+            活動費用欄位.style.display = 'block';
+            Array.from(活動費用欄位.querySelectorAll('input, select')).forEach(input => {
+                input.setAttribute('required', 'required');
+            });
+        } else if (selectedItem === '獎學金') {
+            const 獎學金欄位 = document.getElementById("獎學金欄位");
+            獎學金欄位.style.display = 'block';
+            Array.from(獎學金欄位.querySelectorAll('input')).forEach(input => {
+                input.setAttribute('required', 'required');
+            });
+        } else if (selectedItem === '經濟扶助') {
+            const 經濟扶助欄位 = document.getElementById("經濟扶助欄位");
+            經濟扶助欄位.style.display = 'block';
+            Array.from(經濟扶助欄位.querySelectorAll('select')).forEach(select => {
+                select.setAttribute('required', 'required');
+            });
+        } else if (selectedItem === '其他') {
+            const 其他欄位 = document.getElementById("其他欄位");
+            其他欄位.style.display = 'block';
+            // 對於checkboxes，不設定required，但在驗證時檢查至少選擇一項
+        }
+    }
+
+    function convertAmountToChinese() {
+        // 實作金額轉換為中文的邏輯
+        // 這裡提供一個簡單的示範，實際應用中可能需要更完整的轉換邏輯
+
+        const amount = document.getElementById('國字金額').value;
+        const chineseAmount = numberToChinese(amount);
+        document.getElementById('國字金額_hidden').value = chineseAmount;
+        // 您可以在此處顯示或處理中文金額
+    }
+
+    // 簡單的數字轉中文函式（僅支援整數）
+    function numberToChinese(num) {
+        if (!num) return "零";
+        const digits = "零一二三四五六七八九";
+        const units = ["", "十", "百", "千", "萬", "十萬", "百萬", "千萬", "億"];
+        let str = num.toString();
+        let result = "";
+        let zeroCount = 0;
+
+        for (let i = 0; i < str.length; i++) {
+            const n = parseInt(str[i]);
+            const unit = units[str.length - i - 1];
+            if (n !== 0) {
+                if (zeroCount > 0) {
+                    result += digits[0];
+                    zeroCount = 0;
+                }
+                result += digits[n] + unit;
+            } else {
+                zeroCount++;
+            }
+        }
+        // 處理結尾的零
+        result = result.replace(/零+$/, '');
+        // 處理十位數的特殊情況
+        result = result.replace(/^一十/, "十");
+        return result || digits[0];
+    }
+
+    function showSuccessModal() {
+        // 設置提交狀態
+        sessionStorage.setItem('formSubmitted', 'true');
+        document.getElementById('successModal').style.display = 'flex';
+    }
+
+    function closeSuccessModal() {
+        document.getElementById('successModal').style.display = 'none';
+    }
+
+    // 處理表單提交
+    document.getElementById('paymentForm').addEventListener('submit', function(event) {
+        event.preventDefault(); // 阻止表單的預設提交行為
+
+        if (validateForm()) {
+            // 禁用提交按鈕以防止重複提交
+            const submitBtn = document.getElementById('submitBtn');
+            submitBtn.disabled = true;
+            submitBtn.textContent = "提交中...";
+
+            // 準備表單數據
+            const formData = new FormData(this);
+
+            // 發送AJAX請求
+            fetch(this.action, {
+                method: this.method,
+                body: formData
+            })
+            .then(response => response.text()) // 根據您的 agg.php 返回的內容調整
+            .then(data => {
+                // 假設 agg.php 返回成功的訊息
+                if (data.trim() === "表單已成功提交!!") {
+                    showSuccessModal();
+                    // 可選：重置表單
+                    this.reset();
+                    // 重置條件欄位顯示
+                    updateConditionalFields();
+                    togglePaymentFields();
+                    // 重置提交按鈕狀態
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = "提交表單";
+                } else {
+                    // 處理來自 PHP 的錯誤訊息
+                    alert(data);
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = "提交表單";
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('提交失敗，請稍後再試。');
+                // 重置提交按鈕狀態
+                submitBtn.disabled = false;
+                submitBtn.textContent = "提交表單";
+            });
+        }
+    });
+
+    window.onload = function() {
+        updateConditionalFields();
+        togglePaymentFields();
+
+        document.getElementById('支出項目').addEventListener('change', updateConditionalFields);
+        document.getElementById('支付方式').addEventListener('change', togglePaymentFields);
+        document.getElementById('國字金額').addEventListener('input', convertAmountToChinese);
+
+        // 檢查是否已提交表單
+        if (sessionStorage.getItem('formSubmitted') === 'true') {
+            showSuccessModal();
+            // 清除提交狀態以防止下次載入時再次顯示
+            sessionStorage.removeItem('formSubmitted');
+        }
+
+        // 即時驗證部分欄位
+        const requiredFields = document.querySelectorAll('input[required], select[required], textarea[required]');
+        requiredFields.forEach(field => {
+            field.addEventListener('blur', function() {
+                validateField(field);
+            });
+        });
+    };
+
+    // 即時驗證函式
+    function validateField(field) {
+        const fieldId = field.id;
+        const errorElement = document.getElementById(`${fieldId}-error`);
+        let errorMessage = "";
+
+        if (field.type === 'text') {
+            if (!field.value.trim()) {
+                errorMessage = "此欄位不能空白。";
+            } else if (fieldId !== '說明' && containsSpecialChars(field.value)) {
+                // 「說明」欄位不檢查特殊符號
+                if (['受款人', '活動名稱', '專案名稱', '主題', '簽收人', '銀行', 'transferBankBranch', 'transferAccountName', 'transferAccountNumber', '票號'].includes(fieldId)) {
+                    errorMessage = "此欄位不可包含特殊符號。";
+                }
+            }
+        } else if (field.type === 'date') {
+            if (!field.value) {
+                errorMessage = "此欄位不能空白。";
+            } else if (fieldId === '填表日期') {
+                const today = new Date();
+                const year = today.getFullYear();
+                const month = String(today.getMonth() + 1).padStart(2, '0');
+                const day = String(today.getDate()).padStart(2, '0');
+                const todayString = `${year}-${month}-${day}`;
+                if (field.value !== todayString) {
+                    errorMessage = "填表日期必須是今天。";
+                }
+            }
+        } else if (field.type === 'number') {
+            if (!field.value || parseFloat(field.value) <= 0) {
+                errorMessage = "此欄位必須大於 0。";
+            }
+        } else if (field.tagName.toLowerCase() === 'select') {
+            if (!field.value) {
+                errorMessage = "請選擇一個選項。";
+            }
+        } else if (field.tagName.toLowerCase() === 'textarea') {
+            if (!field.value.trim()) {
+                errorMessage = "此欄位不能空白。";
+            }
+        } else if (field.type === 'file') {
+            const allowedFileTypes = ['image/jpeg', 'image/png', 'application/pdf'];
+            const maxFileSize = 5 * 1024 * 1024; // 5MB
+            const file = field.files[0];
+            if (!file) {
+                errorMessage = "請上傳檔案。";
+            } else if (!allowedFileTypes.includes(file.type)) {
+                errorMessage = "僅允許上傳 JPEG、PNG 或 PDF 檔案。";
+            } else if (file.size > maxFileSize) {
+                errorMessage = "檔案大小不得超過 5MB。";
+            }
+        }
+
+        if (errorMessage) {
+            errorElement.textContent = errorMessage;
+            errorElement.style.display = 'block';
+            field.classList.add('input-error');
+        } else {
+            errorElement.textContent = "";
+            errorElement.style.display = 'none';
+            field.classList.remove('input-error');
+        }
+    }
+  </script>
+
+</body>
+</html>
