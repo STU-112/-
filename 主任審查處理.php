@@ -22,7 +22,50 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["count"])) {
 // 查詢資料
 
 if (!empty($search_count)) {
-    $sql ="SELECT count,受款人,填表日期,付款日期,支出項目,活動名稱,專案日期,獎學金人數,專案名稱,主題,獎學金日期,經濟扶助,其他項目,說明,支付方式,國字金額,國字金額_hidden,簽收金額,簽收人,簽收日,銀行郵局,分行,戶名,帳號,票號,到期日,預支金額 FROM pay_table WHERE count = ?";
+    // 合併查詢語句
+$sql = "
+SELECT 
+    b.`count`,
+    b.受款人,
+    b.填表日期,
+	b.付款日期,
+	s.`count`,
+    s.支出項目,
+	s.活動名稱,
+	s.專案日期,
+	s.獎學金人數,
+	s.專案名稱,
+	s.主題,
+	s.獎學金日期,
+	s.經濟扶助,
+	s.其他項目 ,
+	d.`count`,
+    d.說明,
+	p.`count`,
+	p.支付方式,
+    p.國字金額,
+	p.國字金額_hidden,
+	p.簽收金額,
+	p.簽收人,
+	p.簽收日,
+	p.銀行郵局,
+	p.分行,
+	p.戶名,
+	p.帳號,
+	p.票號,
+	p.到期日,
+	p.預支金額
+	
+FROM 
+    基本資料 AS b
+LEFT JOIN 
+    支出項目 AS s ON b.`count` = s.`count`
+LEFT JOIN 
+    說明 AS d ON b.`count` = d.`count`
+LEFT JOIN 
+    支付方式 AS p ON b.`count` = p.`count`
+WHERE 
+    b.`count` = ?";
     $stmt = $db_link->prepare($sql);
     $stmt->bind_param("s", $search_count);
     $stmt->execute();

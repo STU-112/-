@@ -21,10 +21,27 @@ if ($db_link_review->connect_error) {
     die("連線到 Review_comments 資料庫失敗: " . $db_link_review->connect_error);
 }
 
-// 查詢 op2 資料庫中的 pay_table 資料
-$sql = "SELECT count, 受款人, 支出項目, 填表日期, 國字金額 FROM pay_table WHERE 國字金額 > 0";
-$result = $db_link_預支->query($sql);
+// 合併查詢語句
+$sql = "
+SELECT 
+    b.`count`,
+    b.受款人,
+    b.填表日期,
+    s.支出項目,
+    d.說明,
+    p.國字金額
+FROM 
+    基本資料 AS b
+LEFT JOIN 
+    支出項目 AS s ON b.`count` = s.`count`
+LEFT JOIN 
+    說明 AS d ON b.`count` = d.`count`
+LEFT JOIN 
+    支付方式 AS p ON b.`count` = p.`count`
+WHERE 
+    p.國字金額 IS NOT NULL";
 
+$result = $db_link_預支->query($sql);
 // 顯示資料
 if ($result && $result->num_rows > 0) {
 	 echo "
@@ -128,16 +145,21 @@ if ($result && $result->num_rows > 0) {
         // 檢查條件
         $show_row = false;
         if ($row["國字金額"] < 1000 && $review_result && $review_result->num_rows > 0) {
+			
+			
             $review_row = $review_result->fetch_assoc();
             $opinion1 = $review_row["審核意見"];
             $show_row = true;
         } elseif ($row["國字金額"] < 5000 && $review_result && $review_result->num_rows > 0 && $director_result && $director_result->num_rows > 0) {
+			
+			
             $review_row = $review_result->fetch_assoc();
             $opinion1 = $review_row["審核意見"];
             $director_row = $director_result->fetch_assoc();
             $opinion2 = $director_row["審核意見"];
             $show_row = true;
         } elseif ($row["國字金額"] <= 50000 && $review_result && $review_result->num_rows > 0 && $director_result && $director_result->num_rows > 0 && $exec_result && $exec_result->num_rows > 0) {
+			
 			
 			$review_row = $review_result->fetch_assoc();
             $opinion1 = $review_row["審核意見"];
@@ -158,6 +180,7 @@ if ($result && $result->num_rows > 0) {
             $chair_row = $chair_result->fetch_assoc();
             $opinion4 = $chair_row["審核意見"];
             $show_row = true;
+			
         }
 
         // 顯示符合條件的資料

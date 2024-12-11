@@ -24,9 +24,25 @@ if ($db_link_review->connect_error) {
 $search_serial = isset($_GET['search_serial']) ? $_GET['search_serial'] : '';
 $search_item = isset($_GET['search_item']) ? $_GET['search_item'] : '';
 
-// 查詢 pay_table 資料
-$sql = "SELECT `count`, 受款人, 支出項目, 填表日期, 國字金額 
-        FROM pay_table";
+// 合併查詢語句
+$sql = "
+SELECT 
+    b.`count`,
+    b.受款人,
+    b.填表日期,
+    s.支出項目,
+    d.說明,
+    p.國字金額
+FROM 
+    基本資料 AS b
+LEFT JOIN 
+    支出項目 AS s ON b.`count` = s.`count`
+LEFT JOIN 
+    說明 AS d ON b.`count` = d.`count`
+LEFT JOIN 
+    支付方式 AS p ON b.`count` = p.`count`
+WHERE 
+    p.國字金額 IS NOT NULL";
 
 // 加入搜尋條件
 if (!empty($search_serial)) {
@@ -130,7 +146,7 @@ echo "
         <select name='search_item'>
             <option value=''>-- 全部 --</option>
             <option value='活動費用'" . ($search_item == '活動費用' ? " selected" : "") . ">活動費用</option>
-            <option value='獎助學金'" . ($search_item == '獎助學金' ? " selected" : "") . ">獎助學金</option>
+            <option value='獎學金'" . ($search_item == '獎學金' ? " selected" : "") . ">獎學金</option>
             <option value='經濟扶助'" . ($search_item == '經濟扶助' ? " selected" : "") . ">經濟扶助</option>
             <option value='其他'" . ($search_item == '其他' ? " selected" : "") . ">其他</option>
         </select>
@@ -233,12 +249,12 @@ echo "
         echo "<td>
 		<div style='display: flex; justify-content: center; align-items: center; height: 100xp;'>
 		<div style='display: flex; gap: 10px;'>
-            <form method='post' action='查看.php'>
+            <form method='post' action='審核查看.php'>
                 <input type='hidden' name='count' value='" . $row["count"] . "'>
                 <button type='submit' name='review'>查看</button>
             </form>
 			
-			<form method='post' action='結果.php'>
+			<form method='post' action='審核結果.php'>
                 <input type='hidden' name='count' value='" . $row["count"] . "'>
                 <button type='submit' name='結果'>結果</button>
             </form>

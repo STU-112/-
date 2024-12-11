@@ -4,11 +4,10 @@ $servername = "localhost:3307";
 $username = "root";
 $password = "3307";
 
-// 連接到 op2 資料庫
+// 連接到資料庫
 $dbname_預支 = "預支";
 $db_link_預支 = new mysqli($servername, $username, $password, $dbname_預支);
 
-// 連接到 Review_comments 資料庫
 $dbname_review = "Review_comments";
 $db_link_review = new mysqli($servername, $username, $password, $dbname_review);
 
@@ -21,30 +20,44 @@ if ($db_link_review->connect_error) {
     die("連線到 Review_comments 資料庫失敗: " . $db_link_review->connect_error);
 }
 
-// 查詢 op2 資料庫中的 pay_table 資料 
-$sql = "SELECT `count`, 受款人, 支出項目, 填表日期, 國字金額, 國字金額_hidden 
-        FROM pay_table WHERE 國字金額 IS NOT NULL";
+// 合併查詢語句
+$sql = "
+SELECT 
+    b.`count`,
+    b.受款人,
+    b.填表日期,
+    s.支出項目,
+    d.說明,
+    p.國字金額
+FROM 
+    基本資料 AS b
+LEFT JOIN 
+    支出項目 AS s ON b.`count` = s.`count`
+LEFT JOIN 
+    說明 AS d ON b.`count` = d.`count`
+LEFT JOIN 
+    支付方式 AS p ON b.`count` = p.`count`
+WHERE 
+    p.國字金額 IS NOT NULL";
+
 $result = $db_link_預支->query($sql);
 
 // 顯示資料
 if ($result && $result->num_rows > 0) {
     echo "
     <style>
-	
-	* {
+        * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
-	 body {
+        body {
             height: 100%;
             width: 100%;
             font-family: 'Noto Sans TC', Arial, sans-serif;
-			background: linear-gradient(to bottom, #e8dff2, #f5e8fc); /* 淡紫色漸層 */
+            background: linear-gradient(to bottom, #e8dff2, #f5e8fc);
             color: #333;
         }
-	
-        
         .header {
             display: flex;
             background-color: rgb(220, 236, 245);
@@ -82,9 +95,9 @@ if ($result && $result->num_rows > 0) {
             background-color: #f2f2f2;
             color: #333;
         }
-		tr.second-row {
-    background-color: white; /* 固定背景顏色 */
-}
+        tr.second-row {
+            background-color: white;
+        }
         tr:nth-child(even) {
             background-color: #f9f9f9;
         }
@@ -98,13 +111,13 @@ if ($result && $result->num_rows > 0) {
         }
         .banner {
             width: 100%;
-            background: linear-gradient(to bottom, #e8dff2, #f5e8fc); /* 淡紫色漸層 */
+            background: linear-gradient(to bottom, #e8dff2, #f5e8fc);
             color: #333;
             display: flex;
             justify-content: flex-end;
             align-items: center;
             padding: 10px 20px;
-            box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.2); /* 陰影效果 */
+            box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.2);
         }
         .banner a {
             color: #5a3d2b;
@@ -113,13 +126,13 @@ if ($result && $result->num_rows > 0) {
             font-size: 1.2em;
         }
         .banner a:hover {
-            color: #007bff; /* 當滑鼠懸停時變換顏色 */
+            color: #007bff;
         }
     </style>";
-   echo "
+    echo "
     <div class='banner' style='gap: 20px;'>
-		<a href='督導審查紀錄.php'>審查紀錄</a>
-		<a href='登入.html'>登出</a>
+        <a href='督導審查紀錄.php'>審查紀錄</a>
+        <a href='登入.html'>登出</a>
     </div>";
 
     echo "<table>";

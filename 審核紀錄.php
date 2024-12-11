@@ -24,9 +24,25 @@ if ($db_link_review->connect_error) {
 $search_serial = isset($_GET['search_serial']) ? $_GET['search_serial'] : '';
 $search_item = isset($_GET['search_item']) ? $_GET['search_item'] : '';
 
-// 查詢 pay_table 資料
-$sql = "SELECT `count`, 受款人, 支出項目, 填表日期, 國字金額 
-        FROM pay_table WHERE 國字金額 IS NOT NULL";
+// 合併查詢語句
+$sql = "
+SELECT 
+    b.`count`,
+    b.受款人,
+    b.填表日期,
+    s.支出項目,
+    d.說明,
+    p.國字金額
+FROM 
+    基本資料 AS b
+LEFT JOIN 
+    支出項目 AS s ON b.`count` = s.`count`
+LEFT JOIN 
+    說明 AS d ON b.`count` = d.`count`
+LEFT JOIN 
+    支付方式 AS p ON b.`count` = p.`count`
+WHERE 
+    p.國字金額 IS NOT NULL";
 
 // 加入搜尋條件
 if (!empty($search_serial)) {

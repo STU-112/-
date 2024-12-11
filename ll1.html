@@ -295,7 +295,7 @@
         border-color: var(--error-color) !important;
         box-shadow: 0 0 8px rgba(255, 0, 0, 0.2);
     }
-    </style>
+     </style>
 </head>
 <body>
 
@@ -339,33 +339,33 @@
         </div>
 
         <!-- 活動費用欄位 -->
-        <div id="活動費用欄位" class="conditional-group">
-  <div class="form-group">
-    <label for="專案活動">(專案)活動名稱：<span class="required-star">*</span></label>
-    <select id="專案活動" name="專案活動" required>
-      <option value="">請選擇</option>
-      <option value="半日/一日型">半日/一日型：EX:方案活動</option>
-      <option value="過夜型">過夜型：EX:方案活動</option>
-      <option value="企業贊助活動">企業贊助活動:Happy Go</option>
-      <option value="多次型">多次型：EX:成長團體、領袖小組</option>
-      <option value="其他：體驗活動">其他：體驗活動(10萬元預算以上)</option>
-    </select>
-    <span class="error-message" id="專案活動-error"></span>
-  </div>
-  <div class="form-group">
-    <label for="活動名稱">活動名稱：<span class="required-star">*</span></label>
-    <input type="text" id="活動名稱" name="活動名稱" required>
-    <span class="error-message" id="活動名稱-error"></span>
-  </div>
-  <div class="form-group">
-    <label for="專案日期">日期：<span class="required-star">*</span></label>
-    <input type="date" id="專案日期" name="專案日期" required>
-    <span class="error-message" id="專案日期-error"></span>
-  </div>
-</div>
+        <div id="活動費用欄位" class="conditional-group" style="display: none;">
+          <div class="form-group">
+            <label for="專案活動">(專案)活動名稱：<span class="required-star">*</span></label>
+            <select id="專案活動" name="專案活動" required>
+              <option value="">請選擇</option>
+              <option value="半日/一日型">半日/一日型：EX:方案活動</option>
+              <option value="過夜型">過夜型：EX:方案活動</option>
+              <option value="企業贊助活動">企業贊助活動:Happy Go</option>
+              <option value="多次型">多次型：EX:成長團體、領袖小組</option>
+              <option value="其他：體驗活動">其他：體驗活動(10萬元預算以上)</option>
+            </select>
+            <span class="error-message" id="專案活動-error"></span>
+          </div>
+          <div class="form-group">
+            <label for="活動名稱">活動名稱：<span class="required-star">*</span></label>
+            <input type="text" id="活動名稱" name="活動名稱" required>
+            <span class="error-message" id="活動名稱-error"></span>
+          </div>
+          <div class="form-group">
+            <label for="專案日期">日期：<span class="required-star">*</span></label>
+            <input type="date" id="專案日期" name="專案日期" required>
+            <span class="error-message" id="專案日期-error"></span>
+          </div>
+        </div>
 
         <!-- 獎學金欄位 -->
-        <div id="獎學金欄位" class="conditional-group">
+        <div id="獎學金欄位" class="conditional-group" style="display: none;">
           <div class="form-group">
             <label for="獎學金人數">獎助學金共幾位：<span class="required-star">*</span></label>
             <input type="number" id="獎學金人數" name="獎學金人數" min="1" required>
@@ -389,7 +389,7 @@
         </div>
 
         <!-- 經濟扶助欄位 -->
-        <div id="經濟扶助欄位" class="conditional-group">
+        <div id="經濟扶助欄位" class="conditional-group" style="display: none;">
           <div class="form-group">
             <label for="經濟扶助">經濟扶助：<span class="required-star">*</span></label>
             <select id="經濟扶助" name="經濟扶助" required>
@@ -404,7 +404,7 @@
         </div>
 
         <!-- 其他欄位 -->
-        <div id="其他欄位" class="conditional-group">
+        <div id="其他欄位" class="conditional-group" style="display: none;">
           <div class="form-group">
             <label for="其他項目">其他項目：<span class="required-star">*</span></label>
             <div id="其他項目">
@@ -452,14 +452,16 @@
         <div class="form-group">
           <label for="國字金額">金額：<span class="required-star">*</span></label>
           <input type="number" id="國字金額" name="國字金額" placeholder="請輸入金額" min="0" required aria-required="true" oninput="convertAmountToChinese()">
-          <span class="currency-unit" id="元整" name="元整金額">元整</span>
+          <span class="currency-unit"></span>
           <!-- 隱藏欄位用來儲存國字金額 -->
           <input type="hidden" id="國字金額_hidden" name="國字金額_hidden">
+          <!-- 新增顯示國字金額 -->
+          <div id="國字金額_display" class="chinese-amount-display"></div>
           <span class="error-message" id="國字金額-error"></span>
         </div>
 
         <!-- 現金簽收欄位 -->
-        <div id="現金簽收欄位" class="conditional-group">
+        <div id="現金簽收欄位" class="conditional-group" style="display: none;">
           <div class="form-group">
             <label for="簽收金額">金額：<span class="required-star">*</span></label>
             <input type="number" id="簽收金額" name="簽收金額" min="0" required>
@@ -478,7 +480,7 @@
         </div>
 
         <!-- 轉帳欄位 -->
-        <div id="郵局欄" class="conditional-group" aria-live="polite">
+        <div id="郵局欄" class="conditional-group" style="display: none;" aria-live="polite">
           <div class="form-group">
             <label for="銀行">銀行(郵局)：<span class="required-star">*</span></label>
             <input type="text" id="銀行" name="銀行郵局" placeholder="請輸入銀行名稱" required>
@@ -502,7 +504,7 @@
         </div>
 
         <!-- 支票欄位 -->
-        <div id="支票欄位" class="conditional-group" aria-live="polite">
+        <div id="支票欄位" class="conditional-group" style="display: none;" aria-live="polite">
           <div class="form-group">
             <label for="票號">票號：<span class="required-star">*</span></label>
             <input type="text" id="票號" name="票號" placeholder="請輸入票號" required>
@@ -528,7 +530,7 @@
   </div>
 
   <!-- 提交成功模態框 -->
-  <div id="successModal" class="modal">
+  <div id="successModal" class="modal" style="display: none;">
     <div class="modal-content">
       <h2>提交成功</h2>
       <p>您的表單已成功提交，我們將盡快處理。</p>
@@ -539,7 +541,9 @@
   </div>
 
   <script>
-    /* 修改後的JavaScript代碼 */
+    // 您現有的 JavaScript 代碼（包括上述修改）
+    // 以下為完整的 JavaScript 代碼，包含改進的 numberToChinese 函式和金額轉換顯示
+    // ...
 
     // 定義一個通用的特殊符號檢查函式
     function containsSpecialChars(str) {
@@ -983,18 +987,27 @@
     }
 
     function convertAmountToChinese() {
-        // 實作金額轉換為中文的邏輯
-        // 這裡提供一個簡單的示範，實際應用中可能需要更完整的轉換邏輯
+        const amountInput = document.getElementById('國字金額');
+        const chineseDisplay = document.getElementById('國字金額_display');
+        const hiddenInput = document.getElementById('國字金額_hidden');
 
-        const amount = document.getElementById('國字金額').value;
-        const chineseAmount = numberToChinese(amount);
-        document.getElementById('國字金額_hidden').value = chineseAmount;
-        // 您可以在此處顯示或處理中文金額
+        const amount = amountInput.value;
+
+        if (amount === '') {
+            chineseDisplay.textContent = '';
+            hiddenInput.value = '';
+            return;
+        }
+
+        const integerAmount = Math.floor(parseFloat(amount));
+        const chineseAmount = numberToChinese(integerAmount) + "元整";
+        chineseDisplay.textContent = chineseAmount;
+        hiddenInput.value = chineseAmount;
     }
 
-    // 簡單的數字轉中文函式（僅支援整數）
+    // 改進的數字轉中文函式，處理「兩」的使用
     function numberToChinese(num) {
-        if (!num) return "零";
+        if (num === 0) return "零元整";
         const digits = "零一二三四五六七八九";
         const units = ["", "十", "百", "千", "萬", "十萬", "百萬", "千萬", "億"];
         let str = num.toString();
@@ -1009,16 +1022,22 @@
                     result += digits[0];
                     zeroCount = 0;
                 }
-                result += digits[n] + unit;
+                // 使用「兩」而不是「二」在萬位以上的位置
+                if (n === 2 && (unit === "萬" || unit === "億")) {
+                    result += "兩" + unit;
+                } else {
+                    result += digits[n] + unit;
+                }
             } else {
                 zeroCount++;
             }
         }
+
         // 處理結尾的零
         result = result.replace(/零+$/, '');
         // 處理十位數的特殊情況
         result = result.replace(/^一十/, "十");
-        return result || digits[0];
+        return result;
     }
 
     function showSuccessModal() {
@@ -1058,6 +1077,8 @@
                 // 重置條件欄位顯示
                 updateConditionalFields();
                 togglePaymentFields();
+                // 清空國字金額顯示
+                document.getElementById('國字金額_display').textContent = '';
                 // 重置提交按鈕狀態
                 submitBtn.disabled = false;
                 submitBtn.textContent = "提交表單";
@@ -1148,7 +1169,8 @@
             field.classList.remove('input-error');
         }
     }
-  </script>
+</script>
 
 </body>
 </html>
+
