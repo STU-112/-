@@ -127,23 +127,23 @@ if ($result && $result->num_rows > 0) {
         $opinion1 = $opinion2 = $opinion3 = $opinion4 = "<span style='color: orange;'>無須審核</span>";
 
         // 查詢督導審核意見
-        $sql_review_opinion1 = "SELECT 審核意見 FROM 督導審核意見 WHERE 單號 = '$serial_count' LIMIT 1";
+        $sql_review_opinion1 = "SELECT 審核意見,狀態 FROM 督導審核意見 WHERE 單號 = '$serial_count' LIMIT 1";
         $review_result = $db_link_review->query($sql_review_opinion1);
 
         // 查詢主任審核意見
-        $sql_director_opinion2 = "SELECT 審核意見 FROM 主任審核意見 WHERE 單號 = '$serial_count' LIMIT 1";
+        $sql_director_opinion2 = "SELECT 審核意見,狀態 FROM 主任審核意見 WHERE 單號 = '$serial_count' LIMIT 1";
         $director_result = $db_link_review->query($sql_director_opinion2);
 
         // 查詢執行長審核意見
-        $sql_exec_opinion3 = "SELECT 審核意見 FROM 執行長審核意見 WHERE 單號 = '$serial_count' LIMIT 1";
+        $sql_exec_opinion3 = "SELECT 審核意見,狀態 FROM 執行長審核意見 WHERE 單號 = '$serial_count' LIMIT 1";
         $exec_result = $db_link_review->query($sql_exec_opinion3);
 
         // 查詢董事長審核意見
-        $sql_chair_opinion4 = "SELECT 審核意見 FROM 董事長審核意見 WHERE 單號 = '$serial_count' LIMIT 1";
+        $sql_chair_opinion4 = "SELECT 審核意見,狀態 FROM 董事長審核意見 WHERE 單號 = '$serial_count' LIMIT 1";
         $chair_result = $db_link_review->query($sql_chair_opinion4);
 		
 		// 查詢會計審核意見
-        $sql_chair_opinion5 = "SELECT 審核意見 FROM 會計審核意見 WHERE 單號 = '$serial_count' LIMIT 1";
+        $sql_chair_opinion5 = "SELECT 審核意見,狀態 FROM 會計審核意見 WHERE 單號 = '$serial_count' LIMIT 1";
         $accounting_result = $db_link_review->query($sql_chair_opinion5);
 
 

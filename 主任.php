@@ -40,7 +40,7 @@ LEFT JOIN
 LEFT JOIN 
     支付方式 AS p ON b.`count` = p.`count`
 WHERE 
-    p.國字金額 >= 5000";
+    p.國字金額 >= 1000";
 
 $result = $db_link_預支->query($sql);
 
@@ -150,12 +150,12 @@ while ($row = $result->fetch_assoc()) {
     $serial_count = $row["count"];
 
 		// 查詢督導審核意見是否存在於 Review_comments 資料庫
-		$sql_review_opinion1 = "SELECT 審核意見 FROM 督導審核意見 WHERE 單號 = '$serial_count' LIMIT 1";
+		$sql_review_opinion1 = "SELECT 審核意見,狀態 FROM 督導審核意見 WHERE 單號 = '$serial_count' LIMIT 1";
 		$review_result = $db_link_review->query($sql_review_opinion1);
 
 
         // 查詢主任審核意見是否存在
-        $sql_director_opinion2 = "SELECT 審核意見 FROM 主任審核意見 WHERE 單號 = '$serial_count' LIMIT 1";
+        $sql_director_opinion2 = "SELECT 審核意見,狀態 FROM 主任審核意見 WHERE 單號 = '$serial_count' LIMIT 1";
         $director_result = $db_link_review->query($sql_director_opinion2);
 
 
@@ -165,15 +165,17 @@ while ($row = $result->fetch_assoc()) {
     if ($review_result && $review_result->num_rows > 0) {
         $review_row = $review_result->fetch_assoc();
         $opinion1 = $review_row["審核意見"];
+		$status = $review_row["狀態"]; // 獲取督導審核狀態
 
 
 
         // 如果尚未有主任的審核意見，則顯示這筆資料
-        if ($director_result && $director_result->num_rows > 0) {
+        if ($director_result && $director_result->num_rows > 0 ) {
 			continue;
         }
 			$opinion2 = "<span style='color: orange;'>未審核</span>";
-           
+			
+           if ($status == '通過') {
         
 
         echo "<tr class='second-row'>";
@@ -196,7 +198,7 @@ while ($row = $result->fetch_assoc()) {
             $director_result->free();
         }
     }
-
+	}
     // 釋放督導審核意見結果集
     if ($review_result) {
         $review_result->free();

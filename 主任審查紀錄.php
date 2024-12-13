@@ -46,7 +46,7 @@ LEFT JOIN
 LEFT JOIN 
     支付方式 AS p ON b.`count` = p.`count`
 WHERE 
-    p.國字金額 >= 5000";
+    p.國字金額 >= 1000";
 
 // 加入搜尋條件
 if (!empty($search_serial)) {

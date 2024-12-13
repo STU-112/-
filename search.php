@@ -6,7 +6,8 @@
     <title>查詢表單資料</title>
 </head>
 <body>
-
+<div class="container">
+    <div class="form-container" aria-labelledby="formTitle">
     <h1>查詢表單資料</h1>
 
     <!-- 搜尋單號表單 -->
@@ -86,32 +87,50 @@
 
         // 檢查是否有結果
         if ($result->num_rows > 0) {
+			
+			
+			
+			echo"
+			<link rel='stylesheet' href='style表單.css'>";
+			
+
+			
             echo "<h2>查詢結果:</h2>";
             // 輸出每行資料
             while ($row = $result->fetch_assoc()) {
                 echo "<div class='form-group'>
                         <label for='受款人'>受款人姓名：<span class='required-star'>*</span></label>
-                        <input type='text' id='受款人' name='受款人' value='" . htmlspecialchars($row['受款人']) . "' required>
+                        <input type='text' id='受款人' name='受款人' value='" . htmlspecialchars($row['受款人']) . "' required readonly>
                     </div>";
 
                 echo "<div class='form-group'>
                         <label for='填表日期'>填表日期：<span class='required-star'>*</span></label>
-                        <input type='text' id='填表日期' name='填表日期' value='" . htmlspecialchars($row['填表日期']) . "' required>
+                        <input type='text' id='填表日期' name='填表日期' value='" . htmlspecialchars($row['填表日期']) . "' required readonly>
                     </div>";
 
                 echo "<div class='form-group'>
                         <label for='付款日期'>付款日期：<span class='required-star'>*</span></label>
-                        <input type='text' id='付款日期' name='付款日期' value='" . htmlspecialchars($row['付款日期']) . "' required>
+                        <input type='text' id='付款日期' name='付款日期' value='" . htmlspecialchars($row['付款日期']) . "' required readonly>
                     </div>";
 
                 echo "<div class='form-group'>
                         <label for='支出項目'>支出項目：<span class='required-star'>*</span></label>
-                        <input type='text' id='支出項目' name='支出項目' value='" . htmlspecialchars($row['支出項目']) . "' required>
+                        <input type='text' id='支出項目' name='支出項目' value='" . htmlspecialchars($row['支出項目']) . "' required readonly>
                     </div>";
+					echo "<div class='form-group'>
+                        <label for='說明'>說明：<span class='required-star'>*</span></label>
+                        <input type='text' id='說明' name='說明' value='" . htmlspecialchars($row['說明']) . "' required readonly>
+                    </div>";
+					
+					echo "<div class='form-group'>
+                        <label for='支付方式'>支付方式：<span class='required-star'>*</span></label>
+                        <input type='text' id='支付方式' name='支付方式' value='" . htmlspecialchars($row['支付方式']) . "' required readonly>
+                    </div>";
+					
 
                 echo "<div class='form-group'>
-                        <label for='國字金額'>國字金額：<span class='required-star'>*</span></label>
-                        <input type='text' id='國字金額' name='國字金額' value='" . htmlspecialchars($row['國字金額']) . "' required>
+                        <label for='國字金額'>金額：<span class='required-star'>*</span></label>
+                        <input type='text' id='國字金額' name='國字金額' value='" . htmlspecialchars($row['國字金額']) . "' required readonly>
                     </div>";
             }
         } else {
@@ -123,5 +142,7 @@
 
     $conn->close(); // 關閉資料庫連接
     ?>
+	</div>
+	</div>
 </body>
 </html>

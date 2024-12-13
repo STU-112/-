@@ -3,7 +3,7 @@
 $server = 'localhost:3307'; // 伺服器名稱
 $用戶名 = 'root'; // 用戶名
 $密碼 = '3307'; // 密碼 (設為空字串)
-$資料庫 = '綜合'; // 資料庫名稱
+$資料庫 = '預支'; // 資料庫名稱
 
 // 連接到 MySQL
 $連接 = mysqli_connect($server, $用戶名, $密碼);
@@ -27,9 +27,9 @@ if (!mysqli_select_db($連接, $資料庫)) {
 }
 
 // 創建資料表（基本資料、支出資料、說明、支付方式）
-$create_基本資料_sql = "CREATE TABLE IF NOT EXISTS 基本資料1 (
-    `count` VARCHAR(50) NOT NULL UNIQUE,
-    受款人 VARCHAR(50) NOT NULL,
+$create_基本資料_sql = "CREATE TABLE IF NOT EXISTS 基本資料 (
+    `count` VARCHAR(15) NOT NULL UNIQUE,
+    受款人 VARCHAR(10) NOT NULL,
     填表日期 DATE NOT NULL,
     付款日期 DATE DEFAULT NULL,
     PRIMARY KEY (`count`)
@@ -41,14 +41,14 @@ if (mysqli_query($連接, $create_基本資料_sql)) {
     die("創建基本資料表失敗: " . mysqli_error($連接) . "<br>");
 }
 
-$create_支出項目_sql = "CREATE TABLE IF NOT EXISTS 支出項目1 (
-    `count` VARCHAR(50) NOT NULL,
-    支出項目 VARCHAR(50) NOT NULL,
+$create_支出項目_sql = "CREATE TABLE IF NOT EXISTS 支出項目 (
+    `count` VARCHAR(15) NOT NULL,
+    支出項目 VARCHAR(10) NOT NULL,
     活動名稱 VARCHAR(50) DEFAULT NULL,
     專案日期 DATE DEFAULT NULL,
     獎學金人數 INT DEFAULT NULL,
-    專案名稱 CHAR(10) DEFAULT NULL,
-    主題 CHAR(50) DEFAULT NULL,
+    專案名稱 CHAR(20) DEFAULT NULL,
+    主題 CHAR(20) DEFAULT NULL,
     獎學金日期 DATE DEFAULT NULL,
     經濟扶助 CHAR(10) DEFAULT NULL,
     其他項目 CHAR(50) DEFAULT NULL,
@@ -62,8 +62,8 @@ if (mysqli_query($連接, $create_支出項目_sql)) {
     die("創建支出資料表失敗: " . mysqli_error($連接) . "<br>");
 }
 
-$create_說明_sql = "CREATE TABLE IF NOT EXISTS 說明1 (
-    `count` VARCHAR(50) NOT NULL UNIQUE,
+$create_說明_sql = "CREATE TABLE IF NOT EXISTS 說明 (
+    `count` VARCHAR(15) NOT NULL UNIQUE,
     說明 CHAR(100) DEFAULT NULL,
     PRIMARY KEY (`count`),
     FOREIGN KEY (`count`) REFERENCES 基本資料(`count`) ON DELETE CASCADE
@@ -75,11 +75,11 @@ if (mysqli_query($連接, $create_說明_sql)) {
     die("創建說明資料表失敗: " . mysqli_error($連接) . "<br>");
 }
 
-$create_支付方式_sql = "CREATE TABLE IF NOT EXISTS 支付方式1 (
-    `count` VARCHAR(50) NOT NULL UNIQUE,
+$create_支付方式_sql = "CREATE TABLE IF NOT EXISTS 支付方式 (
+    `count` VARCHAR(15) NOT NULL UNIQUE,
     支付方式 CHAR(10) NOT NULL,
     國字金額 DECIMAL(10,2),
-    國字金額_hidden CHAR(50),
+    國字金額_hidden CHAR(20),
     簽收金額 DECIMAL(10,2) DEFAULT NULL,
     簽收人 CHAR(10) DEFAULT NULL,
     簽收日 DATE DEFAULT NULL,
@@ -89,7 +89,7 @@ $create_支付方式_sql = "CREATE TABLE IF NOT EXISTS 支付方式1 (
     帳號 CHAR(10) DEFAULT NULL,
     票號 CHAR(10) DEFAULT NULL,
     到期日 DATE DEFAULT NULL,
-    付款金額 DECIMAL(10,2) DEFAULT NULL,
+    預支金額 DECIMAL(10,2) DEFAULT NULL,
     PRIMARY KEY (`count`),
     FOREIGN KEY (`count`) REFERENCES 基本資料(`count`) ON DELETE CASCADE
 ) ENGINE=InnoDB;";
@@ -100,7 +100,7 @@ if (mysqli_query($連接, $create_支付方式_sql)) {
     die("創建支付方式資料表失敗: " . mysqli_error($連接) . "<br>");
 }
 
-// 生成帶有 'B' + 民國年 + 月 + 5位數序號的流水號函數
+// 生成帶有 'A' + 民國年 + 月 + 5位數序號的流水號函數
 function generateSerialNumber($連接) {
     // 取得當前時間
     $now = new DateTime();
@@ -171,7 +171,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $帳號 = !empty($_POST['帳號']) ? "'" . mysqli_real_escape_string($連接, $_POST['帳號']) . "'" : "NULL";
     $票號 = !empty($_POST['票號']) ? "'" . mysqli_real_escape_string($連接, $_POST['票號']) . "'" : "NULL";
     $到期日 = !empty($_POST['到期日']) ? "'" . mysqli_real_escape_string($連接, $_POST['到期日']) . "'" : "NULL";
-    $付款金額 = !empty($_POST['付款金額']) ? "'" . mysqli_real_escape_string($連接, $_POST['付款金額']) . "'" : "NULL";
+    $預支金額 = !empty($_POST['預支金額']) ? "'" . mysqli_real_escape_string($連接, $_POST['預支金額']) . "'" : "NULL";
 
     // 開始事務處理
     mysqli_begin_transaction($連接);
@@ -216,9 +216,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
         // 插入支付方式資料
         $insert_支付方式_sql = "INSERT INTO 支付方式 
-            (`count`, 支付方式, 國字金額, 國字金額_hidden, 簽收金額, 簽收人, 簽收日, 銀行郵局, 分行, 戶名, 帳號, 票號, 到期日, 付款金額)
+            (`count`, 支付方式, 國字金額, 國字金額_hidden, 簽收金額, 簽收人, 簽收日, 銀行郵局, 分行, 戶名, 帳號, 票號, 到期日, 預支金額)
             VALUES 
-            ('$流水號', '$支付方式', '$國字金額', '$國字金額_hidden', $簽收金額, $簽收人, $簽收日, $銀行郵局, $分行, $戶名, $帳號, $票號, $到期日, $付款金額)";
+            ('$流水號', '$支付方式', '$國字金額', '$國字金額_hidden', $簽收金額, $簽收人, $簽收日, $銀行郵局, $分行, $戶名, $帳號, $票號, $到期日, $預支金額)";
 
         if (!mysqli_query($連接, $insert_支付方式_sql)) {
             throw new Exception("插入支付方式資料失敗: " . mysqli_error($連接));
@@ -228,7 +228,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         mysqli_commit($連接);
 
         echo "表單已成功提交!!<br>";
-        header("Location: 登入.html");
+        header("Location: ll1.html");
         exit(); // 確保停止執行後續代碼
 
     } catch (Exception $e) {

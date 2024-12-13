@@ -160,7 +160,7 @@ while ($row = $result->fetch_assoc()) {
 
 
 		// 查詢執行長審核意見是否存在
-        $sql_director_opinion3 = "SELECT 審核意見 FROM 執行長審核意見 WHERE 單號 = '$serial_count' LIMIT 1";
+        $sql_director_opinion3 = "SELECT 審核意見 FROM 執行長審核意見,狀態 WHERE 單號 = '$serial_count' LIMIT 1";
         $execution_result = $db_link_review->query($sql_director_opinion3);
 
 		// 查詢董事長審核意見是否存在
@@ -183,14 +183,14 @@ while ($row = $result->fetch_assoc()) {
     if ($execution_result && $execution_result->num_rows > 0) {
         $review_row = $execution_result->fetch_assoc();
         $opinion3 = $review_row["審核意見"];
-		
+		if ($status == '通過') {
 		
         // 如果尚未有董事長的審核意見，則顯示這筆資料
         if ($execution_cashier && $execution_cashier->num_rows > 0) {
 			continue;
         }
 			$opinion4 = "<span style='color: orange;'>未審核</span>";
-            
+            if ($status == '通過') {
         
 
         echo "<tr class='second-row'>";
@@ -214,7 +214,9 @@ while ($row = $result->fetch_assoc()) {
         if ($director_result) {
             $director_result->free();
         }
-    }
+    
+	}
+		}
 
     // 釋放督導審核意見結果集
     if ($review_result) {
@@ -222,6 +224,7 @@ while ($row = $result->fetch_assoc()) {
     }
 }
 }
+	}
 }
     echo "</table>";
 } else {

@@ -272,7 +272,7 @@ echo "
 
         // 釋放結果集
         $review_result->free();
-    }
+}
     echo "</table>";
 } else {
     echo "<p style='text-align:center;'>沒有資料可顯示。</p>";

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>預表單</title>
+    <title>預支表單</title>
     <style>
     :root {
         /* 色彩定義 */
@@ -451,7 +451,7 @@
         <!-- 金額 -->
         <div class="form-group">
           <label for="國字金額">金額：<span class="required-star">*</span></label>
-          <input type="number" id="國字金額" name="國字金額" placeholder="請輸入金額" min="0" required aria-required="true" oninput="convertAmountToChinese()">
+          <input type="number" id="國字金額" name="金額" placeholder="請輸入金額" min="0" required aria-required="true" oninput="convertAmountToChinese()">
           <span class="currency-unit"></span>
           <!-- 隱藏欄位用來儲存國字金額 -->
           <input type="hidden" id="國字金額_hidden" name="國字金額_hidden">
@@ -518,7 +518,7 @@
           <!-- 新增「請輸入預支金額」欄位 -->
           <div class="form-group">
             <label for="預支金額">請輸入預支金額：<span class="required-star">*</span></label>
-            <input type="number" id="預支金額" name="預支金額" min="0" required>
+            <input type="number" id="預支金額" name="結餘繳回" min="0" required>
             <span class="error-message" id="預支金額-error"></span>
           </div>
         </div>
