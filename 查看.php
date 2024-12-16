@@ -44,9 +44,7 @@ SELECT
     d.說明,
 	p.`count`,
 	p.支付方式,
-    p.國字金額,
-	p.國字金額_hidden,
-	p.簽收金額,
+    p.金額,
 	p.簽收人,
 	p.簽收日,
 	p.銀行郵局,
@@ -55,7 +53,7 @@ SELECT
 	p.帳號,
 	p.票號,
 	p.到期日,
-	p.預支金額
+	p.結餘繳回
 	
 FROM 
     基本資料 AS b
@@ -85,7 +83,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['status']) && isset($_P
     $serial_count = $_POST['serial_count'];  // 單號
 
     // 查詢金額
-    $sql = "SELECT 國字金額 FROM pay_table WHERE count = ?";
+    $sql = "SELECT 金額 FROM pay_table WHERE count = ?";
     $stmt = $db_link->prepare($sql);
     $stmt->bind_param("s", $serial_count);
     $stmt->execute();
@@ -93,7 +91,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['status']) && isset($_P
     $row = $result->fetch_assoc();
 
     // 取得金額
-    $amount = $row['國字金額'];
+    $amount = $row['金額'];
 
     // 這裡不再依金額判斷，而是統一傳送給出納
     $sql_update = "UPDATE pay_table SET status = ?, opinion = ?, next_audit = '出納' WHERE count = ?";
@@ -130,9 +128,7 @@ if ($result && $result->num_rows > 0) {
         "其他項目" => "其他項目",
         "說明" => "說明",
         "支付方式" => "支付方式",
-        "國字金額" => "金額",
-        "國字金額_hidden" => "國字金額",
-        "簽收金額" => "簽收金額",
+        "金額" => "金額",
         "簽收人" => "簽收人",
         "簽收日" => "簽收日",
         "銀行郵局" => "銀行/郵局",
@@ -141,7 +137,7 @@ if ($result && $result->num_rows > 0) {
         "帳號" => "帳號",
         "票號" => "票號",
         "到期日" => "到期日",
-        "預支金額" => "預支金額"
+        "結餘繳回" => "結餘繳回"
     ];
     echo "
     <form method='post' action='督導審核意見.php'>

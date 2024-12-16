@@ -30,7 +30,7 @@ SELECT
     b.填表日期,
     s.支出項目,
     d.說明,
-    p.國字金額
+    p.金額
 FROM 
     基本資料 AS b
 LEFT JOIN 
@@ -40,7 +40,7 @@ LEFT JOIN
 LEFT JOIN 
     支付方式 AS p ON b.`count` = p.`count`
 WHERE 
-    p.國字金額 >= 1000";
+    p.金額 >= 1000";
 
 $result = $db_link_預支->query($sql);
 
@@ -181,7 +181,7 @@ while ($row = $result->fetch_assoc()) {
         echo "<tr class='second-row'>";
         echo "<td>" . $row["count"] . "</td>";
         echo "<td>" . $row["受款人"] . "</td>";
-        echo "<td>" . $row["國字金額"] . "</td>";
+        echo "<td>" . $row["金額"] . "</td>";
         echo "<td>" . $row["支出項目"] . "</td>";
         echo "<td>" . $opinion1 . "</td>";
         echo "<td>" . $opinion2 . "</td>";

@@ -3,8 +3,7 @@
 $servername = "localhost:3307";
 $username = "root";
 $password = "3307";
-
-// 連接到 op2 資料庫
+// 連接到 預支 資料庫
 $dbname_預支 = "預支";
 $db_link_預支 = new mysqli($servername, $username, $password, $dbname_預支);
 
@@ -30,7 +29,7 @@ SELECT
     b.填表日期,
     s.支出項目,
     d.說明,
-    p.國字金額
+    p.金額
 FROM 
     基本資料 AS b
 LEFT JOIN 
@@ -40,12 +39,12 @@ LEFT JOIN
 LEFT JOIN 
     支付方式 AS p ON b.`count` = p.`count`
 WHERE 
-    p.國字金額  >= 10000";
+    p.金額  >= 50000";	
 
 $result = $db_link_預支->query($sql);
 // 顯示資料
 if ($result && $result->num_rows > 0) {
-    echo "
+   echo "
     <style>
 	* {
             margin: 0;
@@ -160,12 +159,14 @@ while ($row = $result->fetch_assoc()) {
 
 
 		// 查詢執行長審核意見是否存在
-        $sql_director_opinion3 = "SELECT 審核意見 FROM 執行長審核意見,狀態 WHERE 單號 = '$serial_count' LIMIT 1";
+        $sql_director_opinion3 = "SELECT 審核意見,狀態 FROM 執行長審核意見 WHERE 單號 = '$serial_count' LIMIT 1";
         $execution_result = $db_link_review->query($sql_director_opinion3);
 
-		// 查詢董事長審核意見是否存在
+// 查詢董事長審核意見是否存在
         $sql_director_opinion4 = "SELECT 審核意見 FROM 董事長審核意見 WHERE 單號 = '$serial_count' LIMIT 1";
         $execution_cashier = $db_link_review->query($sql_director_opinion4);
+
+
 
 
 
@@ -174,63 +175,56 @@ while ($row = $result->fetch_assoc()) {
         $review_row = $review_result->fetch_assoc();
         $opinion1 = $review_row["審核意見"];
 		
+		
+		
 		// 檢查主任是否有審核意見，且執行長尚未審核
     if ($director_result && $director_result->num_rows > 0) {
         $review_row = $director_result->fetch_assoc();
         $opinion2 = $review_row["審核意見"];
 		
+		
 		// 檢查執行長是否有審核意見，且董事長尚未審核
     if ($execution_result && $execution_result->num_rows > 0) {
         $review_row = $execution_result->fetch_assoc();
         $opinion3 = $review_row["審核意見"];
-		if ($status == '通過') {
-		
-        // 如果尚未有董事長的審核意見，則顯示這筆資料
+		$status = $review_row["狀態"]; 
+				 
+				 // 如果尚未有董事長的審核意見，則顯示這筆資料
         if ($execution_cashier && $execution_cashier->num_rows > 0) {
 			continue;
         }
 			$opinion4 = "<span style='color: orange;'>未審核</span>";
             if ($status == '通過') {
+
+
+				 
+				 
         
 
         echo "<tr class='second-row'>";
         echo "<td>" . $row["count"] . "</td>";
         echo "<td>" . $row["受款人"] . "</td>";
-        echo "<td>" . $row["國字金額"] . "</td>";
-		echo "<td>" . $opinion1 . "</td>";
+        echo "<td>" . $row["金額"] . "</td>";
+        echo "<td>" . $opinion1 . "</td>";
         echo "<td>" . $opinion2 . "</td>";
         echo "<td>" . $opinion3 . "</td>";
-        echo "<td>" . $opinion4 . "</td>";
+		echo "<td>" . $opinion4 . "</td>";
         echo "<td>
             <form method='post' action='董事長審查處理.php'>
                 <input type='hidden' name='count' value='" . $row["count"] . "'>
                 <button type='submit' name='review'>審查</button>
             </form>
         </td>";
-		
         echo "</tr>";
-
-        // 釋放主任審核意見結果集
-        if ($director_result) {
-            $director_result->free();
         }
-    
-	}
-		}
-
-    // 釋放督導審核意見結果集
-    if ($review_result) {
-        $review_result->free();
+    }
     }
 }
-}
-	}
 }
     echo "</table>";
 } else {
     echo "<p style='text-align:center;'>無資料顯示</p>";
 }
-
 
 // 釋放結果集
 if ($result) {

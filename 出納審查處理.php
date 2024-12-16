@@ -42,9 +42,7 @@ SELECT
     d.說明,
 	p.`count`,
 	p.支付方式,
-    p.國字金額,
-	p.國字金額_hidden,
-	p.簽收金額,
+    p.金額,
 	p.簽收人,
 	p.簽收日,
 	p.銀行郵局,
@@ -53,7 +51,7 @@ SELECT
 	p.帳號,
 	p.票號,
 	p.到期日,
-	p.預支金額
+	p.結餘繳回
 	
 FROM 
     基本資料 AS b
@@ -65,6 +63,7 @@ LEFT JOIN
     支付方式 AS p ON b.`count` = p.`count`
 WHERE 
     b.`count` = ?";
+
     $stmt = $db_link->prepare($sql);
     $stmt->bind_param("s", $search_count);
     $stmt->execute();
@@ -82,7 +81,6 @@ if ($result && $result->num_rows > 0) {
         "填表日期" => "填表日期",
         "付款日期" => "付款日期",
         "支出項目" => "支出項目",
-        "活動名稱" => "活動名稱",
         "專案日期" => "專案日期",
         "獎學金人數" => "獎學金人數",
         "專案名稱" => "專案名稱",
@@ -92,9 +90,7 @@ if ($result && $result->num_rows > 0) {
         "其他項目" => "其他項目",
         "說明" => "說明",
         "支付方式" => "支付方式",
-        "國字金額" => "金額",
-        "國字金額_hidden" => "國字金額",
-        "簽收金額" => "簽收金額",
+        "金額" => "金額",
         "簽收人" => "簽收人",
         "簽收日" => "簽收日",
         "銀行郵局" => "銀行/郵局",
@@ -103,11 +99,23 @@ if ($result && $result->num_rows > 0) {
         "帳號" => "帳號",
         "票號" => "票號",
         "到期日" => "到期日",
-        "預支金額" => "預支金額"
+        "結餘繳回" => "結餘繳回"
     ];
 	echo "
     <form method='post' action='出納審核意見.php'>
     <style>
+	 * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            height: 100%;
+            width: 100%;
+            font-family: 'Noto Sans TC', Arial, sans-serif;
+            background: linear-gradient(to bottom, #e8dff2, #f5e8fc);
+            color: #333;
+        }
         table {
             width: 50%;
             margin: 20px auto;
@@ -179,10 +187,33 @@ if ($result && $result->num_rows > 0) {
         button[type='button']:hover {
             background-color: #666;
         }
+		.banner {
+            width: 100%;
+            background: linear-gradient(to bottom, #e8dff2, #f5e8fc); /* 淡紫色漸層 */
+            color: #333;
+            display: flex;
+           justify-content: flex-start;
+            align-items: center;
+            padding: 10px 20px;
+            box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.2); /* 陰影效果 */
+        }
+        .banner a {
+            color: #5a3d2b;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 1.2em;
+        }
+        .banner a:hover {
+            color: #007bff; /* 當滑鼠懸停時變換顏色 */
+        }
     </style>
     
     <table>
     <caption>檢視申請項目</caption>";
+	echo "
+    <div class='banner'>
+        <a style='align-items: left;' href='出納.php'>◀</a>
+    </div>";
 
    while ($row = $result->fetch_assoc()) {
         foreach ($row as $key => $value) {

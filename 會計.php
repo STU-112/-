@@ -29,7 +29,7 @@ SELECT
     b.填表日期,
     s.支出項目,
     d.說明,
-    p.國字金額
+    p.金額
 FROM 
     基本資料 AS b
 LEFT JOIN 
@@ -39,13 +39,27 @@ LEFT JOIN
 LEFT JOIN 
     支付方式 AS p ON b.`count` = p.`count`
 WHERE 
-    p.國字金額 IS NOT NULL";
+    p.金額 IS NOT NULL";
 
 $result = $db_link_預支->query($sql);
 // 顯示資料
 if ($result && $result->num_rows > 0) {
-	 echo "
-    <style>
+   
+    
+    
+    echo "
+    <div class='banner' style='gap: 20px;'>
+		<a href='會計審查紀錄.php'>審查紀錄</a>
+		<a href='登入.html'>登出</a>
+    </div>";echo "<table>";
+	
+    echo "<caption>會計審核</caption>";
+    echo "<tr>";
+    echo "<th>單號</th><th>受款人</th><th>金額</th><th>督導意見</th><th>主任意見</th><th>執行長意見</th><th>董事長意見</th><th>操作</th>";
+    echo "</tr>";
+
+    while ($row = $result->fetch_assoc()) {
+		echo"<style>
 	* {
             margin: 0;
             padding: 0;
@@ -111,98 +125,100 @@ if ($result && $result->num_rows > 0) {
         }
 
     </style>";
-	echo "
-    <div class='banner' style='gap: 20px;'>
-		<a href='會計審查紀錄.php'>審查紀錄</a>
-		<a href='登入.html'>登出</a>
-    </div>";
-    echo "<table>";
-    echo "<caption>會計審核</caption>";
-    echo "<tr>";
-    echo "<th>單號</th><th>受款人</th><th>金額</th><th>督導意見</th><th>主任意見</th><th>執行長意見</th><th>董事長意見</th><th>操作</th>";
-    echo "</tr>";
-
-    while ($row = $result->fetch_assoc()) {
+	
+		
+		
         $serial_count = $row["count"];
         $opinion1 = $opinion2 = $opinion3 = $opinion4 = "<span style='color: orange;'>無須審核</span>";
 
-        // 查詢督導審核意見
+        // 查詢各階段的審核意見
         $sql_review_opinion1 = "SELECT 審核意見,狀態 FROM 督導審核意見 WHERE 單號 = '$serial_count' LIMIT 1";
         $review_result = $db_link_review->query($sql_review_opinion1);
-
-        // 查詢主任審核意見
         $sql_director_opinion2 = "SELECT 審核意見,狀態 FROM 主任審核意見 WHERE 單號 = '$serial_count' LIMIT 1";
         $director_result = $db_link_review->query($sql_director_opinion2);
-
-        // 查詢執行長審核意見
         $sql_exec_opinion3 = "SELECT 審核意見,狀態 FROM 執行長審核意見 WHERE 單號 = '$serial_count' LIMIT 1";
         $exec_result = $db_link_review->query($sql_exec_opinion3);
-
-        // 查詢董事長審核意見
         $sql_chair_opinion4 = "SELECT 審核意見,狀態 FROM 董事長審核意見 WHERE 單號 = '$serial_count' LIMIT 1";
         $chair_result = $db_link_review->query($sql_chair_opinion4);
-
+$sql_accounting_opinion5 = "SELECT 審核意見,狀態 FROM 會計審核意見 WHERE 單號 = '$serial_count' LIMIT 1";
+        $chair_accounting = $db_link_review->query($sql_accounting_opinion5);
         // 檢查條件
         $show_row = false;
-        if ($row["國字金額"] < 1000 && $review_result && $review_result->num_rows > 0) {
-			
-			
-            $review_row = $review_result->fetch_assoc();
-            $opinion1 = $review_row["審核意見"];
-			$status1 = $review_row["狀態"]; 
-            $show_row = true;
-			
-        } elseif ($row["國字金額"] < 5000 && $review_result && $review_result->num_rows > 0 && $director_result && $director_result->num_rows > 0) {
-			
-			
-            $review_row = $review_result->fetch_assoc();
-            $opinion1 = $review_row["審核意見"];
-            $director_row = $director_result->fetch_assoc();
-            $opinion2 = $director_row["審核意見"];
-			$status2 = $director_row["狀態"]; 
-			$show_row = true;
-			
-        } elseif ($row["國字金額"] <= 50000 && $review_result && $review_result->num_rows > 0 && $director_result && $director_result->num_rows > 0 && $exec_result && $exec_result->num_rows > 0) {
-			
-			
-			$review_row = $review_result->fetch_assoc();
-            $opinion1 = $review_row["審核意見"];
-            $director_row = $director_result->fetch_assoc();
-            $opinion2 = $director_row["審核意見"];
-            $exec_row = $exec_result->fetch_assoc();
-            $opinion3 = $exec_row["審核意見"];
-			$status3 = $exec_row["狀態"]; 
-            $show_row = true;
-			
-        } elseif ($row["國字金額"] > 50000 && $review_result && $review_result->num_rows > 0 && $director_result && $director_result->num_rows > 0 && $exec_result && $exec_result->num_rows > 0 && $chair_result && $chair_result->num_rows > 0) {
-			
-			
-			$review_row = $review_result->fetch_assoc();
-            $opinion1 = $review_row["審核意見"];
-            $director_row = $director_result->fetch_assoc();
-            $opinion2 = $director_row["審核意見"];
-            $exec_row = $exec_result->fetch_assoc();
-            $opinion3 = $exec_row["審核意見"];
-            $chair_row = $chair_result->fetch_assoc();
-            $opinion4 = $chair_row["審核意見"];
-			$status4 = $chair_row["狀態"]; 
-            $show_row = true;
-			
+
+        // 督導審核
+        if ($row["金額"] < 1000) {
+            if ($review_result && $review_result->num_rows > 0) {
+                $review_row = $review_result->fetch_assoc();
+                $opinion1 = $review_row["審核意見"];
+                $status1 = $review_row["狀態"]; 
+                if ($status1 == '通過') {
+                    $show_row = true;
+                }
+            }
         }
-		// 檢查所有狀態是否為通過
-    if ($show_row && $status1 == '通過' && isset($status2) && $status2 == '通過') {
+        // 主任審核
+        elseif ($row["金額"] < 5000) {
+            if ($review_result && $review_result->num_rows > 0 && $director_result && $director_result->num_rows > 0) {
+                $review_row = $review_result->fetch_assoc();
+                $opinion1 = $review_row["審核意見"];
+                $director_row = $director_result->fetch_assoc();
+                $opinion2 = $director_row["審核意見"];
+                $status2 = $director_row["狀態"]; 
+                if ($status2 == '通過') {
+                    $show_row = true;
+                }
+            }
+        }
+        // 執行長審核
+        elseif ($row["金額"] < 50000) {
+            if ($review_result && $review_result->num_rows > 0 && $director_result && $director_result->num_rows > 0 && $exec_result && $exec_result->num_rows > 0) {
+                $review_row = $review_result->fetch_assoc();
+                $opinion1 = $review_row["審核意見"];
+                $director_row = $director_result->fetch_assoc();
+                $opinion2 = $director_row["審核意見"];
+                $exec_row = $exec_result->fetch_assoc();
+                $opinion3 = $exec_row["審核意見"];
+                $status3 = $exec_row["狀態"]; 
+                if ($status3 == '通過') {
+                    $show_row = true;
+                }
+            }
+        }
+        // 董事長審核
+        elseif ($row["金額"] >= 50000) {
+            if ($review_result && $review_result->num_rows > 0 && $director_result && $director_result->num_rows > 0 && $exec_result && $exec_result->num_rows > 0 && $chair_result && $chair_result->num_rows > 0) {
+                $review_row = $review_result->fetch_assoc();
+                $opinion1 = $review_row["審核意見"];
+                $director_row = $director_result->fetch_assoc();
+                $opinion2 = $director_row["審核意見"];
+                $exec_row = $exec_result->fetch_assoc();
+                $opinion3 = $exec_row["審核意見"];
+                $chair_row = $chair_result->fetch_assoc();
+                $opinion4 = $chair_row["審核意見"];
+                $status4 = $chair_row["狀態"]; 
+                if ($status4 == '通過') {
+                    $show_row = true;
+                }
+            }
+        }
 		
+		// 如果尚未有會計的審核意見，則顯示這筆資料
+        if ($chair_accounting && $chair_accounting->num_rows > 0) {
+			continue;
+        }
+			
 
         // 顯示符合條件的資料
         if ($show_row) {
             echo "<tr class='second-row'>";
             echo "<td>" . $row["count"] . "</td>";
             echo "<td>" . $row["受款人"] . "</td>";
-            echo "<td>" . $row["國字金額"] . "</td>";
+            echo "<td>" . $row["金額"] . "</td>";
             echo "<td>" . $opinion1 . "</td>";
             echo "<td>" . $opinion2 . "</td>";
             echo "<td>" . $opinion3 . "</td>";
             echo "<td>" . $opinion4 . "</td>";
+			
             echo "<td>
                 <form method='post' action='會計審查處理.php'>
                     <input type='hidden' name='count' value='" . $row["count"] . "'>
@@ -211,9 +227,7 @@ if ($result && $result->num_rows > 0) {
             </td>";
             echo "</tr>";
         }
-    
-	}
-	}
+    }
     echo "</table>";
 } else {
     echo "<p style='text-align:center;'>無資料顯示</p>";

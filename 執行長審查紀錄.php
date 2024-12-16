@@ -31,7 +31,7 @@ SELECT
     b.填表日期,
     s.支出項目,
     d.說明,
-    p.國字金額
+    p.金額
 FROM 
     基本資料 AS b
 LEFT JOIN 
@@ -41,7 +41,7 @@ LEFT JOIN
 LEFT JOIN 
     支付方式 AS p ON b.`count` = p.`count`
 WHERE 
-    p.國字金額  >= 5000";	
+    p.金額  >= 5000";	
 	
 // 加入搜尋條件
 if (!empty($search_serial)) {
@@ -247,7 +247,7 @@ echo "
         echo "<tr class='second-row'>";
         echo "<td>" . $row["count"] . "</td>";
         echo "<td>" . $row["受款人"] . "</td>";
-        echo "<td>" . $row["國字金額"] . "</td>";
+        echo "<td>" . $row["金額"] . "</td>";
         echo "<td>" . $row["填表日期"] . "</td>";
         echo "<td>" . $row["支出項目"] . "</td>";
         echo "<td>" . $status . "</td>"; // 顯示審核狀態
@@ -259,9 +259,9 @@ echo "
                 <button type='submit' name='review'>查看</button>
             </form>
 			
-			<form method='post' action='審核結果.php'>
+			<form method='post' action='審核意見.php'>
                 <input type='hidden' name='count' value='" . $row["count"] . "'>
-                <button type='submit' name='結果'>結果</button>
+                <button type='submit' name='意見'>意見</button>
             </form>
 			</div>
 			</div>
@@ -269,7 +269,7 @@ echo "
         </td>";
         echo "</tr>";
 
-        // 釋放結果集
+        // 釋放意見集
         $review_result->free();
     }
     echo "</table>";

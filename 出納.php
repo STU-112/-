@@ -29,7 +29,7 @@ SELECT
     b.填表日期,
     s.支出項目,
     d.說明,
-    p.國字金額
+    p.金額
 FROM 
     基本資料 AS b
 LEFT JOIN 
@@ -39,7 +39,7 @@ LEFT JOIN
 LEFT JOIN 
     支付方式 AS p ON b.`count` = p.`count`
 WHERE 
-    p.國字金額 IS NOT NULL";
+    p.金額 IS NOT NULL";
 
 $result = $db_link_預支->query($sql);
 // 顯示資料
@@ -146,11 +146,13 @@ if ($result && $result->num_rows > 0) {
         $sql_chair_opinion5 = "SELECT 審核意見,狀態 FROM 會計審核意見 WHERE 單號 = '$serial_count' LIMIT 1";
         $accounting_result = $db_link_review->query($sql_chair_opinion5);
 
-
+// 查詢會計審核意見
+        $sql_chair_opinion6 = "SELECT 審核意見,狀態 FROM 出納審核意見 WHERE 單號 = '$serial_count' LIMIT 1";
+        $cashier_result = $db_link_review->query($sql_chair_opinion6);
 
         // 檢查條件
         $show_row = false;
-        if ($row["國字金額"] < 1000 && $review_result && $review_result->num_rows > 0 && $accounting_result && $accounting_result->num_rows > 0) {
+        if ($row["金額"] < 1000 && $review_result && $review_result->num_rows > 0 && $accounting_result && $accounting_result->num_rows > 0) {
             $review_row = $review_result->fetch_assoc();
             $opinion1 = $review_row["審核意見"];
 			
@@ -160,7 +162,7 @@ if ($result && $result->num_rows > 0) {
 			
 			
 			
-        } elseif ($row["國字金額"] < 5000 && $review_result && $review_result->num_rows > 0 && $director_result && $director_result->num_rows > 0 && $accounting_result && $accounting_result->num_rows > 0) {
+        } elseif ($row["金額"] < 5000 && $review_result && $review_result->num_rows > 0 && $director_result && $director_result->num_rows > 0 && $accounting_result && $accounting_result->num_rows > 0) {
             $review_row = $review_result->fetch_assoc();
             $opinion1 = $review_row["審核意見"];
             $director_row = $director_result->fetch_assoc();
@@ -172,7 +174,7 @@ if ($result && $result->num_rows > 0) {
 			
 			
 			
-        } elseif ($row["國字金額"] <= 50000 && $review_result && $review_result->num_rows > 0 && $director_result && $director_result->num_rows > 0 && $exec_result && $exec_result->num_rows > 0 && $accounting_result && $accounting_result->num_rows > 0) {
+        } elseif ($row["金額"] <= 50000 && $review_result && $review_result->num_rows > 0 && $director_result && $director_result->num_rows > 0 && $exec_result && $exec_result->num_rows > 0 && $accounting_result && $accounting_result->num_rows > 0) {
 			$review_row = $review_result->fetch_assoc();
             $opinion1 = $review_row["審核意見"];
             $director_row = $director_result->fetch_assoc();
@@ -186,7 +188,7 @@ if ($result && $result->num_rows > 0) {
 			
 			
 			
-        } elseif ($row["國字金額"] > 50000 && $review_result && $review_result->num_rows > 0 && $director_result && $director_result->num_rows > 0 && $exec_result && $exec_result->num_rows > 0 && $chair_result && $chair_result->num_rows > 0 && $accounting_result && $accounting_result->num_rows > 0) {
+        } elseif ($row["金額"] > 50000 && $review_result && $review_result->num_rows > 0 && $director_result && $director_result->num_rows > 0 && $exec_result && $exec_result->num_rows > 0 && $chair_result && $chair_result->num_rows > 0 && $accounting_result && $accounting_result->num_rows > 0) {
 			$review_row = $review_result->fetch_assoc();
             $opinion1 = $review_row["審核意見"];
             $director_row = $director_result->fetch_assoc();
@@ -200,20 +202,26 @@ if ($result && $result->num_rows > 0) {
             $opinion5 = $chair_row["審核意見"];
             $show_row = true;
         }
+		
+		// 如果尚未有會計的審核意見，則顯示這筆資料
+        if ($cashier_result && $cashier_result->num_rows > 0) {
+			continue;
+        }
+			
 
         // 顯示符合條件的資料
         if ($show_row) {
             echo "<tr class='second-row'>";
             echo "<td>" . $row["count"] . "</td>";
             echo "<td>" . $row["受款人"] . "</td>";
-            echo "<td>" . $row["國字金額"] . "</td>";
+            echo "<td>" . $row["金額"] . "</td>";
             echo "<td>" . $opinion1 . "</td>";
             echo "<td>" . $opinion2 . "</td>";
             echo "<td>" . $opinion3 . "</td>";
             echo "<td>" . $opinion4 . "</td>";
 			echo "<td>" . $opinion5 . "</td>";
             echo "<td>
-                <form method='post' action='會計審查處理.php'>
+                <form method='post' action='出納審查處理.php'>
                     <input type='hidden' name='count' value='" . $row["count"] . "'>
                     <button type='submit' name='review'>審查</button>
                 </form>
