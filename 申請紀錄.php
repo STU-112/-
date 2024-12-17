@@ -185,13 +185,18 @@ echo "
         $status = "<span style='color: orange;'>待審核</span>";
 
         // 判斷督導審核狀態
+		
+		
         if ($review_result && $review_result->num_rows > 0) {
             $review_row = $review_result->fetch_assoc();
             $opinion = $review_row["狀態"];
 
             // 根據督導審核意見判斷狀態
             if ($opinion == "通過") {
-                $status = "<span style='color: green;'>主任審核中</span>";
+				// if ($row["金額"] < 1000) {
+				// $status = "<span style='color: green;'>會計審核中</span>";}
+                // else{
+				$status = "<span style='color: green;'>主任審核中</span>";
                 
                 // 查詢主任審核意見
                 $sql_director_opinion = "SELECT 狀態 FROM 主任審核意見 WHERE 單號 = '$serial_count' LIMIT 1";

@@ -78,9 +78,7 @@ if (mysqli_query($連接, $create_說明_sql)) {
 $create_支付方式_sql = "CREATE TABLE IF NOT EXISTS 支付方式 (
     `count` VARCHAR(15) NOT NULL UNIQUE,
     支付方式 CHAR(10) NOT NULL,
-    國字金額 DECIMAL(10,2),
-    國字金額_hidden CHAR(20),
-    簽收金額 DECIMAL(10,2) DEFAULT NULL,
+    金額 DECIMAL(10,2),
     簽收人 CHAR(10) DEFAULT NULL,
     簽收日 DATE DEFAULT NULL,
     銀行郵局 CHAR(10) DEFAULT NULL,
@@ -89,7 +87,7 @@ $create_支付方式_sql = "CREATE TABLE IF NOT EXISTS 支付方式 (
     帳號 CHAR(10) DEFAULT NULL,
     票號 CHAR(10) DEFAULT NULL,
     到期日 DATE DEFAULT NULL,
-    預支金額 DECIMAL(10,2) DEFAULT NULL,
+    結餘繳回	DECIMAL(10,2) DEFAULT NULL,
     PRIMARY KEY (`count`),
     FOREIGN KEY (`count`) REFERENCES 基本資料(`count`) ON DELETE CASCADE
 ) ENGINE=InnoDB;";
@@ -100,7 +98,7 @@ if (mysqli_query($連接, $create_支付方式_sql)) {
     die("創建支付方式資料表失敗: " . mysqli_error($連接) . "<br>");
 }
 
-// 生成帶有 'A' + 民國年 + 月 + 5位數序號的流水號函數
+// 生成帶有 'B' + 民國年 + 月 + 5位數序號的流水號函數
 function generateSerialNumber($連接) {
     // 取得當前時間
     $now = new DateTime();
@@ -132,7 +130,7 @@ function generateSerialNumber($連接) {
 // 處理表單提交
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     // 驗證必填字段
-    $必填字段 = ['填表日期', '受款人', '支出項目', '支付方式', '國字金額'];
+    $必填字段 = ['填表日期', '受款人', '支出項目', '支付方式', '金額'];
     foreach ($必填字段 as $field) {
         if (empty($_POST[$field])) {
             die("請填寫所有必填字段。");
@@ -160,9 +158,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
     // 支付方式
     $支付方式 = mysqli_real_escape_string($連接, $_POST['支付方式']);
-    $國字金額 = isset($_POST['國字金額']) ? mysqli_real_escape_string($連接, $_POST['國字金額']) : '';
-    $國字金額_hidden = isset($_POST['國字金額_hidden']) ? mysqli_real_escape_string($連接, $_POST['國字金額_hidden']) : '';
-    $簽收金額 = !empty($_POST['簽收金額']) ? "'" . mysqli_real_escape_string($連接, $_POST['簽收金額']) . "'" : "NULL";
+    $金額 = isset($_POST['金額']) ? mysqli_real_escape_string($連接, $_POST['金額']) : '';
+    
+    
     $簽收人 = !empty($_POST['簽收人']) ? "'" . mysqli_real_escape_string($連接, $_POST['簽收人']) . "'" : "NULL";
     $簽收日 = !empty($_POST['簽收日']) ? "'" . mysqli_real_escape_string($連接, $_POST['簽收日']) . "'" : "NULL";
     $銀行郵局 = !empty($_POST['銀行郵局']) ? "'" . mysqli_real_escape_string($連接, $_POST['銀行郵局']) . "'" : "NULL";
@@ -171,7 +169,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $帳號 = !empty($_POST['帳號']) ? "'" . mysqli_real_escape_string($連接, $_POST['帳號']) . "'" : "NULL";
     $票號 = !empty($_POST['票號']) ? "'" . mysqli_real_escape_string($連接, $_POST['票號']) . "'" : "NULL";
     $到期日 = !empty($_POST['到期日']) ? "'" . mysqli_real_escape_string($連接, $_POST['到期日']) . "'" : "NULL";
-    $預支金額 = !empty($_POST['預支金額']) ? "'" . mysqli_real_escape_string($連接, $_POST['預支金額']) . "'" : "NULL";
+    $結餘繳回 = !empty($_POST['結餘繳回']) ? "'" . mysqli_real_escape_string($連接, $_POST['預支金額']) . "'" : "NULL";
 
     // 開始事務處理
     mysqli_begin_transaction($連接);
@@ -216,9 +214,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
         // 插入支付方式資料
         $insert_支付方式_sql = "INSERT INTO 支付方式 
-            (`count`, 支付方式, 國字金額, 國字金額_hidden, 簽收金額, 簽收人, 簽收日, 銀行郵局, 分行, 戶名, 帳號, 票號, 到期日, 預支金額)
+            (`count`, 支付方式, 金額,  簽收人, 簽收日, 銀行郵局, 分行, 戶名, 帳號, 票號, 到期日, 結餘繳回)
             VALUES 
-            ('$流水號', '$支付方式', '$國字金額', '$國字金額_hidden', $簽收金額, $簽收人, $簽收日, $銀行郵局, $分行, $戶名, $帳號, $票號, $到期日, $預支金額)";
+            ('$流水號', '$支付方式', '$金額', $簽收人, $簽收日, $銀行郵局, $分行, $戶名, $帳號, $票號, $到期日, $結餘繳回)";
 
         if (!mysqli_query($連接, $insert_支付方式_sql)) {
             throw new Exception("插入支付方式資料失敗: " . mysqli_error($連接));
@@ -228,7 +226,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         mysqli_commit($連接);
 
         echo "表單已成功提交!!<br>";
-        header("Location: ll1.html");
+        header("Location: 登入.html");
         exit(); // 確保停止執行後續代碼
 
     } catch (Exception $e) {

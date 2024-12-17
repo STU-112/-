@@ -35,7 +35,7 @@ if ($serial_count) {
         if ($result && $result->num_rows > 0) {
             $row = $result->fetch_assoc();
             $opinions[$role] = htmlspecialchars($row["審核意見"]);
-            $result->free(); // 確認結果集正確後釋放資源
+            $result->free(); // 確認結果集正確後釋放資源	
         }
     }
 
