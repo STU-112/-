@@ -1,4 +1,4 @@
-<?php
+<?php 
 // 設定資料庫連線參數
 $servername = "localhost:3307";
 $username = "root";
@@ -53,17 +53,45 @@ if (!file_exists($uploadDir)) {
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $serialNumber = generateSerialNumber($conn);
     $單據張數 = isset($_POST['單據張數']) ? intval($_POST['單據張數']) : 0;
-    $isNoUpload = isset($_POST['no-upload']);
 
-    if ($isNoUpload) {
+    if (isset($_POST['no-upload'])) {
         // 不需要上傳情況
         $sql = "INSERT INTO uploads (count, image_path, csv_path, 單據張數) VALUES (?, ?, ?, ?)";
         $stmt = $conn->prepare($sql);
         $emptyValue = "--";
         $stmt->bind_param("sssi", $serialNumber, $emptyValue, $emptyValue, $單據張數);
-        $pageBackgroundColor = "#fdf2e9"; // 更改背景色
-        $successMessage = "不需要上傳，資料已成功儲存，流水號：{$serialNumber}";
-    } else if (isset($_FILES["image"]) && isset($_FILES["csv"])) {
+
+        if ($stmt->execute()) {
+            echo <<<HTML
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>好的</title>
+    <style>
+        body {
+            background-color: #fdf2e9;
+            text-align: center;
+            padding: 50px;
+        }
+    </style>
+    <script>
+        setTimeout(() => {
+            window.location.href = "綜合.html";
+        }, 3000);
+    </script>
+</head>
+<body>
+    <h1>好的~</h1>
+    <p>3秒後跳轉回主頁...</p>
+</body>
+</html>
+HTML;
+        } else {
+            echo "儲存資料失敗：" . $stmt->error;
+        }
+    } elseif (isset($_FILES["image"]) && isset($_FILES["csv"])) {
         // 需要上傳情況
         $imageName = basename($_FILES["image"]["name"]);
         $imagePath = $uploadDir . $imageName;
@@ -76,12 +104,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $sql = "INSERT INTO uploads (count, image_path, csv_path, 單據張數) VALUES (?, ?, ?, ?)";
         $stmt = $conn->prepare($sql);
         $stmt->bind_param("sssi", $serialNumber, $imagePath, $csvPath, $單據張數);
-        $pageBackgroundColor = "#e6ffed"; // 需要上傳的背景色
-        $successMessage = "資料已成功儲存，流水號：{$serialNumber}";
-    }
 
-    if ($stmt->execute()) {
-        echo <<<HTML
+        if ($stmt->execute()) {
+            echo <<<HTML
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
@@ -90,52 +115,29 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <title>上傳成功</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
-            background-color: {$pageBackgroundColor};
+            background-color: #e6ffed;
             text-align: center;
             padding: 50px;
-            margin: 0;
-        }
-        .success-box {
-            background-color: #fff;
-            color: #333;
-            border: 1px solid #ccc;
-            border-radius: 12px;
-            padding: 30px;
-            margin: 50px auto;
-            width: 50%;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        }
-        .success-box h1 {
-            font-size: 28px;
-            margin-bottom: 20px;
-        }
-        .success-box p {
-            font-size: 18px;
-            margin: 10px 0;
-        }
-        .success-box p span {
-            font-weight: bold;
         }
     </style>
     <script>
         setTimeout(() => {
             window.location.href = "綜合.html";
-        }, 3000); // 3秒後跳轉
+        }, 3000);
     </script>
 </head>
 <body>
-    <div class="success-box">
-        <h1>上傳成功</h1>
-        <p>{$successMessage}</p>
-        <p>3秒後將跳轉到主頁...</p>
-    </div>
+    <h1>上傳成功</h1>
+    <p>資料已儲存，流水號：{$serialNumber}</p>
+    <p>3秒後跳轉回主頁...</p>
 </body>
 </html>
 HTML;
-    } else {
-        echo "儲存資料失敗：" . $stmt->error;
+        } else {
+            echo "儲存資料失敗：" . $stmt->error;
+        }
     }
+
     $stmt->close();
 }
 
