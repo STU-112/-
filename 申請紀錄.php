@@ -1,4 +1,18 @@
 <?php
+
+
+session_start();
+
+// 檢查是否已登入
+if (!isset($_SESSION['帳號'])) {
+    header("Location: 申請紀錄.php");
+    exit;
+}
+
+// 獲取用戶帳號
+$current_user = $_SESSION['帳號'];
+
+
 // 資料庫連線參數
 $servername = "localhost:3307";
 $username = "root";
@@ -146,7 +160,11 @@ if ($result && $result->num_rows > 0) {
     </style>";
 		
 echo "<div class='banner'>
-        <a style='align-items: left;' href='申請.html'>◀</a>
+            
+
+        <a style='align-items: left;' onclick='history.back()'>◀</a>
+		
+		<div sytle='justify-content: flex-end;'>歡迎，" . htmlspecialchars($current_user) . "！</div>
     </div>";
 	
 

@@ -1,4 +1,13 @@
 <?php
+
+session_start(); // 啟動 Session
+if (!isset($_SESSION['帳號'])) {
+    echo "<script>alert('請先登入！'); window.location.href = '登入.html';</script>";
+    exit();
+}
+$帳號 = $_SESSION['帳號']; // 獲取登入的帳號
+
+
 // 資料庫連線參數
 $servername = "localhost:3307";
 $username = "root";
@@ -123,16 +132,23 @@ if ($result && $result->num_rows > 0) {
             color: #5a3d2b;
             text-decoration: none;
             font-weight: bold;
+			text-align:left;
             font-size: 1.2em;
         }
+		
         .banner a:hover {
             color: #007bff;
         }
     </style>";
+	
+	
+	
+	
     echo "
     <div class='banner' style='gap: 20px;'>
-        <a href='督導審查紀錄.php'>審查紀錄</a>
-        <a href='登入.html'>登出</a>
+    <span>歡迎，". htmlspecialchars($帳號) ."！</span> 
+	<a href='督導審查紀錄.php'>審查紀錄</a>
+    <a href='登出.php'>登出</a>
     </div>";
 
     echo "<table>";

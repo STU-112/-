@@ -23,7 +23,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['search'])) {
     
     $sql = "
     SELECT 
-        b.`count` AS 單號,
+        b.count AS 單號,
         b.受款人,
         b.填表日期,
         b.付款日期,
@@ -51,12 +51,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['search'])) {
     FROM 
         基本資料 AS b
     LEFT JOIN 
-        支出項目 AS s ON b.`count` = s.`count`
+        支出項目 AS s ON b.count = s.count
     LEFT JOIN 
-        說明 AS d ON b.`count` = d.`count`
+        說明 AS d ON b.count = d.count
     LEFT JOIN 
-        支付方式 AS p ON b.`count` = p.`count`
-    WHERE b.`count` = ?";
+        支付方式 AS p ON b.count = p.count
+    WHERE b.count = ?";
     
     $stmt = mysqli_prepare($連接, $sql);
     mysqli_stmt_bind_param($stmt, 's', $單號); // 綁定單號
@@ -261,9 +261,6 @@ mysqli_close($連接);
         background-color: var(--button-hover-background-color);
         transform: translateY(-3px);
     }
-	.form-group {
-            flex: 1;
-        }
 
     /* 統一勾選欄位的樣式 */
     .form-group input[type="checkbox"],
@@ -353,11 +350,6 @@ mysqli_close($連接);
         display: flex;
         justify-content: center;
     }
-	.form-row {
-            display: flex;
-            gap: 20px;
-            margin-bottom: 20px;
-        }
 
     .modal-content button {
         padding: 10px 20px;
@@ -367,6 +359,11 @@ mysqli_close($連接);
         cursor: pointer;
         margin: 0 10px;
     }
+	.form-row {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
 
     .modal-content .close-btn {
         background-color: var(--button-background-color);
@@ -391,18 +388,16 @@ mysqli_close($連接);
 <body>
     <div class="container">
         <h1>搜尋單號</h1>
-        <form action="核銷.php" method="POST">
-            <input type="text" name="單號" placeholder="輸入單號" value="<?php echo htmlspecialchars($單號); ?>" >
+        <form method="POST" action="">
+            <input type="text" name="search" placeholder="輸入單號" value="<?php echo htmlspecialchars($單號); ?>" required>
             <button type="submit">搜尋</button>
-        
+        </form>
         <div>
             <h2>搜尋結果</h2>
-			
+			<form id="paymentForm" action="核銷.php" method="POST">
 <?php if (!empty($搜尋結果)): ?>
-     <table border="1">
-        
+    <table border="1">        
         <tbody>
-        
             <?php foreach ($搜尋結果 as $row): ?>
                 <?php foreach ($row as $key => $value): ?>
                     <tr>					
@@ -411,20 +406,24 @@ mysqli_close($連接);
                     </tr>
                 <?php endforeach; ?>                
             <?php endforeach; ?>
-			 </tbody>
+        </tbody>
     </table>
-	<div class="form-row">
-    <div class="form-group">
-	<label for="金額">實支金額：<span class="required-star">*</span></label>
-	 <input type="number" id="預支金額" name="實支金額" min="0" placeholder="請輸入預支後使用金額" required>
-	 </div>
-	 <div class="form-group">
-	 <label for="金額">結餘：<span class="required-star">*</span></label>
-	 <input type="number" id="預支金額" name="結餘繳回" min="0" placeholder="請輸入剩餘金額" >
-	 </div>
-	</div>
 	
-	
+	<?php
+	echo "<div class='form-group'>
+                        <label for='單號'>單號：<span class='required-star'>*</span></label>
+                        <input type='text' id='單號' name='單號' value='" . htmlspecialchars($row['單號']) . "' required readonly>
+                    </div>";?>		
+				<div class="form-row">
+               <div class="form-group">
+                   <label for="金額">實支金額：<span class="required-star">*</span></label>
+                   <input type="number" id="實支金額" name="實支金額" min="0" placeholder="請輸入預支後使用金額" required>
+               </div>
+               <div class="form-group">
+                   <label for="金額">結餘：<span class="required-star">*</span></label>
+                   <input type="number" id="結餘繳回" name="結餘繳回" min="0" placeholder="請輸入剩餘金額">
+                            </div>
+                        </div>
 <?php else: ?>
     <p>請輸入單號進行搜尋。</p>
 <?php endif; ?>

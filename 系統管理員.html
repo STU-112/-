@@ -51,13 +51,17 @@
     </style>
 </head>
 <body>
-
+<div class="banner">
+    <span>歡迎，<?php echo htmlspecialchars($帳號); ?>！</span> <!-- 顯示登入的帳號 -->
+    <a href="登出.php" style="align-items: right;">登出</a>
+</div>
     <div class="container">
         <h1>系統管理員</h1>
 
         <div class="button-container">
             <button class="button" onclick="location.href='系統管理員.php'">已註冊帳號密碼</button>
             <button class="button" onclick="location.href='註冊.html'">新增使用者</button>
+			<button class="button" onclick="location.href='職位設定.php'">職位設定</button>
         </div>
     </div>
 
