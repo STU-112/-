@@ -35,7 +35,7 @@ WHERE
 if ($result && $result->num_rows > 0) {
 	
 	
-	include '審核人介面style.php';//include OK
+	include '審查紀錄style.php';//include OK
 	
     
 	

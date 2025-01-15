@@ -28,7 +28,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
         if ($帳號 === $admin_username && $密碼 === $admin_password) {
             $_SESSION['帳號'] = $帳號; // 儲存到 Session
-            echo "<script>alert('登入成功，歡迎管理員！'); window.location.href = '系統管理員.html';</script>";
+            echo "<script>alert('登入成功，歡迎管理員！'); window.location.href = '系統管理員.php';</script>";
         } else {
             $帳號 = $連接->real_escape_string($帳號);
             $密碼 = $連接->real_escape_string($密碼);

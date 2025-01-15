@@ -1,301 +1,516 @@
-<!DOCTYPE html>   
+<!DOCTYPE html>    
 <html lang="zh-Hant">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>預支表單</title>
+    <title>預支請款表單</title>
     <style>
-    :root {
-        /* 色彩定義 */
-        --primary-color: #4A90E2; /* 天藍色 */
-        --secondary-color: #50E3C2; /* 淺綠色 */
-        --accent-color-1: #F5A623; /* 橙色 */
-        --accent-color-2: #9013FE; /* 紫色 */
-        --background-color: #F0F4F8; /* 淺灰背景 */
-        --card-background-color: rgba(255, 255, 255, 0.95); /* 半透明白色 */
-        --input-border-color: #CCCCCC; /* 淺灰邊框 */
-        --input-focus-border-color: var(--primary-color); /* 聚焦邊框 */
-        --button-background-color: var(--primary-color); /* 按鈕主色 */
-        --button-hover-background-color: #357ABD; /* 按鈕懸停色 */
-        --label-color: #333333; /* 深灰標籤 */
-        --text-color: #333333; /* 深灰文字 */
-        --border-color: #DDDDDD; /* 淺灰邊框 */
-        --error-color: red; /* 錯誤訊息紅色 */
-        --transition-speed: 0.3s;
-        --font-family: 'Poppins', sans-serif;
-    }
+   :root {
+    /* 色彩定義 */
+    --primary-color: #4A90E2; /* 天藍色 */
+    --secondary-color: #50E3C2; /* 淺綠色 */
+    --accent-color-1: #F5A623; /* 橙色 */
+    --accent-color-2: #9013FE; /* 紫色 */
+    --background-color: #F0F4F8; /* 淺灰背景 */
+    --card-background-color: rgba(255, 255, 255, 0.95); /* 半透明白色 */
+    --input-border-color: #CCCCCC; /* 淺灰邊框 */
+    --input-focus-border-color: var(--primary-color); /* 聚焦邊框 */
+    --button-background-color: var(--primary-color); /* 按鈕主色 */
+    --button-hover-background-color: #357ABD; /* 按鈕懸停色 */
+    --label-color: #333333; /* 深灰標籤 */
+    --text-color: #333333; /* 深灰文字 */
+    --border-color: #DDDDDD; /* 淺灰邊框 */
+    --error-color: red; /* 錯誤訊息紅色 */
+    --transition-speed: 0.3s;
+    --font-family: 'Poppins', sans-serif;
+    --shadow-color: rgba(0, 0, 0, 0.1);
+    --hover-shadow: rgba(0, 0, 0, 0.2);
+    --animation-duration: 0.5s;
+}
 
-    * {
-        box-sizing: border-box;
-    }
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
 
-    body {
-        font-family: var(--font-family);
-        background-color: var(--background-color);
-        background-image: url('background-pattern.png'); /* 背景圖案 */
-        background-size: cover;
-        background-repeat: no-repeat;
-        background-position: center;
-        padding: 20px;
-        margin: 0;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        min-height: 100vh;
-        color: var(--text-color);
-    }
+body {
+    font-family: var(--font-family);
+    background-color: var(--background-color);
+    background-image: url('background-pattern.png'); /* 背景圖案 */
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center;
+    padding: 20px;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    color: var(--text-color);
+    position: relative;
+    /* 移除 overflow: hidden 以允許頁面滑動 */
+    overflow-y: auto;
+}
 
+/* 動態背景動畫 */
+body::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: linear-gradient(45deg, var(--accent-color-1), var(--accent-color-2));
+    animation: rotateBackground 30s linear infinite;
+    opacity: 0.05;
+    z-index: -1;
+}
+
+@keyframes rotateBackground {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.container {
+    width: 100%;
+    max-width: 800px;
+    padding: 60px;
+    background: var(--card-background-color);
+    border-radius: 20px;
+    box-shadow: 0 15px 30px var(--shadow-color);
+    border: 1px solid var(--border-color);
+    backdrop-filter: blur(10px);
+    position: relative;
+    overflow: hidden;
+    transition: transform var(--transition-speed), box-shadow var(--transition-speed);
+    animation: fadeIn 1s ease forwards;
+    opacity: 0;
+    transform: translateY(20px);
+}
+
+@keyframes fadeIn {
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.container:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 20px 40px var(--hover-shadow);
+}
+
+.container::before, .container::after {
+    content: '';
+    position: absolute;
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    opacity: 0.2;
+    animation: float 6s ease-in-out infinite;
+}
+
+.container::before {
+    top: -50px;
+    right: -50px;
+    background: var(--accent-color-1);
+}
+
+.container::after {
+    bottom: -50px;
+    left: -50px;
+    background: var(--accent-color-2);
+}
+
+@keyframes float {
+    0%, 100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-20px);
+    }
+}
+
+h1 {
+    text-align: center;
+    color: var(--primary-color);
+    margin-bottom: 40px;
+    font-size: 2.5rem; /* 增大標題字體大小 */
+    font-weight: 700;
+    position: relative;
+    animation: fadeInDown var(--animation-duration) ease forwards;
+    opacity: 0;
+}
+
+@keyframes fadeInDown {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+form {
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+    animation: slideInUp var(--animation-duration) ease forwards;
+    opacity: 0;
+    transform: translateY(20px);
+}
+
+@keyframes slideInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    position: relative;
+    transition: transform var(--transition-speed);
+}
+
+.form-group:hover {
+    transform: scale(1.02);
+}
+
+.form-group label {
+    margin-bottom: 10px;
+    font-weight: 600;
+    color: var(--label-color); /* 保持標籤顏色為深灰 */
+    font-size: 1.1rem;
+    position: relative;
+}
+
+.form-group label::after {
+    content: '*';
+    color: var(--error-color);
+    margin-left: 5px;
+    opacity: 0;
+    transition: opacity var(--transition-speed);
+}
+
+.form-group input:focus + label::after,
+.form-group select:focus + label::after,
+.form-group textarea:focus + label::after {
+    opacity: 1;
+}
+
+input,
+select,
+textarea {
+    padding: 16px 18px;
+    font-size: 1rem;
+    border-radius: 10px;
+    border: 1px solid var(--input-border-color);
+    background-color: #FFFFFF;
+    transition: border-color var(--transition-speed), box-shadow var(--transition-speed), transform var(--transition-speed);
+    width: 100%;
+}
+
+input::placeholder,
+select option,
+textarea::placeholder {
+    color: #AAAAAA;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+    border-color: var(--input-focus-border-color);
+    box-shadow: 0 0 8px rgba(74, 144, 226, 0.5);
+    outline: none;
+    transform: scale(1.01);
+}
+
+input[type="checkbox"],
+input[type="radio"] {
+    width: auto;
+    margin-right: 10px;
+}
+
+.form-group .option-group {
+    display: flex;
+    align-items: center;
+}
+
+.form-group .option-group label {
+    margin-right: 20px;
+    font-weight: 500;
+}
+
+.conditional-group {
+    display: none;
+    padding: 25px;
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    background-color: #FFFFFF;
+    margin-top: 20px;
+    transition: all var(--transition-speed) ease;
+}
+
+button {
+    padding: 16px 18px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #FFFFFF;
+    background-color: var(--button-background-color);
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: background-color var(--transition-speed), transform 0.2s, box-shadow var(--transition-speed);
+    width: 100%;
+    position: relative;
+    overflow: hidden;
+    /* 添加按鈕動畫 */
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+button::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: rgba(255, 255, 255, 0.2);
+    transform: translate(-50%, -50%) rotate(45deg);
+    transition: all 0.5s;
+    opacity: 0;
+}
+
+button:hover::after {
+    opacity: 1;
+    transform: translate(-50%, -50%) rotate(0deg);
+}
+
+button:hover {
+    background-color: var(--button-hover-background-color);
+    transform: translateY(-3px) scale(1.02);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+}
+
+/* 統一勾選欄位的樣式 */
+.form-group input[type="checkbox"],
+.form-group input[type="radio"] {
+    margin-right: 10px;
+}
+
+.form-group .option-group {
+    display: flex;
+    align-items: center;
+}
+
+.form-group .option-group label {
+    margin-right: 20px;
+    font-weight: 500;
+}
+
+/* 錯誤訊息樣式 */
+.error-message {
+    color: var(--error-color);
+    font-size: 0.9rem;
+    margin-top: 5px;
+    display: none;
+    opacity: 0;
+    transition: opacity var(--transition-speed);
+}
+
+input:invalid + .error-message,
+select:invalid + .error-message,
+textarea:invalid + .error-message {
+    display: block;
+    opacity: 1;
+}
+
+/* 響應式設計 */
+@media (max-width: 768px) {
     .container {
-        width: 100%;
-        max-width: 800px;
-        padding: 60px;
-        background: var(--card-background-color);
-        border-radius: 20px;
-        box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
-        border: 1px solid var(--border-color);
-        backdrop-filter: blur(10px);
-        position: relative;
-        overflow: hidden;
-    }
-
-    .container::before {
-        content: '';
-        position: absolute;
-        top: -50px;
-        right: -50px;
-        width: 150px;
-        height: 150px;
-        background: var(--accent-color-1);
-        border-radius: 50%;
-        opacity: 0.2;
-    }
-
-    .container::after {
-        content: '';
-        position: absolute;
-        bottom: -50px;
-        left: -50px;
-        width: 150px;
-        height: 150px;
-        background: var(--accent-color-2);
-        border-radius: 50%;
-        opacity: 0.2;
+        padding: 40px 30px;
     }
 
     h1 {
-        text-align: center;
-        color: var(--primary-color);
-        margin-bottom: 40px;
-        font-size: 2.5rem; /* 增大標題字體大小 */
-        font-weight: 700;
+        font-size: 2rem; /* 調整小螢幕下的標題字體大小 */
     }
 
     form {
-        display: flex;
-        flex-direction: column;
-        gap: 30px;
-    }
-
-    .form-group {
-        display: flex;
-        flex-direction: column;
-        width: 100%;
-    }
-
-    .form-group label {
-        margin-bottom: 10px;
-        font-weight: 600;
-        color: var(--label-color); /* 保持標籤顏色為深灰 */
-        font-size: 1.1rem;
+        gap: 20px;
     }
 
     input,
     select,
     textarea {
-        padding: 16px 18px;
-        font-size: 1rem;
-        border-radius: 10px;
-        border: 1px solid var(--input-border-color);
-        background-color: #FFFFFF;
-        transition: border-color var(--transition-speed), box-shadow var(--transition-speed);
-        width: 100%;
-    }
-
-    input::placeholder,
-    select option,
-    textarea::placeholder {
-        color: #AAAAAA;
-    }
-
-    input:focus,
-    select:focus,
-    textarea:focus {
-        border-color: var(--input-focus-border-color);
-        box-shadow: 0 0 8px rgba(74, 144, 226, 0.5);
-        outline: none;
-    }
-
-    input[type="checkbox"],
-    input[type="radio"] {
-        width: auto;
-        margin-right: 10px;
-    }
-
-    .form-group .option-group {
-        display: flex;
-        align-items: center;
-    }
-
-    .form-group .option-group label {
-        margin-right: 20px;
-        font-weight: 500;
-    }
-
-    .conditional-group {
-        display: none;
-        padding: 25px;
-        border: 1px solid var(--border-color);
-        border-radius: 10px;
-        background-color: #FFFFFF;
-        margin-top: 20px;
-        transition: all var(--transition-speed) ease;
+        padding: 14px 16px;
     }
 
     button {
-        padding: 16px 18px;
-        font-size: 1.1rem;
-        font-weight: 600;
-        color: #FFFFFF;
-        background-color: var(--button-background-color);
-        border: none;
-        border-radius: 10px;
-        cursor: pointer;
-        transition: background-color var(--transition-speed), transform 0.2s;
-        width: 100%;
+        padding: 14px 16px;
+    }
+}
+
+@media (max-width: 480px) {
+    .container {
+        padding: 30px 20px;
     }
 
-    button:hover {
-        background-color: var(--button-hover-background-color);
-        transform: translateY(-3px);
+    h1 {
+        font-size: 1.8rem; /* 進一步調整標題字體大小 */
     }
 
-    /* 統一勾選欄位的樣式 */
-    .form-group input[type="checkbox"],
-    .form-group input[type="radio"] {
-        margin-right: 10px;
+    form {
+        gap: 15px;
     }
 
-    .form-group .option-group {
-        display: flex;
-        align-items: center;
+    input,
+    select,
+    textarea {
+        padding: 12px 14px;
     }
 
-    .form-group .option-group label {
-        margin-right: 20px;
-        font-weight: 500;
+    button {
+        padding: 12px 14px;
     }
+}
 
-    /* 錯誤訊息樣式 */
-    .error-message {
-        color: var(--error-color);
-        font-size: 0.9rem;
-        margin-top: 5px;
-        display: none;
+/* 模態框樣式 */
+.modal {
+    display: none; /* 隱藏模態框 */
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0,0,0,0.5); /* 半透明背景 */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-content {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 10px;
+    width: 90%;
+    max-width: 400px;
+    text-align: center;
+    position: relative;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    animation: scaleIn 0.3s ease forwards;
+    transform: scale(0.8);
+    opacity: 0;
+}
+
+@keyframes scaleIn {
+    to {
+        transform: scale(1);
+        opacity: 1;
     }
+}
 
-    /* 響應式設計 */
-    @media (max-width: 768px) {
-        .container {
-            padding: 40px 30px;
-        }
+.modal-content h2 {
+    margin-top: 0;
+    color: var(--primary-color);
+    font-size: 1.5rem;
+}
 
-        h1 {
-            font-size: 2rem; /* 調整小螢幕下的標題字體大小 */
-        }
+.modal-content p {
+    color: var(--text-color);
+    margin: 20px 0;
+    font-size: 1rem;
+}
+
+.modal-content .modal-buttons {
+    display: flex;
+    justify-content: center;
+}
+
+.modal-content button {
+    padding: 10px 20px;
+    font-size: 1rem;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    margin: 0 10px;
+    transition: background-color var(--transition-speed), transform 0.2s;
+}
+
+.modal-content .close-btn {
+    background-color: var(--button-background-color);
+    color: #fff;
+}
+
+.modal-content .close-btn:hover {
+    background-color: var(--button-hover-background-color);
+    transform: scale(1.05);
+}
+
+/* 新增錯誤邊框樣式 */
+.input-error {
+    border-color: var(--error-color) !important;
+    box-shadow: 0 0 8px rgba(255, 0, 0, 0.2);
+}
+
+/* 顯示國字金額樣式 */
+.chinese-amount-display {
+    margin-top: 5px;
+    font-size: 1rem;
+    color: var(--primary-color);
+    animation: fadeInAmount 0.5s ease forwards;
+    opacity: 0;
+}
+
+@keyframes fadeInAmount {
+    to {
+        opacity: 1;
     }
+}
 
-    @media (max-width: 480px) {
-        .container {
-            padding: 30px 20px;
-        }
+/* 幽浮效果 */
+.form-container {
+    position: relative;
+    animation: popIn 0.5s ease forwards;
+    opacity: 0;
+    transform: scale(0.95);
+}
 
-        h1 {
-            font-size: 1.8rem; /* 進一步調整標題字體大小 */
-        }
+@keyframes popIn {
+    to {
+        opacity: 1;
+        transform: scale(1);
     }
+}
+#填表人 {
+    font-weight: bold;
+    font-size: 1rem;
+    color: #1A73E8; /* 添加一個明亮的藍色 */
+    background-color: transparent;
+    border: none;
+    outline: none;
+    text-align: left;
+    padding: 0;
+    margin: 0;
+}
 
-    /* 模態框樣式 */
-    .modal {
-        display: none; /* 隱藏模態框 */
-        position: fixed;
-        z-index: 1000;
-        left: 0;
-        top: 0;
-        width: 100%;
-        height: 100%;
-        overflow: auto;
-        background-color: rgba(0,0,0,0.5); /* 半透明背景 */
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
 
-    .modal-content {
-        background-color: #fff;
-        padding: 20px;
-        border-radius: 10px;
-        width: 90%;
-        max-width: 400px;
-        text-align: center;
-        position: relative;
-        box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-    }
-
-    .modal-content h2 {
-        margin-top: 0;
-        color: var(--primary-color);
-        font-size: 1.5rem;
-    }
-
-    .modal-content p {
-        color: var(--text-color);
-        margin: 20px 0;
-        font-size: 1rem;
-    }
-
-    .modal-content .modal-buttons {
-        display: flex;
-        justify-content: center;
-    }
-
-    .modal-content button {
-        padding: 10px 20px;
-        font-size: 1rem;
-        border: none;
-        border-radius: 5px;
-        cursor: pointer;
-        margin: 0 10px;
-    }
-
-    .modal-content .close-btn {
-        background-color: var(--button-background-color);
-        color: #fff;
-    }
-
-    .modal-content .close-btn:hover {
-        background-color: var(--button-hover-background-color);
-    }
-
-    .success-modal {
-        /* 與一般模態框相同樣式 */
-    }
-
-    /* 新增錯誤邊框樣式 */
-    .input-error {
-        border-color: var(--error-color) !important;
-        box-shadow: 0 0 8px rgba(255, 0, 0, 0.2);
-    }
-     </style>
+</style>
 </head>
 <body>
 
@@ -303,14 +518,23 @@
     <div class="form-container" aria-labelledby="formTitle">
       <form id="paymentForm" action="agg.php" method="POST" novalidate>
         <h1>財團法人台北市失親兒福利基金會</h1>
+		
+ <!-- 填表人員工編號 -->
+<div class="form-group">
+  <label for="填表人">填表人：</label>
+  <input type="text" id="填表人" name="填表人"  value="陳小姐TP318">
+</div>
 
-        <!-- 受款人姓名 -->
+
+ <!-- 受款人姓名 -->
         <div class="form-group">
           <label for="受款人">受款人姓名：<span class="required-star">*</span></label>
           <input type="text" id="受款人" name="受款人" placeholder="請輸入受款人姓名" required>
           <span class="error-message" id="受款人-error"></span>
         </div>
 
+        
+    
         <!-- 填表日期 -->
         <div class="form-group">
           <label for="填表日期">填表日期：<span class="required-star">*</span></label>
@@ -434,6 +658,17 @@
           <span class="error-message" id="說明-error"></span>
         </div>
 
+<!-- 金額 -->
+        <div class="form-group">
+          <label for="國字金額">金額：<span class="required-star">*</span></label>
+          <input type="number" id="國字金額" name="國字金額" placeholder="請輸入金額" min="0" required oninput="convertAmountToChinese()">
+          <!-- 隱藏欄位用來儲存國字金額 -->
+          <input type="hidden" id="國字金額_hidden" name="國字金額_hidden">
+          <!-- 新增顯示國字金額 -->
+          <div id="國字金額_display" class="chinese-amount-display"></div>
+          <span class="error-message" id="國字金額-error"></span>
+        </div>
+
         <!-- 支付方式 -->
         <div class="form-group">
           <label for="支付方式">支付方式：<span class="required-star">*</span></label>
@@ -448,30 +683,16 @@
           <span class="error-message" id="支付方式-error"></span>
         </div>
 
-        <!-- 金額 -->
-        <div class="form-group">
-          <label for="國字金額">金額：<span class="required-star">*</span></label>
-          <input type="number" id="國字金額" name="金額" placeholder="請輸入金額" min="0" required aria-required="true" oninput="convertAmountToChinese()">
-          <span class="currency-unit"></span>
-          <!-- 隱藏欄位用來儲存國字金額 -->
-          <input type="hidden" id="國字金額_hidden" name="國字金額_hidden">
-          <!-- 新增顯示國字金額 -->
-          <div id="國字金額_display" class="chinese-amount-display"></div>
-          <span class="error-message" id="國字金額-error"></span>
-        </div>
 
         <!-- 現金簽收欄位 -->
+		
         <div id="現金簽收欄位" class="conditional-group" style="display: none;">
           <div class="form-group">
             <label for="簽收金額">金額：<span class="required-star">*</span></label>
             <input type="number" id="簽收金額" name="簽收金額" min="0" required>
             <span class="error-message" id="簽收金額-error"></span>
           </div>
-          <div class="form-group">
-            <label for="簽收人">簽收人：<span class="required-star">*</span></label>
-            <input type="text" id="簽收人" name="簽收人" placeholder="請輸入簽收人" required>
-            <span class="error-message" id="簽收人-error"></span>
-          </div>
+        
           <div class="form-group">
             <label for="簽收日">簽收日：<span class="required-star">*</span></label>
             <input type="date" id="簽收日" name="簽收日" required>
@@ -518,7 +739,7 @@
           <!-- 新增「請輸入預支金額」欄位 -->
           <div class="form-group">
             <label for="預支金額">請輸入預支金額：<span class="required-star">*</span></label>
-            <input type="number" id="預支金額" name="結餘繳回" min="0" required>
+            <input type="number" id="預支金額" name="預支金額" min="0" required>
             <span class="error-message" id="預支金額-error"></span>
           </div>
         </div>
@@ -541,10 +762,6 @@
   </div>
 
   <script>
-    // 您現有的 JavaScript 代碼（包括上述修改）
-    // 以下為完整的 JavaScript 代碼，包含改進的 numberToChinese 函式和金額轉換顯示
-    // ...
-
     // 定義一個通用的特殊符號檢查函式
     function containsSpecialChars(str) {
         // 允許的字符：中文、英文、數字、空格
@@ -582,7 +799,7 @@
             受款人.classList.add('input-error');
             isValid = false;
         } else if (containsSpecialChars(受款人.value)) {
-            受款人Error.textContent = "姓名中不可包含特殊符號。";
+            受款人Error.textContent = "受款人中不可包含特殊符號。";
             受款人Error.style.display = 'block';
             受款人.classList.add('input-error');
             isValid = false;
@@ -802,15 +1019,15 @@
                 isValid = false;
             }
 
-            const 簽收人 = document.getElementById('簽收人');
-            const 簽收人Error = document.getElementById('簽收人-error');
+            const 簽收人 = document.getElementById('受款人');
+            const 簽收人Error = document.getElementById('受款人-error');
             if (!簽收人.value.trim()) {
-                簽收人Error.textContent = "請填寫簽收人。";
+                簽收人Error.textContent = "請填寫受款人姓名。";
                 簽收人Error.style.display = 'block';
                 簽收人.classList.add('input-error');
                 isValid = false;
             } else if (containsSpecialChars(簽收人.value)) {
-                簽收人Error.textContent = "簽收人中不可包含特殊符號。";
+                簽收人Error.textContent = "受款人中不可包含特殊符號。";
                 簽收人Error.style.display = 'block';
                 簽收人.classList.add('input-error');
                 isValid = false;
@@ -993,14 +1210,14 @@
 
         const amount = amountInput.value;
 
-        if (amount === '') {
+        if (amount === '' || parseFloat(amount) <= 0) {
             chineseDisplay.textContent = '';
             hiddenInput.value = '';
             return;
         }
 
         const integerAmount = Math.floor(parseFloat(amount));
-        const chineseAmount = numberToChinese(integerAmount) + "元整";
+        const chineseAmount = numberToChinese(integerAmount);
         chineseDisplay.textContent = chineseAmount;
         hiddenInput.value = chineseAmount;
     }
@@ -1012,32 +1229,37 @@
         const units = ["", "十", "百", "千", "萬", "十萬", "百萬", "千萬", "億"];
         let str = num.toString();
         let result = "";
-        let zeroCount = 0;
-
+        let zero = false;
+        
         for (let i = 0; i < str.length; i++) {
             const n = parseInt(str[i]);
-            const unit = units[str.length - i - 1];
+            const pos = str.length - i - 1;
+            const unit = units[pos];
+            
             if (n !== 0) {
-                if (zeroCount > 0) {
+                if (zero) {
                     result += digits[0];
-                    zeroCount = 0;
+                    zero = false;
                 }
-                // 使用「兩」而不是「二」在萬位以上的位置
                 if (n === 2 && (unit === "萬" || unit === "億")) {
                     result += "兩" + unit;
+                } else if (n === 1 && unit === "十" && pos === 1) {
+                    result += unit;
                 } else {
                     result += digits[n] + unit;
                 }
             } else {
-                zeroCount++;
+                if (pos % 4 !== 0) { // 忽略萬位、億位的零
+                    zero = true;
+                }
             }
         }
-
-        // 處理結尾的零
+        
+        // 去除尾部的零
         result = result.replace(/零+$/, '');
-        // 處理十位數的特殊情況
+        // 處理開頭的"一十"
         result = result.replace(/^一十/, "十");
-        return result;
+        return result + "元整";
     }
 
     function showSuccessModal() {
@@ -1115,7 +1337,7 @@
                 validateField(field);
             });
         });
-    };
+    }
 
     // 即時驗證函式
     function validateField(field) {
@@ -1169,8 +1391,7 @@
             field.classList.remove('input-error');
         }
     }
-</script>
+  </script>
 
 </body>
 </html>
-

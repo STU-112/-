@@ -160,10 +160,7 @@ if ($result && $result->num_rows > 0) {
     </style>";
 		
 echo "<div class='banner'>
-            
-
         <a style='align-items: left;' onclick='history.back()'>◀</a>
-		
 		<div sytle='justify-content: flex-end;'>歡迎，" . htmlspecialchars($current_user) . "！</div>
     </div>";
 	

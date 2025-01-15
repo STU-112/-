@@ -1,4 +1,9 @@
 <?php
+// 啟用錯誤報告
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
+
 // 連接資料庫
 $server = 'localhost:3307'; // 伺服器名稱
 $用戶名 = 'root'; // 用戶名
@@ -29,6 +34,7 @@ if (!mysqli_select_db($連接, $資料庫)) {
 // 創建資料表（基本資料、支出資料、說明、支付方式）
 $create_基本資料_sql = "CREATE TABLE IF NOT EXISTS 基本資料 (
     `count` VARCHAR(15) NOT NULL UNIQUE,
+    填表人 VARCHAR(10) NOT NULL,
     受款人 VARCHAR(10) NOT NULL,
     填表日期 DATE NOT NULL,
     付款日期 DATE DEFAULT NULL,
@@ -47,11 +53,11 @@ $create_支出項目_sql = "CREATE TABLE IF NOT EXISTS 支出項目 (
     活動名稱 VARCHAR(50) DEFAULT NULL,
     專案日期 DATE DEFAULT NULL,
     獎學金人數 INT DEFAULT NULL,
-    專案名稱 CHAR(20) DEFAULT NULL,
-    主題 CHAR(20) DEFAULT NULL,
+    專案名稱 VARCHAR(50) DEFAULT NULL, /* 改為 VARCHAR(50) */
+    主題 VARCHAR(50) DEFAULT NULL, /* 改為 VARCHAR(50) */
     獎學金日期 DATE DEFAULT NULL,
-    經濟扶助 CHAR(10) DEFAULT NULL,
-    其他項目 CHAR(50) DEFAULT NULL,
+    經濟扶助 VARCHAR(10) DEFAULT NULL,
+    其他項目 VARCHAR(255) DEFAULT NULL, /* 改為 VARCHAR(255) */
     PRIMARY KEY (`count`),
     FOREIGN KEY (`count`) REFERENCES 基本資料(`count`) ON DELETE CASCADE
 ) ENGINE=InnoDB;";
@@ -64,7 +70,7 @@ if (mysqli_query($連接, $create_支出項目_sql)) {
 
 $create_說明_sql = "CREATE TABLE IF NOT EXISTS 說明 (
     `count` VARCHAR(15) NOT NULL UNIQUE,
-    說明 CHAR(100) DEFAULT NULL,
+    說明 VARCHAR(255) DEFAULT NULL, /* 改為 VARCHAR(255) */
     PRIMARY KEY (`count`),
     FOREIGN KEY (`count`) REFERENCES 基本資料(`count`) ON DELETE CASCADE
 ) ENGINE=InnoDB;";
@@ -77,17 +83,16 @@ if (mysqli_query($連接, $create_說明_sql)) {
 
 $create_支付方式_sql = "CREATE TABLE IF NOT EXISTS 支付方式 (
     `count` VARCHAR(15) NOT NULL UNIQUE,
-    支付方式 CHAR(10) NOT NULL,
+    支付方式 VARCHAR(10) NOT NULL,
     金額 DECIMAL(10,2),
-    簽收人 CHAR(10) DEFAULT NULL,
     簽收日 DATE DEFAULT NULL,
-    銀行郵局 CHAR(10) DEFAULT NULL,
-    分行 CHAR(10) DEFAULT NULL,
-    戶名 CHAR(10) DEFAULT NULL,
-    帳號 CHAR(10) DEFAULT NULL,
-    票號 CHAR(10) DEFAULT NULL,
+    銀行郵局 VARCHAR(50) DEFAULT NULL, /* 增加長度 */
+    分行 VARCHAR(50) DEFAULT NULL, /* 增加長度 */
+    戶名 VARCHAR(50) DEFAULT NULL, /* 增加長度 */
+    帳號 VARCHAR(50) DEFAULT NULL, /* 增加長度 */
+    票號 VARCHAR(50) DEFAULT NULL, /* 增加長度 */
     到期日 DATE DEFAULT NULL,
-    結餘繳回	DECIMAL(10,2) DEFAULT NULL,
+    結餘繳回 DECIMAL(10,2) DEFAULT NULL,
     PRIMARY KEY (`count`),
     FOREIGN KEY (`count`) REFERENCES 基本資料(`count`) ON DELETE CASCADE
 ) ENGINE=InnoDB;";
@@ -98,19 +103,20 @@ if (mysqli_query($連接, $create_支付方式_sql)) {
     die("創建支付方式資料表失敗: " . mysqli_error($連接) . "<br>");
 }
 
-// 生成帶有 'A' + 民國年 + 月 + 5位數序號的流水號函數
+/// 生成帶有 'A' + 民國年 + 月 + 日 + 5位數序號的流水號函式
 function generateSerialNumber($連接) {
     // 取得當前時間
     $now = new DateTime();
     $year = $now->format('Y') - 1911; // 民國年
     $month = str_pad($now->format('m'), 2, '0', STR_PAD_LEFT); // 月份，兩位數
-    $prefix = "A{$year}{$month}"; // 前綴，如 A11311
+    $day = str_pad($now->format('d'), 2, '0', STR_PAD_LEFT); // 日，兩位數
+    $prefix = "A{$year}{$month}{$day}"; // 前綴，如 A1131125
 
-    // 查詢當前月份的最大流水號
+    // 查詢當前日期的最大流水號
     $sql = "SELECT MAX(`count`) AS max_count FROM 基本資料 WHERE `count` LIKE '{$prefix}%'";
     $result = mysqli_query($連接, $sql);
     if (!$result) {
-        die("查詢最大流水號失敗: " . mysqli_error($連接) . "<br>");
+        throw new Exception("查詢最大流水號失敗: " . mysqli_error($連接));
     }
     $row = mysqli_fetch_assoc($result);
     if ($row['max_count']) {
@@ -130,7 +136,7 @@ function generateSerialNumber($連接) {
 // 處理表單提交
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     // 驗證必填字段
-    $必填字段 = ['填表日期', '受款人', '支出項目', '支付方式', '金額'];
+    $必填字段 = ['填表日期', '受款人', '支出項目', '支付方式', '國字金額'];
     foreach ($必填字段 as $field) {
         if (empty($_POST[$field])) {
             die("請填寫所有必填字段。");
@@ -138,6 +144,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     }
 
     // 取得表單數據並進行轉義
+    $填表人 = mysqli_real_escape_string($連接, $_POST['填表人']);
     $受款人 = mysqli_real_escape_string($連接, $_POST['受款人']);
     $填表日期 = mysqli_real_escape_string($連接, $_POST['填表日期']);
     $付款日期 = !empty($_POST['付款日期']) ? "'" . mysqli_real_escape_string($連接, $_POST['付款日期']) . "'" : "NULL";
@@ -158,10 +165,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
     // 支付方式
     $支付方式 = mysqli_real_escape_string($連接, $_POST['支付方式']);
-    $金額 = isset($_POST['金額']) ? mysqli_real_escape_string($連接, $_POST['金額']) : '';
-    
-    
-    $簽收人 = !empty($_POST['簽收人']) ? "'" . mysqli_real_escape_string($連接, $_POST['簽收人']) . "'" : "NULL";
+    $金額 = isset($_POST['國字金額']) ? mysqli_real_escape_string($連接, $_POST['國字金額']) : '';
+
+    // 支付方式相關欄位
     $簽收日 = !empty($_POST['簽收日']) ? "'" . mysqli_real_escape_string($連接, $_POST['簽收日']) . "'" : "NULL";
     $銀行郵局 = !empty($_POST['銀行郵局']) ? "'" . mysqli_real_escape_string($連接, $_POST['銀行郵局']) . "'" : "NULL";
     $分行 = !empty($_POST['分行']) ? "'" . mysqli_real_escape_string($連接, $_POST['分行']) . "'" : "NULL";
@@ -169,7 +175,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $帳號 = !empty($_POST['帳號']) ? "'" . mysqli_real_escape_string($連接, $_POST['帳號']) . "'" : "NULL";
     $票號 = !empty($_POST['票號']) ? "'" . mysqli_real_escape_string($連接, $_POST['票號']) . "'" : "NULL";
     $到期日 = !empty($_POST['到期日']) ? "'" . mysqli_real_escape_string($連接, $_POST['到期日']) . "'" : "NULL";
-    $結餘繳回 = !empty($_POST['結餘繳回']) ? "'" . mysqli_real_escape_string($連接, $_POST['預支金額']) . "'" : "NULL";
+    $結餘繳回 = !empty($_POST['預支金額']) ? "'" . mysqli_real_escape_string($連接, $_POST['預支金額']) . "'" : "NULL";
 
     // 開始事務處理
     mysqli_begin_transaction($連接);
@@ -180,9 +186,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
         // 插入基本資料
         $insert_基本資料_sql = "INSERT INTO 基本資料 
-            (`count`, 受款人, 填表日期, 付款日期)
+            (`count`, 填表人, 受款人, 填表日期, 付款日期)
             VALUES 
-            ('$流水號', '$受款人', '$填表日期', $付款日期)";
+            ('$流水號', '$填表人', '$受款人', '$填表日期', $付款日期)";
 
         if (!mysqli_query($連接, $insert_基本資料_sql)) {
             if (mysqli_errno($連接) == 1062) { // 重複的 `count` 錯誤碼
@@ -214,9 +220,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
         // 插入支付方式資料
         $insert_支付方式_sql = "INSERT INTO 支付方式 
-            (`count`, 支付方式, 金額,  簽收人, 簽收日, 銀行郵局, 分行, 戶名, 帳號, 票號, 到期日, 結餘繳回)
+            (`count`, 支付方式, 金額, 簽收日, 銀行郵局, 分行, 戶名, 帳號, 票號, 到期日, 結餘繳回)
             VALUES 
-            ('$流水號', '$支付方式', '$金額', $簽收人, $簽收日, $銀行郵局, $分行, $戶名, $帳號, $票號, $到期日, $結餘繳回)";
+            ('$流水號', '$支付方式', '$金額', $簽收日, $銀行郵局, $分行, $戶名, $帳號, $票號, $到期日, $結餘繳回)";
 
         if (!mysqli_query($連接, $insert_支付方式_sql)) {
             throw new Exception("插入支付方式資料失敗: " . mysqli_error($連接));
@@ -225,8 +231,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         // 提交事務
         mysqli_commit($連接);
 
-        echo "表單已成功提交!!<br>";
-        header("Location: ll1.html");
+        // 重定向到成功頁面或顯示成功訊息
+        header("Location: success.html"); // 確保您有一個 success.html 頁面
         exit(); // 確保停止執行後續代碼
 
     } catch (Exception $e) {
