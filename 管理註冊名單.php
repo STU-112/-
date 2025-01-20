@@ -26,7 +26,8 @@ if ($db_link->connect_error) {
 
 // Update user details in the database
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['update_user'])) {
-    $name = $_POST['姓名'];
+    $員工編號 = $_POST['員工編號'];
+	$name = $_POST['姓名'];
     $phone = $_POST['電話'];
     $address = $_POST['地址'];
     $department = $_POST['部門'];
@@ -37,9 +38,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['update_user'])) {
     // Check if '權限管理' key exists to avoid undefined array key warning
     $permission = isset($_POST['權限管理']) ? $_POST['權限管理'] : '';
 
-    $update_sql = "UPDATE 註冊資料表 SET 姓名 = ?, 電話 = ?, 地址 = ?, 部門 = ?, 職位 = ?, 密碼 = ?, 權限管理 = ? WHERE 帳號 = ?";
+    $update_sql = "UPDATE 註冊資料表 SET 員工編號 = ?,姓名 = ?, 電話 = ?, 地址 = ?, 部門 = ?, 職位 = ?, 密碼 = ?, 權限管理 = ? WHERE 帳號 = ?";
     $stmt = $db_link->prepare($update_sql);
-    $stmt->bind_param("ssssssss", $name, $phone, $address, $department, $position, $password, $permission, $account);
+    $stmt->bind_param("sssssssss", $員工編號,$name, $phone, $address, $department, $position, $password, $permission, $account);
     
     if ($stmt->execute()) {
         echo "<script>alert('資料更新成功！');</script>";
@@ -64,7 +65,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['delete_user'])) {
 }
 
 // SQL query to read data from the table including 權限管理 column
-$sql = "SELECT 姓名, 電話, 地址, 部門, 職位, 帳號, 密碼, 權限管理 FROM 註冊資料表";
+$sql = "SELECT 員工編號,姓名, 電話, 地址, 部門, 職位, 帳號, 密碼, 權限管理 FROM 註冊資料表";
 $result = $db_link->query($sql);
 
 // Display data 
@@ -78,7 +79,7 @@ if ($result && $result->num_rows > 0) {
     }
 
     table {
-		margin: 20px;
+		margin: 00px;
         width: 100%;
         table-layout: auto; /* Allow columns to adjust based on content */
         border-collapse: collapse;
@@ -156,11 +157,11 @@ if ($result && $result->num_rows > 0) {
 	
 	
 	.banner {
-            width: 1479px;
+            
             background-color: #f2f2f2;
             color: #333;
             display: flex;
-            justify-content: flex-end;
+            justify-content: flex-start;
             align-items: center;
             padding: 10px 20px;
             box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.2);
@@ -172,6 +173,7 @@ if ($result && $result->num_rows > 0) {
             font-weight: bold;
 			text-align:left;
             font-size: 1.2em;
+			padding: 5px 20px;
         }
 	
 </style>
@@ -198,7 +200,8 @@ if ($result && $result->num_rows > 0) {
     while($row = $result->fetch_assoc()) { 
         echo "<tr>"; 
         echo "<form method='POST'>";
-        echo "<td><input type='text' name='姓名' value='" . $row["姓名"] . "' readonly></td>"; 
+        echo "<td><input type='text' name='員工編號' value='" . $row["員工編號"] . "' readonly></td>";
+		echo "<td><input type='text' name='姓名' value='" . $row["姓名"] . "' readonly></td>"; 
         echo "<td><input type='text' name='電話' value='" . $row["電話"] . "' readonly></td>"; 
         echo "<td><input type='text' name='地址' value='" . $row["地址"] . "' readonly></td>"; 
         

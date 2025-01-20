@@ -105,7 +105,7 @@ $帳號 = $_SESSION['帳號']; // 獲取登入的帳號
 </div>
 <div class="container">
     <h1>線上申請表單</h1>
-    <a href="ll1.html" class="btn">預支申請</a>
+    <a href="ll1.php" class="btn">預支申請</a>
     <a href="綜合.html" class="btn">支出核銷 / 報帳</a>
     <a href="申請紀錄.php" class="btn">查看申請紀錄</a>
     <div class="footer">

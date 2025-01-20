@@ -61,7 +61,7 @@ $帳號 = $_SESSION['帳號']; // 獲取登入的帳號
 		
 		
 		.banner {
-            width: 1500px;
+            
             background-color: #f2f2f2;
             color: #333;
             display: flex;
@@ -84,7 +84,7 @@ $帳號 = $_SESSION['帳號']; // 獲取登入的帳號
 <body>
 <div class="banner">
     <span>歡迎，<?php echo htmlspecialchars($帳號); ?>！</span> <!-- 顯示登入的帳號 -->
-    <a href="登出.php" style="align-items: right;">登出</a>
+    <a href="登出.php">登出</a>
 </div>
     <div class="container">
         <h1>系統管理員</h1>

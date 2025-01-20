@@ -48,6 +48,9 @@ $result = $db_link_預支->query($sql);
 // 顯示資料
 if ($result && $result->num_rows > 0) {
     
+	
+	
+	
     include	'審核人style.php';
 	
 	

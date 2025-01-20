@@ -11,6 +11,7 @@ if (!isset($_SESSION['帳號'])) {
 
 // 獲取用戶帳號
 $current_user = $_SESSION['帳號'];
+$current_id = $_SESSION['員工編號'];
 
 
 // 資料庫連線參數
@@ -151,6 +152,7 @@ if ($result && $result->num_rows > 0) {
     text-decoration: none;
     font-weight: bold;
     font-size: 1.2em;
+	padding: 5px 20px;
 }
 
 .banner a:hover {
@@ -168,7 +170,7 @@ echo "<div class='banner'>
     echo "<table>";
     echo "<caption>申請紀錄</caption>";
     echo "<tr>";
-    echo "<th>單號</th><th>受款人</th><th>金額</th><th>填表日期</th><th>支出項目</th><th>審核狀態</th><th>操作</th>";
+    echo "<th>單號</th><th>填表人</th><th>受款人</th><th>金額</th><th>填表日期</th><th>支出項目</th><th>審核狀態</th><th>操作</th>";
     echo "</tr>";
 	
 	// 顯示搜尋表單
@@ -279,6 +281,7 @@ echo "
 
         echo "<tr class='second-row'>";
         echo "<td>" . $row["count"] . "</td>";
+		echo "<td>" . htmlspecialchars($current_id) . "</td>";
         echo "<td>" . $row["受款人"] . "</td>";
         echo "<td>" . $row["金額"] . "</td>";
         echo "<td>" . $row["填表日期"] . "</td>";
