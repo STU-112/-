@@ -1,6 +1,6 @@
 <?php
 session_start(); // 啟動 Session
-if (!isset($_SESSION['帳號']) || $_SESSION['帳號'] !== true) {
+if (!isset($_SESSION['帳號'])) {
     echo "<script>alert('請先登入！'); window.location.href = '登入.html';</script>";
     exit();
 }
@@ -14,7 +14,8 @@ $帳號 = $_SESSION['帳號']; // 獲取登入的帳號
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>申請頁面</title>
     <style>
-        * {
+	
+	* {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
@@ -97,20 +98,3 @@ $帳號 = $_SESSION['帳號']; // 獲取登入的帳號
     color: #007bff; /* 當滑鼠懸停時變換顏色 */
 }
     </style>
-</head>
-<body>
-<div class="banner">
-    <span>歡迎，<?php echo htmlspecialchars($帳號); ?>！</span> <!-- 顯示登入的帳號 -->
-    <a href="登出.php" style="align-items: right;">登出</a>
-</div>
-<div class="container">
-    <h1>線上申請表單</h1>
-    <a href="ll1.php" class="btn">預支申請</a>
-    <a href="綜合.html" class="btn">支出核銷 / 報帳</a>
-    <a href="申請紀錄.php" class="btn">查看申請紀錄</a>
-    <div class="footer">
-        &copy; 2024 財團法人台北市失親兒福利基金會
-    </div>
-</div>
-</body>
-</html>

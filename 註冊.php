@@ -48,6 +48,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $username = mysqli_real_escape_string($db_link, $_POST['帳號']);
     $password = mysqli_real_escape_string($db_link, $_POST['密碼']); // 存儲明文密碼
     $permission = isset($_POST['權限管理']) ? mysqli_real_escape_string($db_link, $_POST['權限管理']) : '經辦人'; // 預設為經辦人
+	
+	
 
     // 檢查帳號是否已存在
     $check_user_sql = "SELECT 帳號 FROM 註冊資料表 WHERE 帳號 = '$username'";

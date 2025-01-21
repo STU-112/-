@@ -1,4 +1,3 @@
-
 <?php
 
 session_start();
@@ -9,10 +8,11 @@ if (!isset($_SESSION['帳號'])) {
     exit;
 }
 
-// 獲取用戶帳號
+// 獲取用戶帳號和員工編號
 $current_user = $_SESSION['帳號'];
 
 ?>
+
 
 <!DOCTYPE html>    
 <html lang="zh-Hant">
@@ -30,7 +30,7 @@ $current_user = $_SESSION['帳號'];
   <div class="container">
   <div class='banner'>
         <a onclick='history.back()'>◀</a>
-		<div sytle='justify-content: flex-start;'>歡迎，<?php echo htmlspecialchars($current_user); ?>！</div>
+		<div style='justify-content: flex-start;'>歡迎，<?php echo htmlspecialchars($current_user); ?>！</div>
     </div>
     <div class="form-container" aria-labelledby="formTitle">
 
@@ -40,7 +40,7 @@ $current_user = $_SESSION['帳號'];
  <!-- 填表人員工編號 -->
 <div class="form-group">
   <label for="填表人">填表人：</label>
-  <input type="text" id="填表人" name="填表人"  value="<?php echo htmlspecialchars($current_user); ?>">
+  <input type="text" id="填表人" name="填表人"  value="<?php echo htmlspecialchars($current_user); ?>" readonly>
 </div>
 
 

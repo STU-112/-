@@ -4,14 +4,14 @@
 session_start();
 
 // 檢查是否已登入
-if (!isset($_SESSION['帳號'])) {
+if (!isset($_SESSION['帳號']) || $_SESSION['帳號'] !== true) {
     header("Location: 申請紀錄.php");
     exit;
 }
 
 // 獲取用戶帳號
 $current_user = $_SESSION['帳號'];
-$current_id = $_SESSION['員工編號'];
+
 
 
 // 資料庫連線參數
@@ -281,7 +281,7 @@ echo "
 
         echo "<tr class='second-row'>";
         echo "<td>" . $row["count"] . "</td>";
-		echo "<td>" . htmlspecialchars($current_id) . "</td>";
+		echo "<td>" . $row["員工編號"] . "</td>";
         echo "<td>" . $row["受款人"] . "</td>";
         echo "<td>" . $row["金額"] . "</td>";
         echo "<td>" . $row["填表日期"] . "</td>";

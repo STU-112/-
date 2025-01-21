@@ -78,13 +78,17 @@ $帳號 = $_SESSION['帳號']; // 獲取登入的帳號
             font-size: 1.2em;
         }
 		
+
+.banner a:hover {
+    color: #007bff; /* 當滑鼠懸停時變換顏色 */
+}
         
     </style>
 </head>
 <body>
 <div class="banner">
     <span>歡迎，<?php echo htmlspecialchars($帳號); ?>！</span> <!-- 顯示登入的帳號 -->
-    <a href="登出.php">登出</a>
+    <a href="登出.php"	>登出</a>
 </div>
     <div class="container">
         <h1>系統管理員</h1>
@@ -92,7 +96,7 @@ $帳號 = $_SESSION['帳號']; // 獲取登入的帳號
         <div class="button-container">
             <button class="button" onclick="location.href='管理註冊名單.php'">已註冊帳號密碼</button>
             <button class="button" onclick="location.href='註冊.html'">新增使用者</button>
-			<button class="button" onclick="location.href='職位設定.php'">職位設定</button>
+			<button class="button" onclick="location.href='新增職位設定.php'">職位設定</button>
         </div>
     </div>
 
