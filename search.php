@@ -39,7 +39,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['search'])) {
         d.說明,
         p.支付方式,
         p.金額,
-        p.簽收人,
         p.簽收日,
         p.銀行郵局,
         p.分行,

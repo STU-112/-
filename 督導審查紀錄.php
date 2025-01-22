@@ -105,8 +105,7 @@ include '審核紀錄顯示搜尋表單.php';//include OK
         </td>";
         echo "</tr>";
 }
-        // 釋放意見集
-        $review_result->free();
+       
     echo "</table>";
 } else {
     echo "<p style='text-align:center;'>沒有資料可顯示。</p>";

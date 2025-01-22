@@ -93,7 +93,7 @@ if ($serial_count) {
         <td>{$opinions['出納']}</td>
     </tr>";
     echo "</table>";
-    echo "<a href='申請紀錄.php'>返回</a>"; // 替換為你的返回頁面
+    echo "<a style='align-items: left;' onclick='history.back()'>返回</a>"; // 替換為你的返回頁面
     echo "</div>";
 } else {
     echo "<p style='text-align:center;'>沒有選擇任何單號。</p>";

@@ -4,7 +4,7 @@
 session_start();
 
 // 檢查是否已登入
-if (!isset($_SESSION['帳號']) || $_SESSION['帳號'] !== true) {
+if (!isset($_SESSION['帳號'])) {
     header("Location: 申請紀錄.php");
     exit;
 }
@@ -43,6 +43,7 @@ $search_item = isset($_GET['search_item']) ? $_GET['search_item'] : '';
 $sql = "
 SELECT 
     b.`count`,
+	b.填表人,
     b.受款人,
     b.填表日期,
     s.支出項目,
@@ -281,7 +282,7 @@ echo "
 
         echo "<tr class='second-row'>";
         echo "<td>" . $row["count"] . "</td>";
-		echo "<td>" . $row["員工編號"] . "</td>";
+		echo "<td>" . $row["填表人"] . "</td>";
         echo "<td>" . $row["受款人"] . "</td>";
         echo "<td>" . $row["金額"] . "</td>";
         echo "<td>" . $row["填表日期"] . "</td>";

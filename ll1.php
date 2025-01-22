@@ -742,43 +742,82 @@ $current_user = $_SESSION['帳號'];
 
     // 改進的數字轉中文函式，處理「兩」的使用
     function numberToChinese(num) {
-        if (num === 0) return "零元整";
-        const digits = "零一二三四五六七八九";
-        const units = ["", "十", "百", "千", "萬", "十萬", "百萬", "千萬", "億"];
-        let str = num.toString();
-        let result = "";
-        let zero = false;
-        
-        for (let i = 0; i < str.length; i++) {
-            const n = parseInt(str[i]);
-            const pos = str.length - i - 1;
-            const unit = units[pos];
-            
+    if (num === 0) return "零元整";
+
+    const digits = "零一二三四五六七八九";
+    const units = ["", "十", "百", "千"];
+    const bigUnits = ["", "萬", "億", "兆"];
+
+    let str = num.toString();
+    let result = "";
+    let zero = false;
+
+    // 將數字分成每四位一組，從右到左處理
+    const groups = [];
+    while (str.length > 0) {
+        groups.unshift(str.slice(-4));
+        str = str.slice(0, -4);
+    }
+
+    // 處理每一組四位數
+    groups.forEach((group, groupIndex) => {
+        let groupResult = "";
+        let isZeroGroup = true;
+
+        for (let i = 0; i < group.length; i++) {
+            const n = parseInt(group[i]);
+            const pos = group.length - i - 1;
+
             if (n !== 0) {
                 if (zero) {
-                    result += digits[0];
+                    groupResult += digits[0];
                     zero = false;
                 }
-                if (n === 2 && (unit === "萬" || unit === "億")) {
-                    result += "兩" + unit;
-                } else if (n === 1 && unit === "十" && pos === 1) {
-                    result += unit;
+                if (n === 1 && pos === 1 && groupResult === "") {
+                    // 如果是「十」位且數字為1，省略「一」
+                    groupResult += units[pos];
                 } else {
-                    result += digits[n] + unit;
+                    groupResult += digits[n] + units[pos];
                 }
+                isZeroGroup = false;
             } else {
-                if (pos % 4 !== 0) { // 忽略萬位、億位的零
-                    zero = true;
+                if (pos !== 0) {
+                    zero = true; // 需要記錄零，但不立即輸出
                 }
             }
         }
-        
-        // 去除尾部的零
-        result = result.replace(/零+$/, '');
-        // 處理開頭的"一十"
-        result = result.replace(/^一十/, "十");
-        return result + "元整";
-    }
+
+        // 處理該組的結果和大單位
+        if (!isZeroGroup) {
+            groupResult += bigUnits[groups.length - groupIndex - 1];
+        } else if (groupIndex === groups.length - 1) {
+            groupResult += bigUnits[groups.length - groupIndex - 1]; // 億或萬後的組仍需保留單位
+        }
+
+        result += groupResult;
+    });
+
+    // 去掉多餘的零
+    result = result.replace(/零+/g, "零");
+
+    // 移除末尾的零
+    result = result.replace(/零$/, "");
+
+    // 加上「元整」
+    return result + "元整";
+}
+
+// 測試範例
+console.log(numberToChinese(123456789)); // 一億二千三百四十五萬六千七百八十九元整
+console.log(numberToChinese(123456));    // 十二萬三千四百五十六元整
+console.log(numberToChinese(100200300)); // 一億零二十萬零三百元整
+console.log(numberToChinese(200000001)); // 二億零一元整
+
+
+
+
+
+
 
     function showSuccessModal() {
         // 設置提交狀態

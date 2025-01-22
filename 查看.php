@@ -27,7 +27,8 @@ if (!empty($search_count)) {
 $sql = "
 SELECT 
     b.`count`,
-    b.受款人,
+    b.填表人,
+	b.受款人,
     b.填表日期,
 	b.付款日期,
 	s.`count`,
@@ -45,7 +46,6 @@ SELECT
 	p.`count`,
 	p.支付方式,
     p.金額,
-	p.簽收人,
 	p.簽收日,
 	p.銀行郵局,
 	p.分行,
@@ -115,6 +115,7 @@ if ($result && $result->num_rows > 0) {
     // 欄位名稱與顯示名稱的對應
     $field_names = [
         "count" => "單號",
+		"填表人" => "填表人",
         "受款人" => "受款人",
         "填表日期" => "填表日期",
         "付款日期" => "付款日期",
@@ -129,7 +130,6 @@ if ($result && $result->num_rows > 0) {
         "說明" => "說明",
         "支付方式" => "支付方式",
         "金額" => "金額",
-        "簽收人" => "簽收人",
         "簽收日" => "簽收日",
         "銀行郵局" => "銀行/郵局",
         "分行" => "分行",
@@ -251,7 +251,7 @@ if ($result && $result->num_rows > 0) {
     </style>
 	
     <div class='banner'>
-        <a style='align-items: left;' href='申請紀錄.php'>◀</a>
+        <a style='align-items: left;' onclick='history.back()'>◀</a>
     </div>
 	
     
