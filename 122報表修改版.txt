@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <title>預支請款表單 - 專業分析Dashboard</title>
+
+  <!-- Bootstrap 5 CDN -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <style>
+    body {
+      background-color: #f8f9fa;
+    }
+    .is-invalid {
+      border-color: #dc3545 !important;
+    }
+    .error-message {
+      color: #dc3545;
+      font-size: 0.875rem;
+      margin-top: 0.25rem;
+      display: none;
+    }
+    #reportSection {
+      display: none; /* 報表區預設隱藏 */
+    }
+  </style>
+</head>
+<body>
+<div class="container my-4">
+  <h1 class="text-center text-primary mb-4">預支請款表單</h1>
+
+  <!-- 表單卡片 -->
+  <div class="card mb-4 shadow-sm">
+    <div class="card-body">
+      <form id="paymentForm" novalidate>
+        <div class="mb-3">
+          <label for="填表人" class="form-label fw-bold">填表人</label>
+          <input type="text" class="form-control" id="填表人" name="填表人" value="陳小姐TP318">
+        </div>
+        <div class="mb-3">
+          <label for="受款人" class="form-label fw-bold">受款人姓名 <span class="text-danger">*</span></label>
+          <input type="text" class="form-control" id="受款人" name="受款人" required>
+          <div id="受款人-error" class="error-message"></div>
+        </div>
+        <div class="mb-3">
+          <label for="支出項目" class="form-label fw-bold">支出項目 <span class="text-danger">*</span></label>
+          <select id="支出項目" name="支出項目" class="form-select" required>
+            <option value="">--請選擇--</option>
+            <option value="活動費用">活動費用</option>
+            <option value="獎學金">獎學金</option>
+            <option value="經濟扶助">經濟扶助</option>
+            <option value="其他">其他</option>
+          </select>
+          <div id="支出項目-error" class="error-message"></div>
+        </div>
+        <div class="mb-3">
+          <label for="金額" class="form-label fw-bold">金額 <span class="text-danger">*</span></label>
+          <input type="number" class="form-control" id="金額" name="金額" min="1" required>
+          <div id="金額-error" class="error-message"></div>
+        </div>
+        <div class="mb-3">
+          <label for="支付方式" class="form-label fw-bold">支付方式 <span class="text-danger">*</span></label>
+          <select id="支付方式" name="支付方式" class="form-select" required>
+            <option value="">--請選擇--</option>
+            <option value="現金">現金</option>
+            <option value="轉帳">轉帳</option>
+            <option value="劃撥">劃撥</option>
+            <option value="匯款">匯款</option>
+            <option value="支票">支票</option>
+          </select>
+          <div id="支付方式-error" class="error-message"></div>
+        </div>
+        <div class="mb-3">
+          <label for="填表日期" class="form-label fw-bold">填表日期 <span class="text-danger">*</span></label>
+          <input type="date" class="form-control" id="填表日期" name="填表日期" required>
+          <div id="填表日期-error" class="error-message"></div>
+        </div>
+        <div class="mb-3">
+          <label for="付款日期" class="form-label fw-bold">付款日期 <span class="text-danger">*</span></label>
+          <input type="date" class="form-control" id="付款日期" name="付款日期" required>
+          <div id="付款日期-error" class="error-message"></div>
+        </div>
+        <div class="mb-3">
+          <label for="說明" class="form-label fw-bold">說明 <span class="text-danger">*</span></label>
+          <textarea class="form-control" id="說明" name="說明" rows="3" required></textarea>
+          <div id="說明-error" class="error-message"></div>
+        </div>
+        <button type="submit" id="submitBtn" class="btn btn-primary w-100">提交表單</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- 成功提示 Modal -->
+  <div class="modal fade" id="successModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title text-success">提交成功</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="關閉"></button>
+        </div>
+        <div class="modal-body">
+          <p>您的表單已成功提交，資料已紀錄！</p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">確定</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 查看 / 收合 報表按鈕 -->
+  <button id="toggleReportBtn" class="btn btn-warning w-100 mb-3" onclick="toggleReport()">檢視報表</button>
+
+  <!-- 報表區 (Dashboard) -->
+  <div id="reportSection">
+    <div class="card shadow-sm mb-4">
+      <div class="card-body">
+        <h3 class="text-center text-primary mb-3">案件列表</h3>
+        <div class="table-responsive">
+          <table class="table table-bordered text-center align-middle">
+            <thead class="table-primary">
+              <tr>
+                <th>編號</th>
+                <th>填表人</th>
+                <th>受款人</th>
+                <th>支出項目</th>
+                <th>金額</th>
+                <th>支付方式</th>
+                <th>填表日期</th>
+                <th>付款日期</th>
+                <th>說明</th>
+              </tr>
+            </thead>
+            <tbody id="casesTableBody"></tbody>
+          </table>
+          <div class="text-muted text-center" id="noDataMessage" style="display: none;">目前尚無資料</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 儀表板 (3 個圖表) -->
+    <div class="row g-3">
+      <!-- 圖表1：各支出項目「金額」加總 -->
+      <div class="col-md-6">
+        <div class="card shadow-sm">
+          <div class="card-body">
+            <h5 class="card-title text-center text-secondary">支出項目 - 金額加總</h5>
+            <canvas id="chartByCategory" height="200"></canvas>
+          </div>
+        </div>
+      </div>
+      <!-- 圖表2：各支付方式「金額」加總 (圓環圖) -->
+      <div class="col-md-6">
+        <div class="card shadow-sm">
+          <div class="card-body">
+            <h5 class="card-title text-center text-secondary">支付方式 - 金額分佈</h5>
+            <canvas id="chartByPayment" height="200"></canvas>
+          </div>
+        </div>
+      </div>
+      <!-- 圖表3：月度總金額 (以付款日期為準) -->
+      <div class="col-12">
+        <div class="card shadow-sm">
+          <div class="card-body">
+            <h5 class="card-title text-center text-secondary">月度支出金額走勢</h5>
+            <canvas id="chartByMonth" height="120"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ===========================
+   1) 驗證 / 表單送出流程
+=========================== */
+function containsSpecialChars(str){
+  const regex = /^[a-zA-Z0-9\u4e00-\u9fa5\s]+$/;
+  return !regex.test(str);
+}
+
+function validateForm(){
+  let isValid=true;
+  document.querySelectorAll('.error-message').forEach(e=>{
+    e.style.display='none';
+    e.textContent='';
+  });
+  document.querySelectorAll('.is-invalid').forEach(i=>{
+    i.classList.remove('is-invalid');
+  });
+
+  // 受款人
+  const payee = document.getElementById('受款人');
+  const payeeErr = document.getElementById('受款人-error');
+  if(!payee.value.trim()){
+    payeeErr.textContent="受款人不可空白";
+    payeeErr.style.display='block';
+    payee.classList.add('is-invalid');
+    isValid=false;
+  } else if(containsSpecialChars(payee.value)){
+    payeeErr.textContent="含特殊字元";
+    payeeErr.style.display='block';
+    payee.classList.add('is-invalid');
+    isValid=false;
+  }
+
+  // 支出項目
+  const cat = document.getElementById('支出項目');
+  const catErr = document.getElementById('支出項目-error');
+  if(!cat.value){
+    catErr.textContent="請選擇支出項目";
+    catErr.style.display='block';
+    cat.classList.add('is-invalid');
+    isValid=false;
+  }
+
+  // 金額
+  const amt = document.getElementById('金額');
+  const amtErr = document.getElementById('金額-error');
+  if(!amt.value || parseFloat(amt.value)<=0){
+    amtErr.textContent="金額需大於0";
+    amtErr.style.display='block';
+    amt.classList.add('is-invalid');
+    isValid=false;
+  }
+
+  // 支付方式
+  const pm = document.getElementById('支付方式');
+  const pmErr = document.getElementById('支付方式-error');
+  if(!pm.value){
+    pmErr.textContent="請選擇支付方式";
+    pmErr.style.display='block';
+    pm.classList.add('is-invalid');
+    isValid=false;
+  }
+
+  // 填表日期
+  const fillDate = document.getElementById('填表日期');
+  const fillDateErr = document.getElementById('填表日期-error');
+  if(!fillDate.value){
+    fillDateErr.textContent="請選擇填表日期";
+    fillDateErr.style.display='block';
+    fillDate.classList.add('is-invalid');
+    isValid=false;
+  } else {
+    // 若需限制「必須今天」，可加下列邏輯
+    const today=new Date();
+    const y=today.getFullYear(), m=String(today.getMonth()+1).padStart(2,'0'), d=String(today.getDate()).padStart(2,'0');
+    const tstr=`${y}-${m}-${d}`;
+    if(fillDate.value !== tstr){
+      fillDateErr.textContent="填表日期必須是今天(可依需求移除)";
+      fillDateErr.style.display='block';
+      fillDate.classList.add('is-invalid');
+      isValid=false;
+    }
+  }
+
+  // 付款日期
+  const payDate = document.getElementById('付款日期');
+  const payDateErr = document.getElementById('付款日期-error');
+  if(!payDate.value){
+    payDateErr.textContent="請選擇付款日期";
+    payDateErr.style.display='block';
+    payDate.classList.add('is-invalid');
+    isValid=false;
+  }
+
+  // 說明
+  const desc = document.getElementById('說明');
+  const descErr = document.getElementById('說明-error');
+  if(!desc.value.trim()){
+    descErr.textContent="說明不可空白";
+    descErr.style.display='block';
+    desc.classList.add('is-invalid');
+    isValid=false;
+  }
+
+  return isValid;
+}
+
+// 監聽表單提交
+document.getElementById('paymentForm').addEventListener('submit',function(e){
+  e.preventDefault();
+  if(!validateForm()) return;
+
+  const btn = document.getElementById('submitBtn');
+  btn.disabled=true; btn.textContent="提交中...";
+
+  // 取表單資料
+  const fd = new FormData(this);
+  const caseData={
+    填表人: fd.get('填表人') || '',
+    受款人: fd.get('受款人') || '',
+    支出項目: fd.get('支出項目') || '',
+    金額: parseFloat(fd.get('金額')||0),
+    支付方式: fd.get('支付方式') || '',
+    填表日期: fd.get('填表日期') || '',
+    付款日期: fd.get('付款日期') || '',
+    說明: fd.get('說明') || ''
+  };
+  addCase(caseData);
+
+  // 顯示成功Modal
+  const m = new bootstrap.Modal(document.getElementById('successModal'));
+  m.show();
+
+  // 重置表單
+  this.reset();
+  btn.disabled=false; btn.textContent="提交表單";
+});
+
+/* ===========================
+   2) localStorage & 報表
+=========================== */
+function getData(){
+  const raw = localStorage.getItem('casesData');
+  return raw? JSON.parse(raw): [];
+}
+function saveData(arr){
+  localStorage.setItem('casesData', JSON.stringify(arr));
+}
+function addCase(obj){
+  const arr=getData();
+  arr.push(obj);
+  saveData(arr);
+}
+
+/** 生成「案件列表」的表格 */
+function renderTable(){
+  const arr=getData();
+  const tb=document.getElementById('casesTableBody');
+  const nd=document.getElementById('noDataMessage');
+  tb.innerHTML="";
+  if(!arr.length){
+    nd.style.display='block';
+    return;
+  } else {
+    nd.style.display='none';
+  }
+  arr.forEach((item,idx)=>{
+    const tr=document.createElement('tr');
+    // 編號
+    const td1=document.createElement('td');
+    td1.textContent=idx+1; tr.appendChild(td1);
+    // 填表人
+    const td2=document.createElement('td');
+    td2.textContent=item.填表人; tr.appendChild(td2);
+    // 受款人
+    const td3=document.createElement('td');
+    td3.textContent=item.受款人; tr.appendChild(td3);
+    // 支出項目
+    const td4=document.createElement('td');
+    td4.textContent=item.支出項目; tr.appendChild(td4);
+    // 金額
+    const td5=document.createElement('td');
+    td5.textContent=item.金額; tr.appendChild(td5);
+    // 支付方式
+    const td6=document.createElement('td');
+    td6.textContent=item.支付方式; tr.appendChild(td6);
+    // 填表日期
+    const td7=document.createElement('td');
+    td7.textContent=item.填表日期; tr.appendChild(td7);
+    // 付款日期
+    const td8=document.createElement('td');
+    td8.textContent=item.付款日期; tr.appendChild(td8);
+    // 說明
+    const td9=document.createElement('td');
+    td9.textContent=item.說明; tr.appendChild(td9);
+
+    tr.appendChild(td1);
+    tb.appendChild(tr);
+  });
+}
+
+/* ===========================
+   3) 專業分析: 聚合後繪圖
+=========================== */
+/** 依「支出項目」計算金額加總 => Bar Chart */
+let chartCat=null, chartPay=null, chartMonth=null;
+
+function renderChartByCategory(dataArr){
+  // 用物件紀錄 => {活動費用: sum, 獎學金: sum, ...}
+  const catMap={};
+  dataArr.forEach(item=>{
+    const cat=item.支出項目||'其他';
+    if(!catMap[cat]) catMap[cat]=0;
+    catMap[cat]+= item.金額;
+  });
+  const labels=Object.keys(catMap);
+  const sums=Object.values(catMap);
+
+  const ctx = document.getElementById('chartByCategory').getContext('2d');
+  if(chartCat) chartCat.destroy();
+  chartCat = new Chart(ctx, {
+    type:'bar',
+    data:{
+      labels,
+      datasets:[{
+        label: '金額加總',
+        data: sums,
+        backgroundColor: '#0d6efd'
+      }]
+    },
+    options:{
+      responsive:true,
+      scales:{
+        y:{ beginAtZero:true }
+      }
+    }
+  });
+}
+
+/** 依「支付方式」計算金額 => 圓環圖(Doughnut) */
+function renderChartByPayment(dataArr){
+  const payMap={};
+  dataArr.forEach(item=>{
+    const pay=item.支付方式||'其他';
+    if(!payMap[pay]) payMap[pay]=0;
+    payMap[pay]+= item.金額;
+  });
+  const labels=Object.keys(payMap);
+  const sums=Object.values(payMap);
+
+  const ctx=document.getElementById('chartByPayment').getContext('2d');
+  if(chartPay) chartPay.destroy();
+  chartPay=new Chart(ctx, {
+    type:'doughnut',
+    data:{
+      labels,
+      datasets:[{
+        data:sums,
+        backgroundColor:['#ffc107','#20c997','#dc3545','#6f42c1','#0d6efd','#198754']
+      }]
+    },
+    options:{
+      responsive:true
+    }
+  });
+}
+
+/** 依「付款月份」(yyyy-MM) 分組，計算金額 => 做出月度總金額的折線圖或柱狀圖 */
+function renderChartByMonth(dataArr){
+  // 先建立 {YYYY-MM: sum} 的結構
+  const monthMap={};
+  dataArr.forEach(item=>{
+    if(!item.付款日期) return; // 沒有付款日期就略過
+    const dt = new Date(item.付款日期);
+    if(isNaN(dt.getTime())) return;
+    const y=dt.getFullYear();
+    const m=(dt.getMonth()+1).toString().padStart(2,'0');
+    const ym = `${y}-${m}`; // yyyy-MM
+    if(!monthMap[ym]) monthMap[ym]=0;
+    monthMap[ym]+= item.金額;
+  });
+  // 按照時間先排序 key
+  const sortedKeys=Object.keys(monthMap).sort((a,b)=> {
+    // "2024-02" < "2025-01" ...
+    return a.localeCompare(b);
+  });
+  const sums=sortedKeys.map(k=> monthMap[k]);
+
+  const ctx=document.getElementById('chartByMonth').getContext('2d');
+  if(chartMonth) chartMonth.destroy();
+  chartMonth=new Chart(ctx,{
+    type:'line', // 如果想柱狀圖可改 'bar'
+    data:{
+      labels: sortedKeys,
+      datasets:[{
+        label:'月度總金額',
+        data: sums,
+        borderColor:'#fd7e14',
+        backgroundColor:'rgba(253,126,20,0.2)',
+        fill:true
+      }]
+    },
+    options:{
+      responsive:true,
+      scales:{
+        y:{ beginAtZero:true }
+      }
+    }
+  });
+}
+
+/** 綜合繪製所有圖表 */
+function renderAllCharts(){
+  const arr = getData();
+  renderChartByCategory(arr);
+  renderChartByPayment(arr);
+  renderChartByMonth(arr);
+}
+
+/* ===========================
+   4) 收合 / 展開 報表
+=========================== */
+let isOpen=false;
+function toggleReport(){
+  const section = document.getElementById('reportSection');
+  const btn = document.getElementById('toggleReportBtn');
+  isOpen=!isOpen;
+  if(isOpen){
+    section.style.display='block';
+    btn.textContent="收合報表";
+    // 先更新表格
+    renderTable();
+    // 再做統計繪圖
+    renderAllCharts();
+  } else {
+    section.style.display='none';
+    btn.textContent="檢視報表";
+  }
+}
+</script>
+</body>
+</html>
