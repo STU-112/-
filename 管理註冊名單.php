@@ -14,14 +14,25 @@ $current_user = $_SESSION['帳號'];
 $servername = "localhost:3307"; // Database server name 
 $username = "root"; // Database user 
 $password = "3307"; // Database password
+
+
 $dbname = "註冊"; // Database name
+$dbname_職位 = "職位設定"; 
+
 
 // Establishing connection 
-$db_link = new mysqli($servername, $username, $password, $dbname);
+$db_link_註冊 = new mysqli($servername, $username, $password, $dbname);
+$db_link_職位 = new mysqli($servername, $username, $password, $dbname);
+
 
 // Check connection 
-if ($db_link->connect_error) { 
-    die("Connection failed: " . $db_link->connect_error); 
+if ($db_link_註冊->connect_error) { 
+    die("Connection failed: " . $db_link_註冊->connect_error); 
+}
+
+// Check connection 
+if ($db_link_職位->connect_error) { 
+    die("職位 failed: " . $db_link_職位->connect_error); 
 }
 
 // Update user details in the database
@@ -39,7 +50,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['update_user'])) {
     $permission = isset($_POST['權限管理']) ? $_POST['權限管理'] : '';
 
     $update_sql = "UPDATE 註冊資料表 SET 員工編號 = ?,姓名 = ?, 電話 = ?, 地址 = ?, 部門 = ?, 職位 = ?, 密碼 = ?, 權限管理 = ? WHERE 帳號 = ?";
-    $stmt = $db_link->prepare($update_sql);
+    $stmt = $db_link_註冊->prepare($update_sql);
     $stmt->bind_param("sssssssss", $員工編號,$name, $phone, $address, $department, $position, $password, $permission, $account);
     
     if ($stmt->execute()) {
@@ -54,7 +65,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['update_user'])) {
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['delete_user'])) {
     $account = $_POST['帳號'];
     $delete_sql = "DELETE FROM 註冊資料表 WHERE 帳號 = ?";
-    $stmt = $db_link->prepare($delete_sql);
+    $stmt = $db_link_註冊->prepare($delete_sql);
     $stmt->bind_param("s", $account);
     if ($stmt->execute()) {
         echo "<script>alert('使用者刪除成功！');</script>";
@@ -66,7 +77,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['delete_user'])) {
 
 // SQL query to read data from the table including 權限管理 column
 $sql = "SELECT 員工編號,姓名, 電話, 地址, 部門, 職位, 帳號, 密碼, 權限管理 FROM 註冊資料表";
-$result = $db_link->query($sql);
+$result = $db_link_註冊->query($sql);
 
 // Display data 
 if ($result && $result->num_rows > 0) { 
@@ -265,8 +276,9 @@ if ($result && $result->num_rows > 0) {
     echo "<tr><td colspan='10'>無資料顯示</td></tr>";
 } 
 
+
 $result->free(); 
-$db_link->close(); 
+$db_link_註冊->close(); 
 ?>
 
 <script>

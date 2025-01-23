@@ -1,10 +1,14 @@
 
 
+
 <?php
 session_start();
-session_unset(); // 清除所有 Session 資料
-session_destroy(); // 銷毀 Session
-echo "<script>alert('已成功登出'); window.location.href = '登入.html';</script>";
+
+// 清除 Session 和 Token
+session_unset();
+session_destroy();
+
+// 選擇性清理 Token 資料庫中的紀錄
+header("Location: 登入.html");
 exit();
 ?>
-
