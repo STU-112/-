@@ -95,7 +95,7 @@ $帳號 = $_SESSION['帳號']; // 獲取登入的帳號
 
         <div class="button-container">
             <button class="button" onclick="location.href='管理註冊名單.php'">已註冊帳號密碼</button>
-            <button class="button" onclick="location.href='註冊.html'">新增使用者</button>
+            <button class="button" onclick="location.href='註冊html.php'">新增使用者</button>
 			<button class="button" onclick="location.href='新增職位設定.php'">職位設定</button>
         </div>
     </div>

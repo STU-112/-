@@ -10,10 +10,10 @@ if (!isset($_SESSION['帳號'])) {
 // 獲取用戶帳號
 $current_user = $_SESSION['帳號'];
 
-// Establishing database connection 
-$servername = "localhost:3307"; // Database server name 
-$username = "root"; // Database user 
-$password = "3307"; // Database password
+ 
+$servername = "localhost:3307"; 
+$username = "root"; 
+$password = "3307"; 
 
 
 $dbname = "註冊"; // Database name
@@ -22,7 +22,7 @@ $dbname_職位 = "職位設定";
 
 // Establishing connection 
 $db_link_註冊 = new mysqli($servername, $username, $password, $dbname);
-$db_link_職位 = new mysqli($servername, $username, $password, $dbname);
+$db_link_職位 = new mysqli($servername, $username, $password, $dbname_職位);
 
 
 // Check connection 
@@ -42,16 +42,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['update_user'])) {
     $phone = $_POST['電話'];
     $address = $_POST['地址'];
     $department = $_POST['部門'];
-    $position = $_POST['職位'];
     $account = $_POST['帳號'];
     $password = $_POST['密碼'];
-
-    // Check if '權限管理' key exists to avoid undefined array key warning
     $permission = isset($_POST['權限管理']) ? $_POST['權限管理'] : '';
 
-    $update_sql = "UPDATE 註冊資料表 SET 員工編號 = ?,姓名 = ?, 電話 = ?, 地址 = ?, 部門 = ?, 職位 = ?, 密碼 = ?, 權限管理 = ? WHERE 帳號 = ?";
+    $update_sql = "UPDATE 註冊資料表 SET 員工編號 = ?,姓名 = ?, 電話 = ?, 地址 = ?, 部門 = ?, 密碼 = ?, 權限管理 = ? WHERE 帳號 = ?";
     $stmt = $db_link_註冊->prepare($update_sql);
-    $stmt->bind_param("sssssssss", $員工編號,$name, $phone, $address, $department, $position, $password, $permission, $account);
+    $stmt->bind_param("ssssssss", $員工編號,$name, $phone, $address, $department, $password, $permission, $account);
     
     if ($stmt->execute()) {
         echo "<script>alert('資料更新成功！');</script>";
@@ -61,7 +58,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['update_user'])) {
     $stmt->close();
 }
 
-// Delete user
+// 刪除使用者
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['delete_user'])) {
     $account = $_POST['帳號'];
     $delete_sql = "DELETE FROM 註冊資料表 WHERE 帳號 = ?";
@@ -75,13 +72,21 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['delete_user'])) {
     $stmt->close();
 }
 
-// SQL query to read data from the table including 權限管理 column
-$sql = "SELECT 員工編號,姓名, 電話, 地址, 部門, 職位, 帳號, 密碼, 權限管理 FROM 註冊資料表";
+// 讀取帳號管理資料
+$sql = "SELECT 員工編號, 姓名, 電話, 地址, 部門, 職位, 帳號, 密碼, 權限管理 FROM 註冊資料表";
 $result = $db_link_註冊->query($sql);
 
-// Display data 
-if ($result && $result->num_rows > 0) { 
-    echo "
+// 讀取職位選單
+$職位_sql = "SELECT 職位名稱 FROM 職位設定表";
+$職位_result = $db_link_職位->query($職位_sql);
+
+$職位選項 = "";
+
+if ($職位_result->num_rows > 0 && $result && $result->num_rows > 0) {
+    while ($row_職位 = $職位_result->fetch_assoc()) {
+		 $職位選項 .= "<option value='" . $row_職位["職位名稱"] . "'>" . $row_職位["職位名稱"] . "</option>";
+    }
+	echo "
 <style>
     body {
         font-family: Arial, sans-serif;
@@ -217,8 +222,7 @@ if ($result && $result->num_rows > 0) {
         echo "<td><input type='text' name='地址' value='" . $row["地址"] . "' readonly></td>"; 
         
         // 部門輸入框和下拉選單
-        echo "<td>
-                <input type='text' name='部門_display' value='" . $row["部門"] . "' readonly>
+        echo "<td><input type='text' name='部門_display' value='" . $row["部門"] . "' readonly>
                 <select name='部門' disabled>
                     <option value='行政部' " . ($row["部門"] == '行政部' ? 'selected' : '') . ">行政部</option>
                     <option value='諮商部' " . ($row["部門"] == '諮商部' ? 'selected' : '') . ">諮商部</option>
@@ -231,35 +235,44 @@ if ($result && $result->num_rows > 0) {
               </td>";
         
         // 職位輸入框和下拉選單
-        echo "<td>
-                <input type='text' name='職位_display' value='" . $row["職位"] . "' readonly>
-                <select name='職位' disabled>
-                    <option value='經辦人' " . ($row["職位"] == '經辦人' ? 'selected' : '') . ">經辦人</option>
-                    <option value='部門主管(督導)' " . ($row["職位"] == '部門主管(督導)' ? 'selected' : '') . ">部門主管(督導)</option>
-                    <option value='主任' " . ($row["職位"] == '主任' ? 'selected' : '') . ">主任</option>
-                    <option value='執行長' " . ($row["職位"] == '執行長' ? 'selected' : '') . ">執行長</option>
-                    <option value='會計' " . ($row["職位"] == '會計' ? 'selected' : '') . ">會計</option>
-                    <option value='出納' " . ($row["職位"] == '出納' ? 'selected' : '') . ">出納</option>
-                    <option value='董事長' " . ($row["職位"] == '董事長' ? 'selected' : '') . ">董事長</option>
-                </select>
-              </td>";
+        // echo "<td>
+                // <input type='text' name='職位_display' value='" . $row["職位"] . "' readonly>
+                // <select name='職位' disabled>
+                    // <option value='經辦人' " . ($row["職位"] == '經辦人' ? 'selected' : '') . ">經辦人</option>
+                    // <option value='部門主管(督導)' " . ($row["職位"] == '部門主管(督導)' ? 'selected' : '') . ">部門主管(督導)</option>
+                    // <option value='主任' " . ($row["職位"] == '主任' ? 'selected' : '') . ">主任</option>
+                    // <option value='執行長' " . ($row["職位"] == '執行長' ? 'selected' : '') . ">執行長</option>
+                    // <option value='會計' " . ($row["職位"] == '會計' ? 'selected' : '') . ">會計</option>
+                    // <option value='出納' " . ($row["職位"] == '出納' ? 'selected' : '') . ">出納</option>
+                    // <option value='董事長' " . ($row["職位"] == '董事長' ? 'selected' : '') . ">董事長</option>
+                // </select>
+              // </td>";
         
+		
+		echo "<td><input type='text' name='職位_display' value='" . $row["職位"] . "' readonly>
+		<select name='職位' disabled><option> " . $職位選項 . "</option></select></td>";
+		
+		
         echo "<td><input type='text' name='帳號' value='" . $row["帳號"] . "' readonly></td>"; 
         echo "<td><input type='text' name='密碼' value='" . $row["密碼"] . "' readonly></td>";
 
         // 權限管理輸入框和下拉選單
-        echo "<td>
-                <input type='text' name='權限管理_display' value='" . $row["權限管理"] . "' readonly>
-                <select name='權限管理' disabled>
-                    <option value='經辦人' " . ($row["權限管理"] == '經辦人' ? 'selected' : '') . ">經辦人</option>
-                    <option value='部門主管(督導)' " . ($row["權限管理"] == '部門主管(督導)' ? 'selected' : '') . ">部門主管(督導)</option>
-                    <option value='主任' " . ($row["權限管理"] == '主任' ? 'selected' : '') . ">主任</option>
-                    <option value='執行長' " . ($row["權限管理"] == '執行長' ? 'selected' : '') . ">執行長</option>
-                    <option value='會計' " . ($row["權限管理"] == '會計' ? 'selected' : '') . ">會計</option>
-                    <option value='出納' " . ($row["權限管理"] == '出納' ? 'selected' : '') . ">出納</option>
-                    <option value='董事長' " . ($row["權限管理"] == '董事長' ? 'selected' : '') . ">董事長</option>
-                </select>
-              </td>";
+        // echo "<td>
+                // <input type='text' name='權限管理_display' value='" . $row["權限管理"] . "' readonly>
+                // <select name='	' disabled>
+                    // <option value='". htmlspecialchars($職位選項) ."' " . ($row["權限管理"] == '". htmlspecialchars($職位選項) ."' ? 'selected' : '') . ">經辦人</option>
+                    // <option value='部門主管(督導)' " . ($row["權限管理"] == '部門主管(督導)' ? 'selected' : '') . ">部門主管(督導)</option>
+                    // <option value='主任' " . ($row["權限管理"] == '主任' ? 'selected' : '') . ">主任</option>
+                    // <option value='執行長' " . ($row["權限管理"] == '執行長' ? 'selected' : '') . ">執行長</option>
+                    // <option value='會計' " . ($row["權限管理"] == '會計' ? 'selected' : '') . ">會計</option>
+                    // <option value='出納' " . ($row["權限管理"] == '出納' ? 'selected' : '') . ">出納</option>
+                    // <option value='董事長' " . ($row["權限管理"] == '董事長' ? 'selected' : '') . ">董事長</option>
+                // </select>
+              // </td>";
+			  
+			  echo "<td><input type='text' name='權限管理_display' value='" . $row["權限管理"] . "' readonly>
+		<select name='權限管理' disabled><option> " . $職位選項 . "</option></select></td>";
+		
         
         echo "<td>
                 <div class='center-buttons'>
@@ -274,11 +287,13 @@ if ($result && $result->num_rows > 0) {
     echo "</table>";
 } else { 
     echo "<tr><td colspan='10'>無資料顯示</td></tr>";
-} 
+}
 
 
-$result->free(); 
-$db_link_註冊->close(); 
+$result->free();
+$職位_result->free(); 
+$db_link_註冊->close();
+$db_link_職位->close(); 
 ?>
 
 <script>

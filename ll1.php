@@ -1,5 +1,4 @@
 <?php
-
 session_start();
 
 // 檢查是否已登入
@@ -8,10 +7,33 @@ if (!isset($_SESSION['帳號'])) {
     exit;
 }
 
-// 獲取用戶帳號和員工編號
+// 獲取當前登入的帳號
 $current_user = $_SESSION['帳號'];
 
+// 建立資料庫連線
+$servername = "localhost:3307"; 
+$username = "root"; 
+$password = "3307"; // 使用空白密碼
+$dbname = "註冊"; 
+
+$連接 = new mysqli($servername, $username, $password, $dbname);
+
+// 檢查連接是否成功
+if ($連接->connect_error) {
+    die("資料庫連接失敗: " . $連接->connect_error);
+}
+
+// 查詢當前使用者的員工編號
+$sql = "SELECT 員工編號 FROM 註冊資料表 WHERE 帳號 = ?";
+$stmt = $連接->prepare($sql);
+$stmt->bind_param("s", $current_user);
+$stmt->execute();
+$stmt->bind_result($員工編號);
+$stmt->fetch();
+$stmt->close();
+$連接->close();
 ?>
+
 
 
 <!DOCTYPE html>    
@@ -37,10 +59,10 @@ $current_user = $_SESSION['帳號'];
       <form id="paymentForm" action="agg.php" method="POST" novalidate>
         <h3>財團法人台北市失親兒福利基金會</h3>
 		
- <!-- 填表人員工編號 -->
+<!-- 填表人員工編號 -->
 <div class="form-group">
   <label for="填表人">填表人：</label>
-  <input type="text" id="填表人" name="填表人"  value="<?php echo htmlspecialchars($current_user); ?>" readonly>
+  <input type="text" id="填表人" name="填表人" value="<?php echo htmlspecialchars($員工編號); ?>" readonly>
 </div>
 
 
@@ -952,3 +974,4 @@ console.log(numberToChinese(200000001)); // 二億零一元整
 
 </body>
 </html>
+

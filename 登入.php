@@ -42,8 +42,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                     $權限 = $row['權限管理'];
                     $_SESSION['帳號'] = $帳號; // 儲存到 Session
                     switch ($權限) {
-                        case '主任': $跳轉頁面 = '主任.php'; break;
-                        case '執行長': $跳轉頁面 = '執行長.php'; break;
+                        case '主任': $跳轉頁面 = '督導.php'; break;
+                        case '執行長': $跳轉頁面 = '督導.php'; break;
                         case '部門主管(督導)': $跳轉頁面 = '督導.php'; break;
                         case '出納': $跳轉頁面 = '出納.php'; break;
                         case '會計': $跳轉頁面 = '會計.php'; break;

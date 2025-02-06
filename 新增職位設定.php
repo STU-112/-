@@ -29,7 +29,7 @@ if ($db_link_職位->connect_error) {
 
 
 // 合併查詢語句
-$sql = "SELECT 編號,職位名稱 FROM 職位設定表";
+$sql = "SELECT 編號,職位名稱,上限,下限 FROM 職位設定表";
 $result = $db_link_職位->query($sql);
 
 ?>
@@ -236,6 +236,30 @@ $result = $db_link_職位->query($sql);
 		  />
       </div>
 	  
+	  <!-- 金額上限-->
+      <div class="form-group">
+        <label for="title">上限<span style="color: red;">*</span></label>
+        <input
+          type="text"
+          id="上限"
+          name="上限"
+          placeholder="請輸入金額上限"
+          required
+		  />
+      </div>
+	  
+	  <!-- 金額下限-->
+      <div class="form-group">
+        <label for="title">下限<span style="color: red;">*</span></label>
+        <input
+          type="text"
+          id="下限"
+          name="下限"
+          placeholder="請輸入金額下限"
+          required
+		  />
+      </div>
+	  
 	  
 	  
 	 <!-- 目前職位 -->
@@ -245,6 +269,8 @@ $result = $db_link_職位->query($sql);
             <tr>
                 <th>編號</th>	
                 <th>職位名稱</th>
+				<th>上限</th>
+				<th>下限</th>
 				<th>編輯</th>
             </tr>
         </thead>
@@ -258,6 +284,8 @@ $result = $db_link_職位->query($sql);
                     echo "<tr>";
                     echo "<td style='text-align:center;'>" . $row["編號"] . "</td>";
                     echo "<td>" . $row["職位名稱"] . "</td>";
+					echo "<td>" . $row["上限"] . "</td>";
+					echo "<td>" . $row["下限"] . "</td>";
 					echo "<td style='text-align:center;'>
                 <a style='background-color: #007bff;text-decoration: none;border-radius: 5px;color: #fff;' 
 				href='刪除職位.php?編號=" . $row["編號"] . "' onclick=\"return confirm('你確定要刪除此職位嗎？');\">
@@ -267,7 +295,7 @@ $result = $db_link_職位->query($sql);
                     echo "</tr>";
                 }
             } else {
-                echo "<tr><td colspan='2'>目前無職位資料</td></tr>";
+                echo "<tr><td colspan='4'>目前無職位資料</td></tr>";
             }
             ?>
         </tbody>

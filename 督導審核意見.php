@@ -12,8 +12,46 @@ if ($db_link->connect_error) {
     die("連線失敗: " . $db_link->connect_error);
 }
 
+$dbname_註冊 = "註冊"; 
+$db_link_註冊 = new mysqli($servername, $username, $password, $dbname_註冊);
+
+// 檢查連線 
+if ($db_link_註冊->connect_error) { 
+    die("註冊資料庫連線失敗: " . $db_link_註冊->connect_error); 
+}
+
+
+// 讀取職位選單
+$職位_sql = "SELECT 職位名稱 FROM 職位設定表";
+$職位_result = $db_link_註冊->query($職位_sql);
+
+// 讀取登入者的職位名稱
+$帳號 = $_SESSION["帳號"];
+$職位查詢 = "SELECT 權限管理 FROM 註冊資料表 WHERE 帳號 = '$帳號' LIMIT 1";
+$職位_result_使用者 = $db_link_註冊->query($職位查詢);
+$職位名稱 = "未知職位";
+if ($職位_result_使用者 && $職位_result_使用者->num_rows > 0) {
+    $row = $職位_result_使用者->fetch_assoc();
+    $職位名稱 = $row["權限管理"];
+}
+
+
+// 讀取註冊資料表中的權限（這裡應該是權限管理，而不是職位名稱）
+$職位_sql = "SELECT DISTINCT 權限管理 FROM 註冊資料表";
+$職位_result = $db_link_註冊->query($職位_sql);
+
+$職位選項 = "";
+if ($職位_result->num_rows > 0) {
+    while ($row = $職位_result->fetch_assoc()) {
+        $職位選項 .= "<option value='" . htmlspecialchars($row["權限管理"]) . "'>" . htmlspecialchars($row["權限管理"]) . "</option>";
+    }
+}
+
+
+
+
 // 創建資料表（如果表不存在）
-$create_table_sql = "CREATE TABLE IF NOT EXISTS 督導審核意見 (
+$create_table_sql = "CREATE TABLE IF NOT EXISTS " . htmlspecialchars($職位名稱) . "審核意見 (
     流水號 INT AUTO_INCREMENT PRIMARY KEY,
     單號 VARCHAR(20) UNIQUE,
     審核意見 TEXT NOT NULL,
@@ -30,7 +68,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $status = mysqli_real_escape_string($db_link, $_POST['status']);
 
     // 插入資料 SQL 語句
-    $insert_record_sql = "INSERT INTO 督導審核意見 (單號, 審核意見, 狀態) 
+    $insert_record_sql = "INSERT INTO " . htmlspecialchars($職位名稱) . "審核意見 (單號, 審核意見, 狀態) 
                           VALUES ('$number', '$opinion', '$status')";
 
    // 執行 SQL 語句

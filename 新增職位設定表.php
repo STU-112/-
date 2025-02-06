@@ -22,8 +22,10 @@ mysqli_select_db($db_link, $db_name);
 
 // 創建資料表（如果不存在）
 $create_table_sql = "CREATE TABLE IF NOT EXISTS `職位設定表` (
-    `編號` char(5) PRIMARY KEY,
+    `編號` CHAR(5) PRIMARY KEY,
     `職位名稱` VARCHAR(10) NOT NULL,
+	`上限` INT NOT NULL,
+	`下限` INT NOT NULL,
     `建立時間` TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 )";
 if (!mysqli_query($db_link, $create_table_sql)) {
@@ -34,9 +36,32 @@ if (!mysqli_query($db_link, $create_table_sql)) {
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     // 獲取表單資料並防範 SQL 注入
     $職位名稱 = mysqli_real_escape_string($db_link, $_POST['title']); // 表單欄位 name="title"
-$編號 = mysqli_real_escape_string($db_link, $_POST['編號']);
+    $編號 = mysqli_real_escape_string($db_link, $_POST['編號']);
+	 $上限 = intval($_POST['上限']);
+    $下限 = intval($_POST['下限']);
+
+    // 驗證編號長度
+    if (strlen($編號) !== 5) {
+        die("錯誤：編號必須是 5 個字元！");
+    }
+
+    // 檢查上限是否大於下限
+    if ($上限 < $下限) {
+        die("錯誤：上限必須大於等於下限！");
+    }
+
+    // 檢查是否已存在該編號
+    $check_sql = "SELECT * FROM `職位設定表` WHERE `編號` = '$編號'";
+    $result = mysqli_query($db_link, $check_sql);
+    if (mysqli_num_rows($result) > 0) {
+        die("錯誤：該編號已存在！");
+    }
+
+
     // 插入記錄
-    $insert_record_sql = "INSERT INTO `職位設定表` (編號,`職位名稱`) VALUES ('$編號','$職位名稱')";
+    $insert_record_sql = "INSERT INTO `職位設定表` (編號, `職位名稱`,上限,下限) 
+    VALUES ('$編號', '$職位名稱', '$上限', '$下限')";
+
     if (mysqli_query($db_link, $insert_record_sql)) {
         echo "資料新增成功！";
     } else {

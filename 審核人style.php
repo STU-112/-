@@ -63,24 +63,31 @@
             font-weight: bold;
         }
         .banner {
-            width: 100%;
-            background: linear-gradient(to bottom, #e8dff2, #f5e8fc);
-            color: #333;
-            display: flex;
-            justify-content: flex-end;
-            align-items: center;
-            padding: 10px 20px;
-            box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.2);
-        }
-        .banner a {
-            color: #5a3d2b;
-            text-decoration: none;
-            font-weight: bold;
-			text-align:left;
-            font-size: 1.2em;
-        }
-		
-        .banner a:hover {
-            color: #007bff;
-        }
+    width: 100%;
+    background: linear-gradient(to bottom, #e8dff2, #f5e8fc);
+    color: #333;
+    display: flex;
+    justify-content: space-between; /* 左右對齊 */
+    align-items: center;
+    padding: 10px 20px;
+    box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.2);
+}
+.banner .left {
+    text-align: left;
+	gap: 20px;
+}
+.banner .right {
+    display: flex;
+    gap: 20px; /* 按鈕間距 */
+    align-items: center;
+}
+.banner a {
+    color: #5a3d2b;
+    text-decoration: none;
+    font-weight: bold;
+    font-size: 1.2em;
+}
+.banner a:hover {
+    color: #007bff;
+}
     </style>
