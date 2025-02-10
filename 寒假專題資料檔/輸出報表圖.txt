@@ -1,0 +1,144 @@
+report_example.html
+
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <title>預支請款報表 - 範例</title>
+  <style>
+    /* ===== 以下可自行視需求調整或使用您原本的 CSS ===== */
+    body {
+      font-family: 'Poppins', sans-serif;
+      background-color: #F0F4F8;
+      margin: 0;
+      padding: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      color: #333;
+    }
+    .report-container {
+      width: 100%;
+      max-width: 800px;
+      background: #fff;
+      border-radius: 10px;
+      box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+      border: 1px solid #DDDDDD;
+      padding: 30px 40px;
+      margin: 0 auto;
+    }
+    h1 {
+      text-align: center;
+      color: #4A90E2;
+      margin-bottom: 20px;
+    }
+    .section-title {
+      font-size: 1.2rem;
+      color: #4A90E2;
+      margin-top: 30px;
+      margin-bottom: 10px;
+      border-bottom: 1px solid #CCC;
+      padding-bottom: 5px;
+    }
+    .field-row {
+      display: flex;
+      margin-bottom: 8px;
+    }
+    .field-label {
+      width: 120px;
+      font-weight: 600;
+      color: #333;
+      /* 調整字體大小 */
+    }
+    .field-value {
+      color: #555;
+    }
+    /* 也可以改用 table 呈現，這裡示範 DIV + flex */
+  </style>
+</head>
+
+<body>
+  <div class="report-container">
+    <h1>財團法人台北市失親兒福利基金會</h1>
+    <h2 style="text-align:center; margin-bottom: 30px;">預支請款報表（範例）</h2>
+
+    <!-- 基本資料區塊 -->
+    <div class="section-title">一、基本資料</div>
+    <div class="field-row">
+      <div class="field-label">單號 (count)：</div>
+      <div class="field-value">A1140101-00001</div>
+    </div>
+    <div class="field-row">
+      <div class="field-label">填表人：</div>
+      <div class="field-value">陳小姐TP318</div>
+    </div>
+    <div class="field-row">
+      <div class="field-label">受款人：</div>
+      <div class="field-value">王大明</div>
+    </div>
+    <div class="field-row">
+      <div class="field-label">填表日期：</div>
+      <div class="field-value">2025-01-20</div>
+    </div>
+    <div class="field-row">
+      <div class="field-label">付款日期：</div>
+      <div class="field-value">2025-02-03</div>
+    </div>
+
+    <!-- 支出項目區塊 -->
+    <div class="section-title">二、支出項目</div>
+    <div class="field-row">
+      <div class="field-label">支出項目：</div>
+      <div class="field-value">活動費用</div>
+    </div>
+    <div class="field-row">
+      <div class="field-label">(專案)活動：</div>
+      <div class="field-value">企業贊助活動-Happy Go</div>
+    </div>
+    <div class="field-row">
+      <div class="field-label">活動名稱：</div>
+      <div class="field-value">元宵聯歡</div>
+    </div>
+    <div class="field-row">
+      <div class="field-label">活動日期：</div>
+      <div class="field-value">2025-02-12</div>
+    </div>
+
+    <!-- 說明 -->
+    <div class="section-title">三、說明</div>
+    <div style="margin-bottom: 8px;">
+      <span style="font-weight:600;">內容：</span>
+      <span>本次活動補貼活動器材費與餐點費用</span>
+    </div>
+
+    <!-- 金額與支付方式 -->
+    <div class="section-title">四、金額與支付方式</div>
+    <div class="field-row">
+      <div class="field-label">金額：</div>
+      <div class="field-value">30000（貳萬元整）</div>
+      <!-- 也可以把國字金額再放在旁邊 -->
+    </div>
+    <div class="field-row">
+      <div class="field-label">支付方式：</div>
+      <div class="field-value">轉帳</div>
+    </div>
+    <div class="field-row">
+      <div class="field-label">銀行/郵局：</div>
+      <div class="field-value">中國信託</div>
+    </div>
+    <div class="field-row">
+      <div class="field-label">分行：</div>
+      <div class="field-value">台北松江分行</div>
+    </div>
+    <div class="field-row">
+      <div class="field-label">戶名：</div>
+      <div class="field-value">財團法人台北市失親兒福利基金會</div>
+    </div>
+    <div class="field-row">
+      <div class="field-label">帳號：</div>
+      <div class="field-value">1234-5678-90</div>
+    </div>
+  </div>
+</body>
+</html>
