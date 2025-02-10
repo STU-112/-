@@ -19,6 +19,7 @@ $password = "3307";
 // 連接到 op2 資料庫
 $dbname_職位 = "職位設定";
 
+
 $db_link_職位 = new mysqli($servername, $username, $password, $dbname_職位);
 
 
@@ -173,7 +174,7 @@ $result = $db_link_職位->query($sql);
 	tr,td{
 		border: 1px solid #ddd;
 		
-	}
+	}	
 	.banner {
             
             background-color: #ffffff;
@@ -193,6 +194,7 @@ $result = $db_link_職位->query($sql);
             font-size: 1.2em;
 			padding: 5px 20px;
         }
+		
 		
 		
         	
@@ -267,6 +269,7 @@ $result = $db_link_職位->query($sql);
     <table>
         <thead>
             <tr>
+			
                 <th>編號</th>	
                 <th>職位名稱</th>
 				<th>上限</th>
