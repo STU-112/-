@@ -33,22 +33,22 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $帳號 = $連接->real_escape_string($帳號);
             $密碼 = $連接->real_escape_string($密碼);
 
+             // 查詢使用者資料
             $select_sql = "SELECT * FROM 註冊資料表 WHERE 帳號 = '$帳號'";
             $帳號查詢 = $連接->query($select_sql);
 
             if ($帳號查詢->num_rows > 0) {
                 $row = $帳號查詢->fetch_assoc();
+                // 比對密碼
                 if ($密碼 == $row['密碼']) {
                     $權限 = $row['權限管理'];
                     $_SESSION['帳號'] = $帳號; // 儲存到 Session
-                    switch ($權限) {
-                        case '主任': $跳轉頁面 = '督導.php'; break;
-                        case '執行長': $跳轉頁面 = '督導.php'; break;
-                        case '部門主管(督導)': $跳轉頁面 = '督導.php'; break;
-                        case '出納': $跳轉頁面 = '出納.php'; break;
-                        case '會計': $跳轉頁面 = '會計.php'; break;
-                        case '董事長': $跳轉頁面 = '董事長.php'; break;
-                        default: $跳轉頁面 = '申請.php'; break;
+
+                    // 根據權限設定跳轉頁面
+                    if ($權限 == '經辦人') {
+                        $跳轉頁面 = '申請.php'; // 經辦人跳轉
+                    } else {
+                        $跳轉頁面 = '審核人.php'; // 其他職位跳轉
                     }
                     echo "<script>alert('登入成功！歡迎 $權限 $帳號'); window.location.href = '$跳轉頁面';</script>";
                 } else {

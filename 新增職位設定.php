@@ -238,29 +238,31 @@ $result = $db_link_職位->query($sql);
 		  />
       </div>
 	  
-	  <!-- 金額上限-->
-      <div class="form-group">
-        <label for="title">上限<span style="color: red;">*</span></label>
-        <input
-          type="text"
-          id="上限"
-          name="上限"
-          placeholder="請輸入金額上限"
-          required
-		  />
-      </div>
+	  <!-- 金額上限 -->
+<div class="form-group">
+    <label for="上限">上限<span style="color: red;">*</span></label>
+    <input
+        type="number"
+        id="上限"
+        name="上限"
+        placeholder="請輸入金額上限"
+        min="0"
+        required
+    />
+</div>
 	  
-	  <!-- 金額下限-->
-      <div class="form-group">
-        <label for="title">下限<span style="color: red;">*</span></label>
-        <input
-          type="text"
-          id="下限"
-          name="下限"
-          placeholder="請輸入金額下限"
-          required
-		  />
-      </div>
+	  <!-- 金額下限 -->
+<div class="form-group">
+    <label for="下限">下限<span style="color: red;">*</span></label>
+    <input
+        type="number"
+        id="下限"
+        name="下限"
+        placeholder="請輸入金額下限"
+        min="0"
+        required
+    />
+</div>
 	  
 	  
 	  

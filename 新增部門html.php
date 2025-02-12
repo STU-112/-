@@ -357,7 +357,7 @@ $result = $db_link_部門->query($sql);
     <h2>目前部門列表</h2>
     <table>
         <thead>
-            <tr>
+            <t`r>
                 <th style="width: 70%;">部門代號 & 部門名稱</th>
                 <th style="width: 30%;">編輯</th>
             </tr>
