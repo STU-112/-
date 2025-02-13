@@ -1,0 +1,260 @@
+<?php
+// -------------------------------------
+// 1. 錯誤顯示 (開發時可開啟)
+// -------------------------------------
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
+
+// -------------------------------------
+// 2. 連線資料庫
+// -------------------------------------
+$伺服器  = 'localhost:3307'; 
+$使用者  = 'root'; 
+$密碼    = ' ';
+$資料庫  = '預支'; // 或 '預支' 都可
+
+$連接 = new mysqli($伺服器, $使用者, $密碼);
+if ($連接->connect_error) {
+    die("連線失敗: " . $連接->connect_error);
+}
+
+// 建立DB(若無)
+$sql = "CREATE DATABASE IF NOT EXISTS `$資料庫`
+        CHARACTER SET utf8mb4
+        COLLATE utf8mb4_unicode_ci";
+$連接->query($sql);
+
+// 選擇資料庫
+$連接->select_db($資料庫);
+$連接->set_charset("utf8mb4");
+
+// -------------------------------------
+// 3. 建表 (3)(4)(5)，此處略或依您實際表結構
+// -------------------------------------
+/*
+$連接->query("
+CREATE TABLE IF NOT EXISTS `申請人檔`(
+  `申請者代號` VARCHAR(15) NOT NULL,
+  `申請人姓名` VARCHAR(50) NOT NULL,
+  PRIMARY KEY (`申請者代號`)
+)...
+");
+$連接->query("
+CREATE TABLE IF NOT EXISTS `經辦業務檔`(
+  `業務代號`       VARCHAR(10) NOT NULL,
+  `業務名稱`       VARCHAR(50),
+  `活動名稱`       VARCHAR(50),
+  `活動日期`       DATE,
+  `負責員工編號`   VARCHAR(10),
+  `備註`           VARCHAR(100),
+  PRIMARY KEY(`業務代號`)
+)...
+");
+$連接->query("
+CREATE TABLE IF NOT EXISTS `經辦交易檔`(
+  `交易單號`   VARCHAR(10) NOT NULL,
+  `申請者代號` VARCHAR(15) NOT NULL,
+  `業務代號`   VARCHAR(10) NOT NULL,
+  `金額`       DECIMAL(10,2),
+  `交易時間`   DATETIME,
+  `交易方式`   VARCHAR(20),
+  `銀行別`     VARCHAR(50),
+  `行號`       VARCHAR(10),
+  `戶名`       VARCHAR(50),
+  `帳號`       VARCHAR(20),
+  `票號`       VARCHAR(50),
+  PRIMARY KEY(`交易單號`)
+)...
+");
+*/
+
+// -------------------------------------
+// 4. 自動產生代號的函式
+// -------------------------------------
+function generateApplicantSerialNumber($conn) {
+    $now = new DateTime();
+    $year  = $now->format('Y') - 1911;
+    $month = str_pad($now->format('m'),2,'0',STR_PAD_LEFT);
+    $day   = str_pad($now->format('d'),2,'0',STR_PAD_LEFT);
+    $prefix= "A{$year}{$month}{$day}";
+    $sql= "SELECT MAX(`申請者代號`) AS m
+           FROM `申請人檔`
+           WHERE `申請者代號` LIKE '{$prefix}%'";
+    $res= $conn->query($sql);
+    if(!$res) throw new Exception("查詢申請者代號失敗: ".$conn->error);
+    $row= $res->fetch_assoc();
+    if($row['m']){
+       $last=intval(substr($row['m'],strlen($prefix)));
+       $new =$last+1;
+    } else {
+       $new=1;
+    }
+    return $prefix . str_pad($new,5,'0',STR_PAD_LEFT);
+}
+
+function generateBusinessSerialNumber($conn,$prefix='TP'){
+    $sql="SELECT MAX(`業務代號`) AS mb
+          FROM `經辦業務檔`
+          WHERE `業務代號` LIKE '{$prefix}%'";
+    $res=$conn->query($sql);
+    if(!$res) throw new Exception("查詢業務代號失敗: ".$conn->error);
+    $row=$res->fetch_assoc();
+    if($row['mb']){
+       $numPart=intval(substr($row['mb'],strlen($prefix)));
+       $next=$numPart+1;
+    } else {
+       $next=1;
+    }
+    return $prefix.str_pad($next,2,'0',STR_PAD_LEFT);
+}
+
+function generateTransactionId($conn,$prefix='TRX'){
+    $sql="SELECT MAX(`交易單號`) AS mt
+          FROM `經辦交易檔`
+          WHERE `交易單號` LIKE '{$prefix}%'";
+    $res=$conn->query($sql);
+    if(!$res) throw new Exception("查詢交易單號失敗: ".$conn->error);
+    $row=$res->fetch_assoc();
+    if($row['mt']){
+       $numPart=intval(substr($row['mt'],strlen($prefix)));
+       $next=$numPart+1;
+    } else {
+       $next=1;
+    }
+    return $prefix.str_pad($next,3,'0',STR_PAD_LEFT);
+}
+
+// -------------------------------------
+// 5. 接收表單 & 插入
+// -------------------------------------
+if($_SERVER['REQUEST_METHOD']==='POST'){
+    try{
+        $連接->begin_transaction();
+
+        // 1) 產生 申請者代號
+        $申請者代號= generateApplicantSerialNumber($連接);
+
+        // 2) 插入(3) 申請人檔
+        //    表單: name="受款人" => 申請人姓名
+        $受款人= isset($_POST['受款人'])? $_POST['受款人'] : '王小明';
+        $sql_app="
+          INSERT INTO `申請人檔`(申請者代號, 申請人姓名)
+          VALUES
+          ('$申請者代號','$受款人')
+        ";
+        $連接->query($sql_app);
+
+        // 3) 產生 業務代號
+        $業務代號= generateBusinessSerialNumber($連接,'TP');
+
+        // 4) 插入(4) 經辦業務檔
+        //    - 業務名稱 => 表單 name="支出項目"
+        //    - 負責員工編號 => 'TP318'
+        //    - 活動名稱 => 表單 name="活動名稱"
+        //    - 活動日期 => 
+        //       若支票 => 取到期日
+        //       否則 => 表單 name="活動日期" (若有)
+        //    - 備註 => 若 "支出項目=獎學金" => 拼接 "獎學金人數,主題"
+        $支出項目  = isset($_POST['支出項目'])? $_POST['支出項目']:'經濟扶助';
+        $負責員工編號= 'TP318';
+        $活動名稱= isset($_POST['活動名稱'])? $_POST['活動名稱']:'';
+        
+        // 獎學金人數 & 主題 → 若 "支出項目=獎學金" 就合併到備註
+        $備註= '';
+        if($支出項目==='獎學金'){
+           $獎學金人數= isset($_POST['獎學金人數'])? $_POST['獎學金人數']:'';
+           $主題= isset($_POST['主題'])? $_POST['主題']:'';
+           $備註= "{$獎學金人數},{$主題}";
+        }
+
+        // 活動日期
+        $活動日期Val= "NULL";
+        $支付方式= isset($_POST['支付方式'])? $_POST['支付方式']:'';
+        if($支付方式==='支票'){
+            // 若支票 => 到期日 => 活動日期
+            if(!empty($_POST['到期日'])){
+               $活動日期Val= "'{$_POST['到期日']}'";
+            }
+        } else {
+            // 若非支票 => 直接使用表單 "活動日期" (若有)
+            if(!empty($_POST['活動日期'])){
+               $活動日期Val= "'{$_POST['活動日期']}'";
+            }
+        }
+
+        $sql_biz="
+          INSERT INTO `經辦業務檔`
+            (業務代號,業務名稱,活動名稱,活動日期,負責員工編號,備註)
+          VALUES
+            ('$業務代號','$支出項目','$活動名稱',$活動日期Val,'$負責員工編號','$備註')
+        ";
+        $連接->query($sql_biz);
+
+        // 5) 產生 交易單號
+        $交易單號= generateTransactionId($連接,'TRX');
+
+        // 6) 插入(5) 經辦交易檔
+        //    - 金額 => $_POST['國字金額']
+        //    - 交易時間= date('Y-m-d H:i:s')
+        //    - 交易方式 => $_POST['支付方式']
+        //    - 銀行別/行號/戶名/帳號/票號 => 若空 => NULL
+        $交易時間= date('Y-m-d H:i:s');
+        $金額= isset($_POST['國字金額'])? $_POST['國字金額']:'0';
+        
+        function toNullOrValue($v){
+           if(!isset($v) || $v===''){
+              return "NULL";
+           } else {
+              return "'$v'";
+           }
+        }
+
+        $銀行別= toNullOrValue(isset($_POST['銀行郵局'])? $_POST['銀行郵局']:'');
+        $行號 = toNullOrValue(isset($_POST['分行'])? $_POST['分行']:'');
+        $戶名 = toNullOrValue(isset($_POST['戶名'])? $_POST['戶名']:'');
+        $帳號 = toNullOrValue(isset($_POST['帳號'])? $_POST['帳號']:'');
+        $票號 = toNullOrValue(isset($_POST['票號'])? $_POST['票號']:'');
+
+        $sql_tx="
+          INSERT INTO `經辦交易檔`
+           (交易單號, 申請者代號, 業務代號, 金額, 交易時間, 交易方式,
+            銀行別, 行號, 戶名, 帳號, 票號)
+          VALUES
+           ('$交易單號','$申請者代號','$業務代號','$金額','$交易時間',
+            '$支付方式',$銀行別,$行號,$戶名,$帳號,$票號)
+        ";
+        $連接->query($sql_tx);
+
+        $連接->commit();
+
+        // 7) 成功訊息：顯示 活動名稱 & 活動日期
+        echo "插入成功！<br>
+              申請者代號 = $申請者代號<br>
+              業務代號   = $業務代號 (負責員工=TP318)<br>
+              交易單號   = $交易單號<br>
+              交易時間   = $交易時間<br>
+              活動名稱   = $活動名稱<br>
+        ";
+
+        // 若 活動日期Val != NULL => 顯示
+        if($活動日期Val!=='NULL'){
+            $顯示活動日期= trim($活動日期Val,"'");
+            echo "活動日期 = $顯示活動日期<br>";
+        } else {
+            echo "活動日期 = (無/NULL)<br>";
+        }
+
+        // 若 支出項目=獎學金 => 備註=獎學金人數,主題
+        if($支出項目==='獎學金'){
+            echo "備註(獎學金人數,主題) = $備註<br>";
+        }
+
+    } catch(Exception $ex){
+        $連接->rollback();
+        die("錯誤: ".$ex->getMessage());
+    }
+}
+
+$連接->close();
+?>
