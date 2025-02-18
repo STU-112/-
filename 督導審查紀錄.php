@@ -42,7 +42,7 @@ if ($result && $result->num_rows > 0) {
 		
  echo "
     <div class='banner'>
-        <a style='align-items: left;' href='督導.php'>◀</a>
+        <a style='align-items: left;' onclick='history.back()'>◀</a>
     </div>";
 	
 	

@@ -28,7 +28,7 @@ $職位_sql = "SELECT 職位名稱 FROM 職位設定表";
 $職位_result = $db_link_註冊->query($職位_sql);
 
 // 讀取登入者的職位名稱
-// $帳號 = $_SESSION["帳號"];
+$帳號 = $_SESSION["帳號"];
 $職位查詢 = "SELECT 權限管理 FROM 註冊資料表 WHERE 帳號 = '$帳號' LIMIT 1";
 $職位_result_使用者 = $db_link_註冊->query($職位查詢);
 $職位名稱 = "未知職位";
