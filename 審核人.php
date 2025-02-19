@@ -54,15 +54,18 @@ if ($職位_result_使用者 && $職位_result_使用者->num_rows > 0) {
     $職位名稱 = $row["權限管理"];
 }
 
-// 讀取對應職位的上限與下限
-$範圍_sql = "SELECT 上限, 下限 FROM 職位設定表 WHERE 職位名稱 = '$職位名稱' LIMIT 1";
+// 讀取對應職位的編號、上限與下限
+$範圍_sql = "SELECT 編號, 職位名稱, 上限, 下限 FROM 職位設定表 WHERE 職位名稱 = '$職位名稱' LIMIT 1";
 $範圍_result = $db_link_職位設定->query($範圍_sql);
 
 if ($範圍_result && $範圍_result->num_rows > 0) {
     $範圍_data = $範圍_result->fetch_assoc();
-    $上限 = $範圍_data["上限"];
-    $下限 = $範圍_data["下限"];
+    $職位編號 = $範圍_data["編號"]; // 取得職位編號
+    $上限 = $範圍_data["上限"]; // 取得上限
+    $下限 = $範圍_data["下限"]; // 取得下限
+    $職位名稱 = $範圍_data["職位名稱"]; // 取得職位名稱（如需要）
 }
+
 
 // 查詢符合審核範圍的資料
 $sql = "
@@ -81,9 +84,9 @@ LEFT JOIN
     說明 AS d ON b.`count` = d.`count`
 LEFT JOIN 
     支付方式 AS p ON b.`count` = p.`count`
-WHERE 
-    p.金額 BETWEEN $下限 AND $上限";  // 限制金額範圍
-
+WHERE  p.金額 BETWEEN $下限 AND $上限
+   ";  
+ 
 $result = $db_link_預支->query($sql);
 
 // 顯示資料
@@ -109,16 +112,17 @@ if ($result && $result->num_rows > 0) {
     while ($row = $result->fetch_assoc()) {
         $serial_count = $row["count"];
 
+        // 預設為未審核
+        $opinion = "<span style='color: orange;'>未審核</span>";
+
         // 查詢是否已經審核
-        $sql_review_opinion = "SELECT 審核意見 FROM 督導審核意見 WHERE 單號 = '$serial_count' LIMIT 1";
+        $sql_review_opinion = "SELECT 審核意見 FROM ". htmlspecialchars($職位名稱) ."審核意見 WHERE 單號 = '$serial_count' LIMIT 1";
         $review_result = $db_link_review->query($sql_review_opinion);
         
         if ($review_result && $review_result->num_rows > 0) {
-            $review_result->free();
-            continue;
+            $review_row = $review_result->fetch_assoc();
+            $opinion = "<span style='color: green;'>" . htmlspecialchars($review_row["審核意見"]) . "</span>";
         }
-
-        $opinion = "<span style='color: orange;'>未審核</span>";
 
         echo "<tr class='second-row'>";
         echo "<td>" . htmlspecialchars($row["count"]) . "</td>";
@@ -148,3 +152,4 @@ $db_link_review->close();
 $db_link_註冊->close();
 $db_link_職位設定->close();
 ?>
+	
