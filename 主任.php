@@ -1,16 +1,23 @@
 <?php
+include '啟動Session.php';
+
 // 資料庫連線參數
 $servername = "localhost:3307";
 $username = "root";
 $password = "3307";
 
-// 連接到 預支 資料庫
+// 連接到資料庫
 $dbname_預支 = "預支";
 $db_link_預支 = new mysqli($servername, $username, $password, $dbname_預支);
 
-// 連接到 Review_comments 資料庫
 $dbname_review = "Review_comments";
 $db_link_review = new mysqli($servername, $username, $password, $dbname_review);
+
+$dbname_註冊 = "註冊"; 
+$db_link_註冊 = new mysqli($servername, $username, $password, $dbname_註冊);
+
+$dbname_職位設定 = "職位設定";
+$db_link_職位設定 = new mysqli($servername, $username, $password, $dbname_職位設定);
 
 // 檢查資料庫連線
 if ($db_link_預支->connect_error) {
@@ -21,8 +28,45 @@ if ($db_link_review->connect_error) {
     die("連線到 Review_comments 資料庫失敗: " . $db_link_review->connect_error);
 }
 
+if ($db_link_註冊->connect_error) { 
+    die("註冊資料庫連線失敗: " . $db_link_註冊->connect_error); 
+}
 
-// 合併查詢語句
+if ($db_link_職位設定->connect_error) { 
+    die("職位設定連線失敗: " . $db_link_職位設定->connect_error); 
+}
+
+// 取得登入者資訊
+$帳號 = $_SESSION["帳號"];
+$職位查詢 = "SELECT 員工編號, 部門, 權限管理 FROM 註冊資料表 WHERE 帳號 = '$帳號' LIMIT 1";
+$職位_result_使用者 = $db_link_註冊->query($職位查詢);
+
+$員工編號 = "";
+$部門 = "";
+$職位名稱 = "";
+$上限 = 0;
+$下限 = 0;
+
+if ($職位_result_使用者 && $職位_result_使用者->num_rows > 0) {
+    $row = $職位_result_使用者->fetch_assoc();
+    $員工編號 = $row["員工編號"];
+    $部門 = $row["部門"];
+    $職位名稱 = $row["權限管理"];
+}
+
+// 讀取對應職位的上限、下限及職位編號
+$範圍_sql = "SELECT 編號, 職位名稱, 上限, 下限 FROM 職位設定表 WHERE 職位名稱 = '$職位名稱' LIMIT 1";
+$範圍_result = $db_link_職位設定->query($範圍_sql);
+
+if ($範圍_result && $範圍_result->num_rows > 0) {
+    $範圍_data = $範圍_result->fetch_assoc();
+    $上限 = $範圍_data["上限"];
+    $下限 = $範圍_data["下限"];
+    $職位編號 = $範圍_data["編號"];  // 獲取職位編號
+    $職位名稱 = $範圍_data["職位名稱"];  // 獲取職位名稱
+}
+
+// 查詢符合審核範圍的資料
 $sql = "
 SELECT 
     b.`count`,
@@ -40,181 +84,70 @@ LEFT JOIN
 LEFT JOIN 
     支付方式 AS p ON b.`count` = p.`count`
 WHERE 
-    p.金額 >= 1000";
+    p.金額 BETWEEN $下限 AND $上限";  // 限制金額範圍
 
 $result = $db_link_預支->query($sql);
 
 // 顯示資料
+include '審核人style.php';
+
+echo "
+<div class='banner'>
+    <div class='left'>". htmlspecialchars($部門) ." - ". htmlspecialchars($員工編號) ."</div>
+    <div class='right'>
+        <span>歡迎，". htmlspecialchars($帳號) ."！</span> 
+        <a href='督導審查紀錄.php'>審查紀錄</a>
+        <a href='登出.php'>登出</a>
+    </div>
+</div>";
+
+echo "<table>";
+echo "<caption>" . htmlspecialchars($職位名稱) . "審核</caption>";
+echo "<tr>";
+echo "<th>單號</th><th>受款人</th><th>金額</th><th>填表日期</th><th>支出項目</th><th>審核狀態</th><th>操作</th>";
+echo "</tr>";
+
 if ($result && $result->num_rows > 0) {
-   echo "
-    <style>
-	* {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-	 body {
-            height: 100%;
-            width: 100%;
-            font-family: 'Noto Sans TC', Arial, sans-serif;
-			background: linear-gradient(to bottom, #e8dff2, #f5e8fc); /* 淡紫色漸層 */
-            color: #333;
-        }
-        .header {
-            display: flex;
-            background-color: rgb(220, 236, 245);
-        }
-        .header nav {
-            text-align: right;
-            width: 100%;
-            font-size: 100%;
-            text-indent: 10px;
-        }
-        .header nav a {
-            font-size: 30px;
-            color: rgb(39, 160, 130);
-            text-decoration: none;
-            display: inline-block;
-            line-height: 52px;
-        }
-        .header nav a:hover {
-             background-color: #ffaa00;
-        }
-        table {
-            width: 80%;
-            margin: 20px auto;
-            border-collapse: collapse;
-            font-family: Arial, sans-serif;
-        }
-        table, th, td {
-            border: 1px solid #ddd;
-        }
-        th, td {
-            padding: 12px;
-            text-align: center;
-        }
-        th {
-            background-color: #f2f2f2;
-            color: #333;
-        }
-		tr.second-row {
-    background-color: white; /* 固定背景顏色 */
-}
-        tr:nth-child(even) {
-            background-color: #f9f9f9;
-        }
-        tr:hover {
-            background-color: #f1f1f1;
-        }
-        caption {
-            font-size: 1.5em;
-            margin: 10px;
-            font-weight: bold;
-        }
-		.banner {
-            width: 100%;
-            background: linear-gradient(to bottom, #e8dff2, #f5e8fc); /* 淡紫色漸層 */
-            color: #333;
-            display: flex;
-            justify-content: flex-end;
-            align-items: center;
-            padding: 10px 20px;
-            box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.2); /* 陰影效果 */
-        }
-        .banner a {
-            color: #5a3d2b;
-            text-decoration: none;
-            font-weight: bold;
-            font-size: 1.2em;
-        }
-        .banner a:hover {
-            color: #007bff; /* 當滑鼠懸停時變換顏色 */
-        }
-    </style>";
-	echo "
-    <div class='banner' style='gap: 20px;'>
-		<a href='主任審查紀錄.php'>審查紀錄</a>
-		<a href='登入.html'>登出</a>
-    </div>";
-    
-    echo "<table>";
-    echo "<caption>主任審核</caption>";
-    
-    // 顯示欄位名稱
-    echo "<tr>";
-    echo "<th>單號</th><th>受款人</th><th>金額</th><th>支出項目</th><th>督導意見</th><th>審核狀態</th><th>操作</th>";
-    echo "</tr>";
-	
-   // 顯示每一行資料 
-while ($row = $result->fetch_assoc()) {
-    $serial_count = $row["count"];
+    while ($row = $result->fetch_assoc()) {
+        $serial_count = $row["count"];
 
-		// 查詢督導審核意見是否存在於 Review_comments 資料庫
-		$sql_review_opinion1 = "SELECT 審核意見,狀態 FROM 督導審核意見 WHERE 單號 = '$serial_count' LIMIT 1";
-		$review_result = $db_link_review->query($sql_review_opinion1);
-
-
-        // 查詢主任審核意見是否存在
-        $sql_director_opinion2 = "SELECT 審核意見,狀態 FROM 主任審核意見 WHERE 單號 = '$serial_count' LIMIT 1";
-        $director_result = $db_link_review->query($sql_director_opinion2);
-
-
-
-
-    // 檢查督導是否有審核意見，且主任尚未審核
-    if ($review_result && $review_result->num_rows > 0) {
-        $review_row = $review_result->fetch_assoc();
-        $opinion1 = $review_row["審核意見"];
-		$status = $review_row["狀態"]; // 獲取督導審核狀態
-
-
-
-        // 如果尚未有主任的審核意見，則顯示這筆資料
-        if ($director_result && $director_result->num_rows > 0 ) {
-			continue;
-        }
-			$opinion2 = "<span style='color: orange;'>未審核</span>";
-			
-           if ($status == '通過') {
+        // 查詢對應職位的審核意見
+        $sql_review_opinion = "SELECT 審核意見 FROM `$職位名稱` WHERE 單號 = '$serial_count' LIMIT 1"; // 根據職位名稱動態查詢
+        $review_result = $db_link_review->query($sql_review_opinion);
         
+        if ($review_result && $review_result->num_rows > 0) {
+            // 有審核意見，顯示該意見
+            $review_row = $review_result->fetch_assoc();
+            $opinion = htmlspecialchars($review_row["審核意見"]);
+        } else {
+            $opinion = "<span style='color: orange;'>未審核</span>";
+        }
 
         echo "<tr class='second-row'>";
-        echo "<td>" . $row["count"] . "</td>";
-        echo "<td>" . $row["受款人"] . "</td>";
-        echo "<td>" . $row["金額"] . "</td>";
-        echo "<td>" . $row["支出項目"] . "</td>";
-        echo "<td>" . $opinion1 . "</td>";
-        echo "<td>" . $opinion2 . "</td>";
+        echo "<td>" . htmlspecialchars($row["count"]) . "</td>";
+        echo "<td>" . htmlspecialchars($row["受款人"]) . "</td>";
+        echo "<td>" . htmlspecialchars($row["金額"]) . "</td>";
+        echo "<td>" . htmlspecialchars($row["填表日期"]) . "</td>";
+        echo "<td>" . htmlspecialchars($row["支出項目"]) . "</td>";
+        echo "<td>" . $opinion . "</td>";
         echo "<td>
-            <form method='post' action='主任審查處理.php'>
-                <input type='hidden' name='count' value='" . $row["count"] . "'>
+            <form method='post' action='審核人審查處理.php'>
+                <input type='hidden' name='count' value='" . htmlspecialchars($row["count"]) . "'>
                 <button type='submit' name='review'>審查</button>
             </form>
         </td>";
         echo "</tr>";
-
-        // 釋放主任審核意見結果集
-        if ($director_result) {
-            $director_result->free();
-        }
     }
-	}
-    // 釋放督導審核意見結果集
-    if ($review_result) {
-        $review_result->free();
-    }
-}
-    echo "</table>";
 } else {
-    echo "<p style='text-align:center;'>無資料顯示</p>";
+    echo "<tr><td colspan='7' style='text-align:center;'>無符合條件的資料</td></tr>";
 }
 
-// 釋放結果集
-if ($result) {
-    $result->free();
-}
+echo "</table>";
 
-// 關閉資料庫連線
+// 釋放結果與關閉連線
+if ($result) $result->free();
 $db_link_預支->close();
 $db_link_review->close();
+$db_link_註冊->close();
+$db_link_職位設定->close();
 ?>
