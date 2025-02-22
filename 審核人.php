@@ -107,40 +107,52 @@ echo "<tr>";
 echo "<th>單號</th><th>受款人</th><th>金額</th><th>填表日期</th><th>支出項目</th><th>審核狀態</th><th>操作</th>";
 echo "</tr>";
 
-if ($result && $result->num_rows > 0) {
-    while ($row = $result->fetch_assoc()) {
-        $serial_count = $row["count"];
+// 目前使用者的職位名稱
+$當前職位名稱 = "" . htmlspecialchars($職位名稱) . ""; // 這裡要改成動態取得
+$單號 = "2024010001"; // 這是要審核的單號
 
-        // 查詢是否已經審核
-		$sql_review_opinion = "SELECT 審核意見 FROM `{$職位名稱}審核意見` WHERE 單號 = '$serial_count' LIMIT 1";
+// 取得當前職位的編號
+$sql_get_position = "SELECT 編號 FROM 職位列表 WHERE 職位名稱 = ?";
+$stmt = $db_link->prepare($sql_get_position);
+$stmt->bind_param("s", $當前職位名稱);
+$stmt->execute();
+$result = $stmt->get_result();
 
-        $review_result = $db_link_review->query($sql_review_opinion);
-        
-        if ($review_result && $review_result->num_rows > 0) {
-            $review_result->free();
-            continue;
+if ($result->num_rows > 0) {
+    $row = $result->fetch_assoc();
+    $當前編號 = floatval($row["編號"]); // 轉成數值處理
+
+    // 找到前一個職位
+    $sql_get_prev_position = "SELECT 職位名稱 FROM 職位列表 WHERE 編號 < ? ORDER BY 編號 DESC LIMIT 1";
+    $stmt = $db_link->prepare($sql_get_prev_position);
+    $stmt->bind_param("d", $當前編號);
+    $stmt->execute();
+    $result = $stmt->get_result();
+
+    if ($result->num_rows > 0) {
+        $row = $result->fetch_assoc();
+        $前一個職位 = $row["職位名稱"];
+
+        // 查詢前一個職位是否已經審核
+        $sql_check_review = "SELECT * FROM `{$前一個職位}審核意見` WHERE 單號 = ? LIMIT 1";
+        $stmt = $db_link_review->prepare($sql_check_review);
+        $stmt->bind_param("s", $單號);
+        $stmt->execute();
+        $review_result = $stmt->get_result();
+
+        if ($review_result->num_rows > 0) {
+            echo "<p style='color: green;'>前一個職位 ($前一個職位) 已完成審核，您可以繼續審核。</p>";
+        } else {
+            echo "<p style='color: red;'>前一個職位 ($前一個職位) 尚未完成審核，無法進行審核。</p>";
+            exit;
         }
-
-        $opinion = "<span style='color: orange;'>未審核</span>";
-
-        echo "<tr class='second-row'>";
-        echo "<td>" . htmlspecialchars($row["count"]) . "</td>";
-        echo "<td>" . htmlspecialchars($row["受款人"]) . "</td>";
-        echo "<td>" . htmlspecialchars($row["金額"]) . "</td>";
-        echo "<td>" . htmlspecialchars($row["填表日期"]) . "</td>";
-        echo "<td>" . htmlspecialchars($row["支出項目"]) . "</td>";
-        echo "<td>" . $opinion . "</td>";
-        echo "<td>
-            <form method='post' action='審核人審查處理.php'>
-                <input type='hidden' name='count' value='" . htmlspecialchars($row["count"]) . "'>
-                <button type='submit' name='review'>審查</button>
-            </form>
-        </td>";
-        echo "</tr>";
+    } else {
+        echo "<p style='color: green;'>沒有前一個職位，您可以直接審核。</p>";
     }
 } else {
-    echo "<tr><td colspan='7' style='text-align:center;'>無符合條件的資料</td></tr>";
+    echo "<p style='color: red;'>找不到您的職位資訊。</p>";
 }
+
 
 echo "</table>";
 
