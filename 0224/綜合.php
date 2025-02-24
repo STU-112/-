@@ -1,9 +1,9 @@
 <?php
 // 連接資料庫
-$server = 'localhost:3307';     // 伺服器名稱
-$用戶名 = 'root';              // 用戶名
-$密碼 = ' ';                   // 密碼 (設為空字串，保留您原本的空格)
-$資料庫 = '預支';             // 資料庫名稱
+$server = 'localhost:3307'; // 伺服器名稱
+$用戶名 = 'root';          // 用戶名
+$密碼 = ' ';               // 密碼 (若無密碼則保留空字串即可)
+$資料庫 = '預支';         // 資料庫名稱
 
 // 連接到 MySQL
 $連接 = mysqli_connect($server, $用戶名, $密碼);
@@ -84,10 +84,9 @@ if (!mysqli_query($連接, $create_支付方式_sql)) {
     die("創建支付方式資料表失敗: " . mysqli_error($連接) . "<br>");
 }
 
-// === 新增: 建立 uploads 表 (用於存放檔案資訊) ===
+// === 新增: 建立 uploads 表 (無 user_id) ===
 $create_uploads_sql = "CREATE TABLE IF NOT EXISTS uploads (
     `count` VARCHAR(15) NOT NULL UNIQUE,
-    user_id INT NOT NULL,
     image_path VARCHAR(255) NOT NULL,
     csv_path VARCHAR(255) NOT NULL,
     upload_timestamp TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -103,8 +102,8 @@ function generateSerialNumber($連接) {
     // 取得當前時間
     $now = new DateTime();
     $year = $now->format('Y') - 1911; // 民國年
-    $month = str_pad($now->format('m'), 2, '0', STR_PAD_LEFT); // 月份，兩位數
-    $prefix = "B{$year}{$month}"; // 前綴，如 B11212
+    $month = str_pad($now->format('m'), 2, '0', STR_PAD_LEFT); // 月份(兩位數)
+    $prefix = "B{$year}{$month}"; // 例如 B11202
 
     // 查詢當前月份的最大流水號
     $sql = "SELECT MAX(`count`) AS max_count FROM 基本資料 WHERE `count` LIKE '{$prefix}%'";
@@ -130,7 +129,7 @@ function generateSerialNumber($連接) {
 
 // 處理表單提交
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    // 驗證必填字段 (僅示範核心必填，您可根據自己需求增補)
+    // 驗證必填字段 (依需求自行增加)
     $必填字段 = ['填表日期', '受款人', '支出項目', '支付方式', '金額'];
     foreach ($必填字段 as $field) {
         if (empty($_POST[$field])) {
@@ -152,7 +151,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $主題 = !empty($_POST['主題']) ? "'" . mysqli_real_escape_string($連接, $_POST['主題']) . "'" : "NULL";
     $獎學金日期 = !empty($_POST['獎學金日期']) ? "'" . mysqli_real_escape_string($連接, $_POST['獎學金日期']) . "'" : "NULL";
     $經濟扶助 = !empty($_POST['經濟扶助']) ? "'" . mysqli_real_escape_string($連接, $_POST['經濟扶助']) . "'" : "NULL";
-    // 其他項目為 checkbox 多選
+    // 多選的「其他項目」
     $其他項目 = isset($_POST['其他項目']) ? "'" . mysqli_real_escape_string($連接, implode(", ", $_POST['其他項目'])) . "'" : "NULL";
 
     // 說明
@@ -172,35 +171,31 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $到期日 = !empty($_POST['到期日']) ? "'" . mysqli_real_escape_string($連接, $_POST['到期日']) . "'" : "NULL";
     $結餘繳回 = !empty($_POST['結餘繳回']) ? "'" . mysqli_real_escape_string($連接, $_POST['結餘繳回']) . "'" : "NULL";
 
-    // === 新增: 處理檔案上傳 ===
     // 單據張數
     $單據張數 = isset($_POST['單據張數']) ? intval($_POST['單據張數']) : 0;
 
-    // 先預設檔案路徑為空字串，若上傳成功再更新
+    // 上傳檔案的路徑初始化
     $imagePath = '';
     $csvPath   = '';
 
-    // 圖片檔案處理
+    // 處理圖片上傳
     if (isset($_FILES['image_file']) && $_FILES['image_file']['error'] === UPLOAD_ERR_OK) {
-        // 暫存路徑與原檔名
         $imageTmpName = $_FILES['image_file']['tmp_name'];
         $imageName    = $_FILES['image_file']['name'];
 
-        // 建立目錄(若不存在)
+        // 圖片上傳目錄
         $imageFolder = 'uploads/images/';
         if (!is_dir($imageFolder)) {
             mkdir($imageFolder, 0777, true);
         }
-
-        // 產生唯一檔名防止覆蓋
+        // 避免檔名衝突，使用 uniqid 產生前綴
         $uniqueName = uniqid() . '_' . $imageName;
         $imagePath = $imageFolder . $uniqueName;
 
-        // 將檔案搬移到指定位置
         move_uploaded_file($imageTmpName, $imagePath);
     }
 
-    // CSV 檔案處理
+    // 處理 CSV 上傳
     if (isset($_FILES['csv_file']) && $_FILES['csv_file']['error'] === UPLOAD_ERR_OK) {
         $csvTmpName = $_FILES['csv_file']['tmp_name'];
         $csvName    = $_FILES['csv_file']['name'];
@@ -209,16 +204,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         if (!is_dir($csvFolder)) {
             mkdir($csvFolder, 0777, true);
         }
-
         $uniqueCsvName = uniqid() . '_' . $csvName;
         $csvPath = $csvFolder . $uniqueCsvName;
 
         move_uploaded_file($csvTmpName, $csvPath);
     }
-
-    // === 取得 user_id (示範用，實際要看您系統如何儲存或管理) ===
-    // 假設 Session 內已有 user_id，若沒有就設 0 或改成您自訂的取得方式
-    $userId = isset($_SESSION['user_id']) ? intval($_SESSION['user_id']) : 0;
 
     // 開始事務處理
     mysqli_begin_transaction($連接);
@@ -233,14 +223,15 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             VALUES 
             ('$流水號', '$受款人', '$填表日期', $付款日期)";
         if (!mysqli_query($連接, $insert_基本資料_sql)) {
-            if (mysqli_errno($連接) == 1062) { // 重複的 `count` 錯誤碼
+            if (mysqli_errno($連接) == 1062) {
+                // 重複的 `count` 錯誤碼
                 throw new Exception("重複的流水號，請稍後再試。");
             } else {
                 throw new Exception("插入基本資料失敗: " . mysqli_error($連接));
             }
         }
 
-        // 插入支出資料
+        // 插入支出項目
         $insert_支出項目_sql = "INSERT INTO 支出項目 
             (`count`, 支出項目, 活動名稱, 專案日期, 獎學金人數, 專案名稱, 主題, 獎學金日期, 經濟扶助, 其他項目)
             VALUES 
@@ -267,11 +258,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             throw new Exception("插入支付方式資料失敗: " . mysqli_error($連接));
         }
 
-        // === 新增: 插入 uploads 資料 (圖檔路徑、CSV 路徑、單據張數 等) ===
+        // 最後插入 uploads（無 user_id）
         $insert_uploads_sql = "INSERT INTO uploads 
-            (`count`, user_id, image_path, csv_path, 單據張數)
+            (`count`, image_path, csv_path, 單據張數)
             VALUES 
-            ('$流水號', '$userId', '$imagePath', '$csvPath', '$單據張數')";
+            ('$流水號', '$imagePath', '$csvPath', '$單據張數')";
         if (!mysqli_query($連接, $insert_uploads_sql)) {
             throw new Exception("插入 uploads 資料失敗: " . mysqli_error($連接));
         }
@@ -280,7 +271,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         mysqli_commit($連接);
 
         echo "表單已成功提交!!<br>";
-        // 原程式中成功後導向登入頁，可保留或自行修改
+        // 成功後導向登入頁 (可依需求自行修改)
         header("Location: 登入.html");
         exit();
 
