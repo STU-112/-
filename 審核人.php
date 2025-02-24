@@ -1,4 +1,4 @@
-<?php
+<?php 
 include '啟動Session.php';
 
 // 資料庫連線參數
@@ -54,22 +54,20 @@ if ($職位_result_使用者 && $職位_result_使用者->num_rows > 0) {
     $職位名稱 = $row["權限管理"];
 }
 
-// 讀取對應職位的上限、下限及職位編號
-$範圍_sql = "SELECT 編號, 職位名稱, 上限, 下限 FROM 職位設定表 WHERE 職位名稱 = '$職位名稱' LIMIT 1";
+// 讀取對應職位的上限與下限
+$範圍_sql = "SELECT 上限, 下限 FROM 職位設定表 WHERE 職位名稱 = '$職位名稱' LIMIT 1";
 $範圍_result = $db_link_職位設定->query($範圍_sql);
 
 if ($範圍_result && $範圍_result->num_rows > 0) {
     $範圍_data = $範圍_result->fetch_assoc();
     $上限 = $範圍_data["上限"];
     $下限 = $範圍_data["下限"];
-    $職位編號 = $範圍_data["編號"];  // 獲取職位編號
-    $職位名稱 = $範圍_data["職位名稱"];  // 獲取職位名稱
 }
 
 // 查詢符合審核範圍的資料
 $sql = "
 SELECT 
-    b.`count`,
+    b.count,
     b.受款人,
     b.填表日期,
     s.支出項目,
@@ -78,13 +76,13 @@ SELECT
 FROM 
     基本資料 AS b
 LEFT JOIN 
-    支出項目 AS s ON b.`count` = s.`count`
+    支出項目 AS s ON b.count = s.count
 LEFT JOIN 
-    說明 AS d ON b.`count` = d.`count`
+    說明 AS d ON b.count = d.count
 LEFT JOIN 
-    支付方式 AS p ON b.`count` = p.`count`
+    支付方式 AS p ON b.count = p.count
 WHERE 
-    p.金額 BETWEEN $下限 AND $上限";  // 限制金額範圍
+    p.金額 BETWEEN $下限 AND $上限"	;  // 限制金額範圍
 
 $result = $db_link_預支->query($sql);
 
@@ -107,52 +105,45 @@ echo "<tr>";
 echo "<th>單號</th><th>受款人</th><th>金額</th><th>填表日期</th><th>支出項目</th><th>審核狀態</th><th>操作</th>";
 echo "</tr>";
 
-// 目前使用者的職位名稱
-$當前職位名稱 = "" . htmlspecialchars($職位名稱) . ""; // 這裡要改成動態取得
-$單號 = "2024010001"; // 這是要審核的單號
+if ($result && $result->num_rows > 0) {
+    while ($row = $result->fetch_assoc()) {
+        $serial_count = $row["count"];
 
-// 取得當前職位的編號
-$sql_get_position = "SELECT 編號 FROM 職位列表 WHERE 職位名稱 = ?";
-$stmt = $db_link->prepare($sql_get_position);
-$stmt->bind_param("s", $當前職位名稱);
-$stmt->execute();
-$result = $stmt->get_result();
-
-if ($result->num_rows > 0) {
-    $row = $result->fetch_assoc();
-    $當前編號 = floatval($row["編號"]); // 轉成數值處理
-
-    // 找到前一個職位
-    $sql_get_prev_position = "SELECT 職位名稱 FROM 職位列表 WHERE 編號 < ? ORDER BY 編號 DESC LIMIT 1";
-    $stmt = $db_link->prepare($sql_get_prev_position);
-    $stmt->bind_param("d", $當前編號);
-    $stmt->execute();
-    $result = $stmt->get_result();
-
-    if ($result->num_rows > 0) {
-        $row = $result->fetch_assoc();
-        $前一個職位 = $row["職位名稱"];
-
-        // 查詢前一個職位是否已經審核
-        $sql_check_review = "SELECT * FROM `{$前一個職位}審核意見` WHERE 單號 = ? LIMIT 1";
-        $stmt = $db_link_review->prepare($sql_check_review);
-        $stmt->bind_param("s", $單號);
-        $stmt->execute();
-        $review_result = $stmt->get_result();
-
-        if ($review_result->num_rows > 0) {
-            echo "<p style='color: green;'>前一個職位 ($前一個職位) 已完成審核，您可以繼續審核。</p>";
-        } else {
-            echo "<p style='color: red;'>前一個職位 ($前一個職位) 尚未完成審核，無法進行審核。</p>";
-            exit;
+        // 查詢職位編號、審核意見、狀態
+       $sql_review_opinion = "
+    SELECT ps.編號, ro.職位名稱, ro.審核意見, ro.狀態
+    FROM `職位設定表` AS ps
+    JOIN `{$職位名稱}審核意見` AS ro ON ps.職位名稱 = ro.職位名稱
+    WHERE ro.單號 = '$serial_count'
+    LIMIT 1";
+	
+        $review_result = $db_link_review->query($sql_review_opinion);
+		
+        if ($review_result && $review_result->num_rows > 0) {
+            $review_result->free();
+            continue;
         }
-    } else {
-        echo "<p style='color: green;'>沒有前一個職位，您可以直接審核。</p>";
+
+        $opinion = "<span style='color: orange;'>未審核</span>";
+
+        echo "<tr class='second-row'>";
+        echo "<td>" . htmlspecialchars($row["count"]) . "</td>";
+        echo "<td>" . htmlspecialchars($row["受款人"]) . "</td>";
+        echo "<td>" . htmlspecialchars($row["金額"]) . "</td>";
+        echo "<td>" . htmlspecialchars($row["填表日期"]) . "</td>";
+        echo "<td>" . htmlspecialchars($row["支出項目"]) . "</td>";
+        echo "<td>" . $opinion . "</td>";
+        echo "<td>
+            <form method='post' action='審核人審查處理.php'>
+                <input type='hidden' name='count' value='" . htmlspecialchars($row["count"]) . "'>
+                <button type='submit' name='review'>審查</button>
+            </form>
+        </td>";
+        echo "</tr>";
     }
 } else {
-    echo "<p style='color: red;'>找不到您的職位資訊。</p>";
+    echo "<tr><td colspan='7' style='text-align:center;'>無符合條件的資料</td></tr>";
 }
-
 
 echo "</table>";
 

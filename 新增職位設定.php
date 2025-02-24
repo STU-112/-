@@ -265,14 +265,15 @@ $result = $db_link_職位->query($sql);
 </div>
 	  
 	  
-	  
+		
 	 <!-- 目前職位 -->
     <h2>目前職位列表</h2>
     <table>
         <thead>
             <tr>
 			
-                <th>編號</th>	
+                <th>編號</th>
+				<th>審查等級</th>	
                 <th>職位名稱</th>
 				<th>上限</th>
 				<th>下限</th>
@@ -288,6 +289,7 @@ $result = $db_link_職位->query($sql);
                 while ($row = $result->fetch_assoc()) {
                     echo "<tr>";
                     echo "<td style='text-align:center;'>" . $row["編號"] . "</td>";
+					echo "<td></td>";
                     echo "<td>" . $row["職位名稱"] . "</td>";
 					echo "<td>" . $row["上限"] . "</td>";
 					echo "<td>" . $row["下限"] . "</td>";
