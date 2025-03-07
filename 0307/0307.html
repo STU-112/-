@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <title>支出項目統計查詢</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+    }
+    form {
+      margin-bottom: 20px;
+    }
+    label {
+      margin-right: 8px;
+    }
+    /* 讓 iframe 佔滿可用寬度，高度自訂 */
+    iframe {
+      width: 100%;
+      height: 600px;
+      border: 1px solid #ccc;
+    }
+  </style>
+</head>
+<body>
+  <h1>支出項目統計查詢</h1>
+
+  <!-- 篩選表單：不含「全部」選項，若不選任何項目就顯示所有 -->
+  <form method="GET" action="0307.php" target="resultFrame">
+    <label for="expenseItem">支出項目：</label>
+    <select id="expenseItem" name="expenseItem">
+      <!-- 不選任何項目 => 顯示所有 -->
+      <option value="">-- 請選擇 --</option>
+      <option value="活動費用">活動費用</option>
+      <option value="獎學金">獎學金</option>
+      <option value="經濟扶助">經濟扶助</option>
+      <option value="其他">其他</option>
+    </select>
+    <button type="submit">查詢</button>
+  </form>
+
+  <!-- 一進入頁面就直接載入 0307.php，顯示所有統計資料 -->
+  <iframe name="resultFrame" src="0307.php"></iframe>
+
+</body>
+</html>
