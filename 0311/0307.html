@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <title>支出項目統計查詢</title>
+  <!-- 載入 Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+  <!-- 載入 html2canvas + jspdf (用於匯出PDF) -->
+  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.0/dist/jspdf.umd.min.js"></script>
+  <style>
+    * {
+      margin: 0; 
+      padding: 0; 
+      box-sizing: border-box;
+    }
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: #F0F4F8;
+      padding: 20px;
+    }
+    .container {
+      max-width: 700px; /* 調整容器寬度，使畫面較小 */
+      margin: 0 auto;
+      background: #fff;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    h1 {
+      text-align: center;
+      color: #4A90E2;
+      margin-bottom: 20px;
+    }
+    form {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+    label {
+      font-weight: 600; 
+      margin-right: 8px;
+    }
+    select, 
+    input[type="month"], 
+    button {
+      padding: 8px 12px;
+      font-size: 1rem;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+    }
+    button {
+      background: #4A90E2;
+      color: #fff;
+      border: none;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    button:hover {
+      background: #357ABD;
+    }
+    /* iframe 內會顯示 0307.php 結果 */
+    iframe {
+      width: 100%;
+      height: 600px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+    }
+    /* 額外按鈕樣式（匯出PDF） */
+    .pdf-btn {
+      background: #50C878;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>統計查詢</h1>
+    
+    <form method="GET" action="0307.php" target="resultFrame" id="searchForm">
+      <div>
+        <label for="expenseItem">支出項目：</label>
+        <select id="expenseItem" name="expenseItem">
+          <option value="全部" selected>全部</option>
+          <option value="活動費用">活動費用</option>
+          <option value="獎學金">獎學金</option>
+          <option value="經濟扶助">經濟扶助</option>
+          <option value="其他">其他</option>
+        </select>
+      </div>
+      <div>
+        <label for="monthFilter">月份：</label>
+        <input type="month" id="monthFilter" name="monthFilter">
+      </div>
+      <button type="submit">查詢</button>
+      
+      <button type="button" class="pdf-btn" onclick="exportPDF()">匯出PDF</button>
+    </form>
+
+    <iframe name="resultFrame" src="0307.php"></iframe>
+  </div>
+
+  <script>
+    /**
+     * 產生防呆檔名: "report_YYYYMMDD_HHMMSS.pdf"
+     */
+    function getPDFFileName() {
+      const now = new Date();
+      const y = now.getFullYear();
+      const m = String(now.getMonth() + 1).padStart(2,'0');
+      const d = String(now.getDate()).padStart(2,'0');
+      const hh = String(now.getHours()).padStart(2,'0');
+      const mm = String(now.getMinutes()).padStart(2,'0');
+      const ss = String(now.getSeconds()).padStart(2,'0');
+      return `report_${y}${m}${d}_${hh}${mm}${ss}.pdf`;
+    }
+
+    /**
+     * 匯出PDF:
+     * 1) 從 iframe 抓取 .container (含表格與圖表)
+     * 2) 使用 html2canvas + jsPDF 轉為 PDF
+     * 3) 檔名帶上防呆
+     */
+    async function exportPDF() {
+      // 取得 iframe 中的 .container
+      const iframeDoc = document.querySelector('iframe').contentDocument;
+      if (!iframeDoc) {
+        alert("無法取得 iframe 內容。");
+        return;
+      }
+      const container = iframeDoc.querySelector('.container');
+      if (!container) {
+        alert("結果尚未載入，或無資料。");
+        return;
+      }
+
+      try {
+        // 使用 html2canvas 將 container 轉為 canvas
+        const canvas = await html2canvas(container, { scale: 2 }); 
+        // scale: 2 → 提高解析度
+
+        // 將 canvas 轉為圖片 base64
+        const imgData = canvas.toDataURL("image/png");
+
+        // 產生 PDF
+        const { jsPDF } = window.jspdf;
+        const pdf = new jsPDF('p', 'pt', 'a4'); // portrait, points, A4
+
+        // 計算圖片放入 PDF 的尺寸
+        const pdfWidth = pdf.internal.pageSize.getWidth();
+        const canvasWidth = canvas.width;
+        const canvasHeight = canvas.height;
+        const ratio = pdfWidth / canvasWidth;
+        const pdfHeight = canvasHeight * ratio;
+
+        // 放入 PDF
+        pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+
+        // 下載 PDF
+        pdf.save(getPDFFileName());
+      } catch (err) {
+        console.error(err);
+        alert("匯出PDF失敗：" + err);
+      }
+    }
+  </script>
+</body>
+</html>
