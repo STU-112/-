@@ -7,7 +7,7 @@ $username = "root";
 $password = "3307";
 
 // 連接到資料庫
-$dbname_預支 = "預支";
+$dbname_預支 = "0228";
 $db_link_預支 = new mysqli($servername, $username, $password, $dbname_預支);
 
 $dbname_review = "Review_comments";
@@ -16,24 +16,12 @@ $db_link_review = new mysqli($servername, $username, $password, $dbname_review);
 $dbname_註冊 = "註冊"; 
 $db_link_註冊 = new mysqli($servername, $username, $password, $dbname_註冊);
 
-$dbname_職位設定 = "職位設定";
+$dbname_職位設定 = "職位";
 $db_link_職位設定 = new mysqli($servername, $username, $password, $dbname_職位設定);
 
 // 檢查資料庫連線
-if ($db_link_預支->connect_error) {
-    die("連線到 預支 資料庫失敗: " . $db_link_預支->connect_error);
-}
-
-if ($db_link_review->connect_error) {
-    die("連線到 Review_comments 資料庫失敗: " . $db_link_review->connect_error);
-}
-
-if ($db_link_註冊->connect_error) { 
-    die("註冊資料庫連線失敗: " . $db_link_註冊->connect_error); 
-}
-
-if ($db_link_職位設定->connect_error) { 
-    die("職位設定連線失敗: " . $db_link_職位設定->connect_error); 
+if ($db_link_預支->connect_error || $db_link_review->connect_error || $db_link_註冊->connect_error || $db_link_職位設定->connect_error) {
+    die("資料庫連線失敗");
 }
 
 // 取得登入者資訊
@@ -44,8 +32,7 @@ $職位_result_使用者 = $db_link_註冊->query($職位查詢);
 $員工編號 = "";
 $部門 = "";
 $職位名稱 = "";
-$上限 = 0;
-$下限 = 0;
+$當前職位編號 = 0;
 
 if ($職位_result_使用者 && $職位_result_使用者->num_rows > 0) {
     $row = $職位_result_使用者->fetch_assoc();
@@ -54,35 +41,42 @@ if ($職位_result_使用者 && $職位_result_使用者->num_rows > 0) {
     $職位名稱 = $row["權限管理"];
 }
 
-// 讀取對應職位的上限與下限
-$範圍_sql = "SELECT 上限, 下限 FROM 職位設定表 WHERE 職位名稱 = '$職位名稱' LIMIT 1";
-$範圍_result = $db_link_職位設定->query($範圍_sql);
+// 讀取當前職位的編號
+$職位編號查詢 = "SELECT 編號 FROM 職位 WHERE 職位名稱 = '$職位名稱' LIMIT 1";
+$職位編號結果 = $db_link_職位設定->query($職位編號查詢);
 
-if ($範圍_result && $範圍_result->num_rows > 0) {
-    $範圍_data = $範圍_result->fetch_assoc();
-    $上限 = $範圍_data["上限"];
-    $下限 = $範圍_data["下限"];
+if ($職位編號結果 && $職位編號結果->num_rows > 0) {
+    $row = $職位編號結果->fetch_assoc();
+    $當前職位編號 = $row["編號"];
 }
 
-// 查詢符合審核範圍的資料
+// 取得上一級職位名稱
+$上一級職位名稱 = "";
+$上一個職位查詢 = "SELECT 職位名稱 FROM 職位 WHERE 編號 < $當前職位編號 ORDER BY 編號 DESC LIMIT 1";
+$上一個職位結果 = $db_link_職位設定->query($上一個職位查詢);
+
+if ($上一個職位結果 && $上一個職位結果->num_rows > 0) {
+    $row = $上一個職位結果->fetch_assoc();
+    $上一級職位名稱 = $row["職位名稱"];
+}
+
+// 查詢預支資料
 $sql = "
 SELECT 
-    b.count,
-    b.受款人,
-    b.填表日期,
-    s.支出項目,
-    d.說明,
-    p.金額
+    b.受款人代號,
+    s.交易單號,
+    d.支出項目,
+    d.填表日期,
+    s.金額
 FROM 
-    基本資料 AS b
+    受款人資料檔 AS b
 LEFT JOIN 
-    支出項目 AS s ON b.count = s.count
-LEFT JOIN 
-    說明 AS d ON b.count = d.count
-LEFT JOIN 
-    支付方式 AS p ON b.count = p.count
+    經辦人交易檔 AS s ON b.受款人代號 = s.受款人代號
+LEFT JOIN 	
+    經辦業務檔 AS d ON b.受款人代號 = d.受款人代號
 WHERE 
-    p.金額 BETWEEN $下限 AND $上限"	;  // 限制金額範圍
+    s.金額 IS NOT NULL
+";
 
 $result = $db_link_預支->query($sql);
 
@@ -94,10 +88,11 @@ echo "
     <div class='left'>". htmlspecialchars($部門) ." - ". htmlspecialchars($員工編號) ."</div>
     <div class='right'>
         <span>歡迎，". htmlspecialchars($帳號) ."！</span> 
-        <a href='督導審查紀錄.php'>審查紀錄</a>
+        <a href='審核人審查紀錄.php'>審查紀錄</a>
         <a href='登出.php'>登出</a>
     </div>
 </div>";
+
 
 echo "<table>";
 echo "<caption>" . htmlspecialchars($職位名稱) . "審核</caption>";
@@ -106,49 +101,52 @@ echo "<th>單號</th><th>受款人</th><th>金額</th><th>填表日期</th><th>�
 echo "</tr>";
 
 if ($result && $result->num_rows > 0) {
-    while ($row = $result->fetch_assoc()) {
-        $serial_count = $row["count"];
+   while ($row = $result->fetch_assoc()) {
+    $serial_count = $row["受款人代號"];
 
-        // 查詢職位編號、審核意見、狀態
-       $sql_review_opinion = "
-    SELECT ps.編號, ro.職位名稱, ro.審核意見, ro.狀態
-    FROM `職位設定表` AS ps
-    JOIN `{$職位名稱}審核意見` AS ro ON ps.職位名稱 = ro.職位名稱
-    WHERE ro.單號 = '$serial_count'
-    LIMIT 1";
-	
+ // **檢查當前職位是否已審核過**
+    $sql_current_review = "SELECT 審核意見 FROM `{$職位名稱}審核意見` WHERE 單號 = '$serial_count' LIMIT 1";
+    $current_review_result = $db_link_review->query($sql_current_review);
+
+    // **如果當前職位已經審核過，則跳過這筆資料**
+    if ($current_review_result && $current_review_result->num_rows > 0) {
+        continue;
+    }
+
+
+    // **部門主管直接顯示所有資料**
+    if ($職位名稱 == "部門主管") {
+        $審核條件符合 = true;
+    } else {
+        // **其他職位需確認上一級是否已審核**
+        $sql_review_opinion = "SELECT 審核意見 FROM `{$上一級職位名稱}審核意見` WHERE 單號 = '$serial_count' LIMIT 1";
         $review_result = $db_link_review->query($sql_review_opinion);
-		
-        if ($review_result && $review_result->num_rows > 0) {
-            $review_result->free();
-            continue;
-        }
+        $審核條件符合 = ($review_result && $review_result->num_rows > 0);
+    }
 
-        $opinion = "<span style='color: orange;'>未審核</span>";
-
+    // **符合審核條件才顯示**
+    if ($審核條件符合) {
         echo "<tr class='second-row'>";
-        echo "<td>" . htmlspecialchars($row["count"]) . "</td>";
-        echo "<td>" . htmlspecialchars($row["受款人"]) . "</td>";
+        echo "<td>" . htmlspecialchars($row["交易單號"]) . "</td>";
+        echo "<td>" . htmlspecialchars($row["受款人代號"]) . "</td>";
         echo "<td>" . htmlspecialchars($row["金額"]) . "</td>";
         echo "<td>" . htmlspecialchars($row["填表日期"]) . "</td>";
         echo "<td>" . htmlspecialchars($row["支出項目"]) . "</td>";
-        echo "<td>" . $opinion . "</td>";
+        echo "<td style='color: orange;'>待審核</td>";
         echo "<td>
             <form method='post' action='審核人審查處理.php'>
-                <input type='hidden' name='count' value='" . htmlspecialchars($row["count"]) . "'>
+                <input type='hidden' name='受款人代號' value='" . htmlspecialchars($row["受款人代號"]) . "'>
                 <button type='submit' name='review'>審查</button>
             </form>
         </td>";
         echo "</tr>";
     }
-} else {
-    echo "<tr><td colspan='7' style='text-align:center;'>無符合條件的資料</td></tr>";
+    }
 }
 
 echo "</table>";
 
-// 釋放結果與關閉連線
-if ($result) $result->free();
+// 關閉資料庫連線
 $db_link_預支->close();
 $db_link_review->close();
 $db_link_註冊->close();

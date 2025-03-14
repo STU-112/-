@@ -1,25 +1,25 @@
 <?php 
-error_reporting(E_ALL);
-ini_set('display_errors', 1);
-date_default_timezone_set('Asia/Taipei');
+error_reporting(E_ALL);  
+ini_set('display_errors', 1);  
+date_default_timezone_set('Asia/Taipei');  
 
-$host     = 'localhost:3307';
-$dbname   = '0228';
-$username = 'root';
-$password = ' ';
-金額
-try {
-    $pdo = new PDO("mysql:host=$host;charset=utf8", $username, $password);
-    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-    $pdo->exec("
+$host     = 'localhost:3307';   
+$dbname   = '0228';             
+$username = 'root';             
+$password = '3307';                 
+
+try {     
+    $pdo = new PDO("mysql:host=$host;charset=utf8", $username, $password);     
+    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);      
+    $pdo->exec("         
         CREATE DATABASE IF NOT EXISTS `$dbname`
         DEFAULT CHARACTER SET utf8
         COLLATE utf8_general_ci;
-    ");
-    $pdo->exec("USE `$dbname`;");
-
-    // 1) 受款人資料檔
-    $pdo->exec("
+    ");     
+    $pdo->exec("USE `$dbname`;");      
+    
+    // 1) 受款人資料檔     
+    $pdo->exec("         
         CREATE TABLE IF NOT EXISTS 受款人資料檔 (
             受款人代號  VARCHAR(5)  NOT NULL,
             受款人姓名  VARCHAR(50) NOT NULL,
@@ -27,10 +27,10 @@ try {
             地址        VARCHAR(100) NOT NULL,
             PRIMARY KEY (受款人代號)
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-    ");
-
-    // 2) 經辦業務檔
-    $pdo->exec("
+    ");      
+    
+    // 2) 經辦業務檔     
+    $pdo->exec("         
         CREATE TABLE IF NOT EXISTS 經辦業務檔 (
             業務代號     VARCHAR(5)   NOT NULL,
             受款人代號   VARCHAR(5)   NOT NULL,
@@ -55,10 +55,10 @@ try {
               ON UPDATE CASCADE
               ON DELETE RESTRICT
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-    ");
-
-    // 3) 經辦人交易檔 (已移除付款金額、簽收人、簽收金額 3欄位，只保留票號、到期日、簽收日)
-    $pdo->exec("
+    ");      
+    
+    // 3) 經辦人交易檔     
+    $pdo->exec("         
         CREATE TABLE IF NOT EXISTS 經辦人交易檔 (
             交易單號    VARCHAR(15)   NOT NULL,
             受款人代號  VARCHAR(5)    NOT NULL,
@@ -67,20 +67,16 @@ try {
             國字金額    VARCHAR(100)  DEFAULT NULL,
             交易時間    DATETIME      NOT NULL,
             交易方式    VARCHAR(10)   NOT NULL,
-
-            -- 轉帳/匯款/劃撥需的欄位
             銀行別      VARCHAR(50)   DEFAULT NULL,
             行號        VARCHAR(10)   DEFAULT NULL,
             戶名        VARCHAR(50)   DEFAULT NULL,
             帳號        VARCHAR(50)   DEFAULT NULL,
-
-            -- 支票(只留票號、到期日)
             票號        VARCHAR(50)   DEFAULT NULL,
             到期日      DATE          DEFAULT NULL,
-
-            -- 現金(只留簽收日)
+            付款金額    DECIMAL(10,2) DEFAULT NULL,
             簽收日      DATE          DEFAULT NULL,
-
+            簽收人      VARCHAR(50)   DEFAULT NULL,
+            簽收金額    DECIMAL(10,2) DEFAULT NULL,
             PRIMARY KEY (交易單號),
             CONSTRAINT fk_交易檔_受款人
               FOREIGN KEY (受款人代號)
@@ -93,9 +89,9 @@ try {
               ON UPDATE CASCADE
               ON DELETE RESTRICT
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-    ");
-} catch (PDOException $e) {
-    die('資料庫或資料表建立失敗: ' . $e->getMessage());
+    ");  
+} catch (PDOException $e) {     
+    die('資料庫或資料表建立失敗: ' . $e->getMessage()); 
 }
 
 /**
@@ -108,8 +104,8 @@ function generateTransactionID(PDO $pdo) {
     $month   = $now->format('m');
     $prefix  = "A{$rocYear}{$month}";
     $stmt = $pdo->prepare("
-        SELECT MAX(交易單號) AS max_id
-        FROM 經辦人交易檔
+        SELECT MAX(交易單號) AS max_id 
+        FROM 經辦人交易檔 
         WHERE 交易單號 LIKE ?
     ");
     $stmt->execute(["{$prefix}%"]);
@@ -128,6 +124,7 @@ function generateTransactionID(PDO $pdo) {
  * 例如：W活動費用, X獎學金, Y經濟扶助, Z其他
  */
 function generateBusinessCode(PDO $pdo, string $expenseItem) {
+    // 根據整個字串，取第一個英文字母
     switch ($expenseItem) {
         case 'W活動費用':
             $prefix = 'W';
@@ -142,18 +139,19 @@ function generateBusinessCode(PDO $pdo, string $expenseItem) {
             $prefix = 'Z';
             break;
         default:
+            // 萬一抓不到，預設 Z
             $prefix = 'Z';
             break;
     }
     $stmt = $pdo->prepare("
-        SELECT MAX(業務代號) AS max_code
-        FROM 經辦業務檔
+        SELECT MAX(業務代號) AS max_code 
+        FROM 經辦業務檔 
         WHERE 業務代號 LIKE CONCAT(?, '%')
     ");
     $stmt->execute([$prefix]);
     $row = $stmt->fetch(PDO::FETCH_ASSOC);
     if ($row && $row['max_code']) {
-        $lastNum = (int)substr($row['max_code'], 1);
+        $lastNum = (int)substr($row['max_code'], 1); // 去除第一碼後剩餘的數字
         $newNum  = $lastNum + 1;
     } else {
         $newNum  = 1;
@@ -167,15 +165,11 @@ function generateBusinessCode(PDO $pdo, string $expenseItem) {
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // 受款人代號 + 受款人姓名
     $recipientCode = $_POST['受款人']     ?? '';  // Rxx
-    $recipientName = $_POST['受款人姓名'] ?? '';
-
-    // 新增：從前端表單接收使用者輸入的「地址」與「手機號碼」
-    $recipientAddr  = $_POST['地址']    ?? '';
-    $recipientPhone = $_POST['手機號碼'] ?? '';
+    $recipientName = $_POST['受款人姓名'] ?? '';  // 使用者自行輸入
 
     // 其他欄位
-    $expenseItem   = $_POST['支出項目'] ?? '';
-    $businessName  = $_POST['填表人']   ?? '';
+    $expenseItem   = $_POST['支出項目'] ?? '';    // W活動費用 / X獎學金 / Y經濟扶助 / Z其他
+    $businessName  = $_POST['填表人']   ?? '';    // 經辦代號(舊「業務名稱」)
     $desc          = $_POST['說明']     ?? '';
 
     // 填表日期 (DATETIME)
@@ -203,19 +197,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $othersArr    = $_POST['其他項目']    ?? [];
     $othersStr    = is_array($othersArr) ? implode(',', $othersArr) : '';
 
-    // 預留（現金 / 轉帳 / 匯款 / 劃撥 / 支票）
-    // 現金：只保留「簽收日」
+    // 現金 / 轉帳 / 匯款 / 劃撥 / 支票
+    $signAmt    = $_POST['簽收金額']   ?? '';
+    $signPerson = $_POST['簽收人']     ?? '';
     $signDate   = $_POST['簽收日']     ?? '';
-
-    // 轉帳/匯款/劃撥
     $bank       = $_POST['銀行郵局']   ?? '';
     $branch     = $_POST['分行']       ?? '';
     $acctName   = $_POST['戶名']       ?? '';
     $acctNumber = $_POST['帳號']       ?? '';
-
-    // 支票：只保留「票號」、「到期日」
     $checkNo    = $_POST['票號']       ?? '';
     $dueDate    = $_POST['到期日']     ?? '';
+    $advanceAmt = $_POST['付款金額']   ?? '';
 
     // 防呆檢查
     if (!$recipientCode) {
@@ -249,13 +241,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             ");
             $stmt1->execute([
                 $recipientCode,
-                $recipientName,
-                $recipientPhone,
-                $recipientAddr
+                $recipientName,  // 使用者輸入的姓名
+                '0912-345678',   // 手機號碼(範例)
+                '未填寫'         // 地址(範例)
             ]);
         }
 
-        // 2) 新增到 經辦業務檔
+        // 2) 新增 經辦業務檔
         $stmt2 = $pdo->prepare("
             INSERT INTO 經辦業務檔
             (
@@ -272,8 +264,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $recipientCode,
             $fillDate,
             $payDate,
-            $expenseItem,
-            $businessName,
+            $expenseItem,   // 例如 "W活動費用" / "X獎學金" / ...
+            $businessName,  // 將「填表人」存入「經辦代號」欄位
             $desc ?: null,
             $projectType    ?: null,
             $activityName   ?: null,
@@ -286,23 +278,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $othersStr      ?: null
         ]);
 
-        // 3) 新增到 經辦人交易檔 (移除付款金額、簽收人、簽收金額等)
+        // 3) 新增 經辦人交易檔
         $stmt3 = $pdo->prepare("
             INSERT INTO 經辦人交易檔
             (
                 交易單號, 受款人代號, 業務代號,
                 金額, 國字金額, 交易時間, 交易方式,
-
-                -- 轉帳/匯款/劃撥
-                銀行別, 行號, 戶名, 帳號,
-
-                -- 支票
-                票號, 到期日,
-
-                -- 現金
-                簽收日
+                銀行別, 行號, 戶名, 帳號, 票號,
+                到期日, 付款金額,
+                簽收日, 簽收人, 簽收金額
             )
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         ");
         $stmt3->execute([
             $trxID,
@@ -312,19 +298,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $amtChinese ?: null,
             date('Y-m-d H:i:s'),
             $payMethod,
-
-            // 轉帳/匯款/劃撥
             $bank       ?: null,
             $branch     ?: null,
             $acctName   ?: null,
             $acctNumber ?: null,
-
-            // 支票欄位
-            !empty($checkNo) ? $checkNo : null,
+            $checkNo    ?: null,
             !empty($dueDate) ? $dueDate : null,
-
-            // 現金欄位
-            !empty($signDate) ? $signDate : null
+            !empty($advanceAmt) ? floatval($advanceAmt) : null,
+            !empty($signDate)   ? $signDate   : null,
+            !empty($signPerson) ? $signPerson : null,
+            !empty($signAmt)    ? floatval($signAmt) : null
         ]);
 
         $pdo->commit();

@@ -3,7 +3,7 @@
 $servername = "localhost:3307"; 
 $username = "root"; 
 $password = "3307"; 
-$dbname = "預支"; 
+$dbname = "0228"; 
 
 // 建立連線
 $db_link = new mysqli($servername, $username, $password, $dbname);
@@ -15,57 +15,21 @@ if ($db_link->connect_error) {
 
 // 檢查是否有表單提交
 $search_count = '';
-if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["count"])) {
-    $search_count = $_POST["count"];
+if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["受款人代號"])) {
+    $search_count = $_POST["受款人代號"];
 }
 
 
 
    
 if (!empty($search_count)) {
-    // 合併查詢語句
-$sql = "
-SELECT 
-    b.`count`,
-    b.受款人,
-    b.填表日期,
-	b.付款日期,
-	s.`count`,
-    s.支出項目,
-	s.活動名稱,
-	s.專案日期,
-	s.獎學金人數,
-	s.專案名稱,
-	s.主題,
-	s.獎學金日期,
-	s.經濟扶助,
-	s.其他項目 ,
-	d.`count`,
-    d.說明,
-	p.`count`,
-	p.支付方式,
-    p.金額,
-	p.簽收日,
-	p.銀行郵局,
-	p.分行,
-	p.戶名,
-	p.帳號,
-	p.票號,
-	p.到期日,
-	p.結餘繳回
+    // 合併查詢語句 
 	
-FROM 
-    基本資料 AS b
-LEFT JOIN 
-    支出項目 AS s ON b.`count` = s.`count`
-LEFT JOIN 
-    說明 AS d ON b.`count` = d.`count`
-LEFT JOIN 
-    支付方式 AS p ON b.`count` = p.`count`
-WHERE 
-    b.`count` = ?";
+	
+    include '審查處理sql.php';
     
-    if ($stmt = $db_link->prepare($sql)) {
+	
+	if ($stmt = $db_link->prepare($sql)) {
         $stmt->bind_param("s", $search_count);
         $stmt->execute();
         $result = $stmt->get_result();
@@ -82,7 +46,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['status']) && isset($_P
     $serial_count = $_POST['serial_count'];  // 單號
 
     // 查詢金額
-    $sql = "SELECT 金額 FROM pay_table WHERE count = ?";
+    $sql = "SELECT 金額 FROM 經辦人交易檔 WHERE 受款人代號 = ?";
     $stmt = $db_link->prepare($sql);
     $stmt->bind_param("s", $serial_count);
     $stmt->execute();
@@ -93,7 +57,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['status']) && isset($_P
     $amount = $row['金額'];
 
     // 這裡不再依金額判斷，而是統一傳送給出納
-    $sql_update = "UPDATE pay_table SET status = ?, opinion = ?, next_audit = '出納' WHERE count = ?";
+    $sql_update = "UPDATE 經辦人交易檔 SET status = ?, opinion = ?, next_audit = '出納' WHERE 受款人代號 = ?";
 
     // 更新資料庫
     $stmt_update = $db_link->prepare($sql_update);
@@ -102,7 +66,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['status']) && isset($_P
 
     // 完成後的跳轉或訊息
     if ($stmt_update->affected_rows > 0) {
-        echo "<script>alert('審核已完成，資料已轉交給出納。'); window.location.href = '督導.php';</script>";
+        echo "<script>alert('審核已完成，資料已轉交給出納。'); window.location.href = '審核人.php';</script>";
     } else {
         echo "<script>alert('更新失敗，請重試。');</script>";
     }
@@ -114,6 +78,7 @@ if ($result && $result->num_rows > 0) {
     // 欄位名稱與顯示名稱的對應
     $field_names = [
         "count" => "單號",
+		"填表人" => "填表人",
         "受款人" => "受款人",
         "填表日期" => "填表日期",
         "付款日期" => "付款日期",
@@ -138,7 +103,7 @@ if ($result && $result->num_rows > 0) {
         "結餘繳回" => "結餘繳回"
     ];
     echo "
-    <form method='post' action='督導審核意見.php'>
+    <form method='post' action='審核人審核意見.php'>
     <style>
 	* {
             margin: 0;
@@ -247,8 +212,7 @@ if ($result && $result->num_rows > 0) {
     </style>
 	
     <div class='banner'>
-	
-        <a onclick='history.back()'>◀</a>
+        <a style='align-items: left;' onclick='history.back()'>◀</a>
     </div>
 	
     

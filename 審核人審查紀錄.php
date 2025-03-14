@@ -3,7 +3,7 @@ session_start();
 
 // 檢查是否已登入
 if (!isset($_SESSION['帳號'])) {
-    header("Location: 申請紀錄.php");
+    header("Location: 審核人審查紀錄.php");
     exit;
 }
 
@@ -95,7 +95,7 @@ LEFT JOIN
     經辦業務檔 AS d ON b.受款人代號 = d.受款人代號
 WHERE 
     s.金額 IS NOT NULL
-    AND d.經辦代號 = '$員工編號'"; // 確保員工編號符合
+   "; 
 
 
 if (!empty($search_serial)) {
@@ -108,96 +108,13 @@ if (!empty($search_item)) {
 $result = $db_link_預支->query($sql);
 // 顯示資料
 if ($result && $result->num_rows > 0) {
-    echo "
-    <style>
-	* {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-	 body {
-            height: 100%;
-            width: 100%;
-            font-family: 'Noto Sans TC', Arial, sans-serif;
-            background-color: #f5d3ab;
-            color: #5a4a3f;
-        }
-        .header {
-            display: flex;
-            background-color: rgb(220, 236, 245);
-        }
-        .header nav {
-            text-align: right;
-            width: 100%;
-            font-size: 100%;
-            text-indent: 10px;
-        }
-        .header nav a {
-            font-size: 30px;
-            color: rgb(39, 160, 130);
-            text-decoration: none;
-            display: inline-block;
-            line-height: 52px;
-        }
-        .header nav a:hover {
-             background-color: #ffaa00;
-        }
-        table {
-            width: 80%;
-            margin: 20px auto;
-            border-collapse: collapse;
-            font-family: Arial, sans-serif;
-        }
-        table, th, td {
-            border: 1px solid #ddd;
-        }
-        th, td {
-            padding: 12px;
-            text-align: center;
-        }
-        th {
-            background-color: #f2f2f2;
-            color: #333;
-        }
-		tr.second-row {
-    background-color: white; /* 固定背景顏色 */
-}
-        tr:nth-child(even) {
-            background-color: #f9f9f9;
-        }
-        tr:hover {
-            background-color: #f1f1f1;
-        }
-        caption {
-            font-size: 1.5em;
-            margin: 10px;
-            font-weight: bold;
-        }
-		.banner {
-    width: 100%;
-    background: linear-gradient(to bottom, #fbe3c9, #f5d3ab); /* 漸層效果 */
-    color: #5a3d2b;
-    display: flex;
-    justify-content: flex-start; /* 改為靠左對齊 */
-    align-items: center;
-    padding: 10px 20px;
-    box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.2); /* 陰影效果 */
-}
+	
+	
+	
+    include '審核人style.php';
+	
 
-.banner a {
-    color: #5a3d2b;
-    text-decoration: none;
-    font-weight: bold;
-    font-size: 1.2em;
-	padding: 5px 20px;
-}
-
-.banner a:hover {
-    color: #007bff; /* 當滑鼠懸停時變換顏色 */
-}
-		
-    </style>";
-		
+	
 echo "<div class='banner'>
         <a style='align-items: left;' onclick='history.back()'>◀</a>
 		<div sytle='justify-content: flex-end;'>歡迎，" . htmlspecialchars($current_user) . "！</div>

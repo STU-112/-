@@ -1,38 +1,38 @@
-<?php
-session_start();
+// <?php
+// session_start();
 
 // 檢查是否已登入
-if (!isset($_SESSION['帳號'])) {
-    header("Location: ll1.php");
-    exit;
-}
+// if (!isset($_SESSION['帳號'])) {
+    // header("Location: ll1.php");
+    // exit;
+// }
 
 // 獲取當前登入的帳號
-$current_user = $_SESSION['帳號'];
+// $current_user = $_SESSION['帳號'];
 
 // 建立資料庫連線
-$servername = "localhost:3307"; 
-$username = "root"; 
-$password = "3307"; // 使用空白密碼
-$dbname = "註冊"; 
+// $servername = "localhost:3307"; 
+// $username = "root"; 
+// $password = "3307"; // 使用空白密碼
+// $dbname = "註冊"; 
 
-$連接 = new mysqli($servername, $username, $password, $dbname);
+// $連接 = new mysqli($servername, $username, $password, $dbname);
 
 // 檢查連接是否成功
-if ($連接->connect_error) {
-    die("資料庫連接失敗: " . $連接->connect_error);
-}
+// if ($連接->connect_error) {
+    // die("資料庫連接失敗: " . $連接->connect_error);
+// }
 
 // 查詢當前使用者的員工編號
-$sql = "SELECT 員工編號 FROM 註冊資料表 WHERE 帳號 = ?";
-$stmt = $連接->prepare($sql);
-$stmt->bind_param("s", $current_user);
-$stmt->execute();
-$stmt->bind_result($員工編號);
-$stmt->fetch();
-$stmt->close();
-$連接->close();
-?>
+// $sql = "SELECT 員工編號 FROM 註冊資料表 WHERE 帳號 = ?";
+// $stmt = $連接->prepare($sql);
+// $stmt->bind_param("s", $current_user);
+// $stmt->execute();
+// $stmt->bind_result($員工編號);
+// $stmt->fetch();
+// $stmt->close();
+// $連接->close();
+// ?>
 
 
 

@@ -1,7 +1,6 @@
 <?php
 session_start(); // 啟動 Session
 
-
 // 連接到資料庫
 $db_host = "localhost:3307"; // 指定主機和端口
 $db_id = "root";             // 資料庫用戶名
@@ -33,7 +32,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $帳號 = $連接->real_escape_string($帳號);
             $密碼 = $連接->real_escape_string($密碼);
 
-             // 查詢使用者資料
+            // 查詢使用者資料
             $select_sql = "SELECT * FROM 註冊資料表 WHERE 帳號 = '$帳號'";
             $帳號查詢 = $連接->query($select_sql);
 
@@ -46,10 +45,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
                     // 根據權限設定跳轉頁面
                     if ($權限 == '經辦人') {
-                        $跳轉頁面 = '申請.php'; // 經辦人跳轉
+                        $跳轉頁面 = '申請.php';
                     } else {
-                        $跳轉頁面 = '審核人.php'; // 其他職位跳轉
+                        $跳轉頁面 = '審核人.php';
                     }
+
                     echo "<script>alert('登入成功！歡迎 $權限 $帳號'); window.location.href = '$跳轉頁面';</script>";
                 } else {
                     echo "<script>alert('密碼錯誤!'); window.location.href = '登入.html';</script>";

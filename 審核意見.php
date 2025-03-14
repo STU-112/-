@@ -40,27 +40,8 @@ if ($serial_count) {
     }
 
 
-
-// * {
-            // margin: 0;
-            // padding: 0;
-            // box-sizing: border-box;
-        // }
-	 // body {
-            // height: 100%;
-            // width: 100%;
-            // font-family: 'Noto Sans TC', Arial, sans-serif;
-			// background: linear-gradient(to bottom, #e8dff2, #f5e8fc); /* 淡紫色漸層 */
-            // color: #333;
-        // }
-
     // 顯示結果
     echo "<style>
-	
-	
-	
-	
-	
         body {
             font-family: 'Noto Sans TC', Arial, sans-serif;
             background: linear-gradient(to bottom, #e8dff2, #f5e8fc); /* 淡紫色漸層 */

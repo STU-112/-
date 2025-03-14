@@ -1,19 +1,19 @@
 <?php  
-session_start();
+// session_start();
 
 // 檢查是否已登入
-if (!isset($_SESSION['帳號'])) {
-    header("Location: 註冊html.php");
-    exit;
-}
+// if (!isset($_SESSION['帳號'])) {
+    // header("Location: 註冊html.php");
+    // exit;
+// }
 
 // 獲取用戶帳號
-$current_user = $_SESSION['帳號'];
+// $current_user = $_SESSION['帳號'];
 
 $servername = "localhost:3307"; 
 $username = "root"; 
 $password = "3307"; 
-$dbname_職位 = "職位設定"; 
+$dbname_職位 = "註冊"; 
 
 $db_link_職位 = new mysqli($servername, $username, $password, $dbname_職位);
 
@@ -23,7 +23,7 @@ if ($db_link_職位->connect_error) {
 }
 
 // 讀取職位選單
-$職位_sql = "SELECT 職位名稱 FROM 職位設定表";
+$職位_sql = "SELECT 職位名稱 FROM 職位";
 $職位_result = $db_link_職位->query($職位_sql);
 
 $職位選項 = "";

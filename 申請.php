@@ -5,6 +5,71 @@ if (!isset($_SESSION['帳號'])) {
     exit();
 }
 $帳號 = $_SESSION['帳號']; // 獲取登入的帳號
+
+// 資料庫連線參數
+$servername = "localhost:3307";
+$username = "root";
+$password = "3307";
+
+// 連接到資料庫
+$dbname_預支 = "預支";
+$db_link_預支 = new mysqli($servername, $username, $password, $dbname_預支);
+
+$dbname_review = "Review_comments";
+$db_link_review = new mysqli($servername, $username, $password, $dbname_review);
+
+$dbname_註冊 = "註冊"; 
+$db_link_註冊 = new mysqli($servername, $username, $password, $dbname_註冊);
+
+$dbname_職位設定 = "職位";
+$db_link_職位設定 = new mysqli($servername, $username, $password, $dbname_職位設定);
+
+// 檢查資料庫連線
+if ($db_link_預支->connect_error) {
+    die("連線到 預支 資料庫失敗: " . $db_link_預支->connect_error);
+}
+
+if ($db_link_review->connect_error) {
+    die("連線到 Review_comments 資料庫失敗: " . $db_link_review->connect_error);
+}
+
+if ($db_link_註冊->connect_error) { 
+    die("註冊資料庫連線失敗: " . $db_link_註冊->connect_error); 
+}
+
+if ($db_link_職位設定->connect_error) { 
+    die("職位設定連線失敗: " . $db_link_職位設定->connect_error); 
+}
+
+// 取得登入者資訊
+$帳號 = $_SESSION["帳號"];
+$職位查詢 = "SELECT 員工編號, 部門, 權限管理 FROM 註冊資料表 WHERE 帳號 = '$帳號' LIMIT 1";
+$職位_result_使用者 = $db_link_註冊->query($職位查詢);
+
+$員工編號 = "";
+$部門 = "";
+$職位名稱 = "";
+$上限 = 0;
+$下限 = 0;
+
+if ($職位_result_使用者 && $職位_result_使用者->num_rows > 0) {
+    $row = $職位_result_使用者->fetch_assoc();
+    $員工編號 = $row["員工編號"];
+    $部門 = $row["部門"];
+    $職位名稱 = $row["權限管理"];
+}
+
+// 讀取對應職位的上限與下限
+$範圍_sql = "SELECT 上限, 下限 FROM 職位設定表 WHERE 職位名稱 = '$職位名稱' LIMIT 1";
+$範圍_result = $db_link_職位設定->query($範圍_sql);
+
+if ($範圍_result && $範圍_result->num_rows > 0) {
+    $範圍_data = $範圍_result->fetch_assoc();
+    $上限 = $範圍_data["上限"];
+    $下限 = $範圍_data["下限"];
+}
+
+
 ?>
 
 <!DOCTYPE html>
@@ -80,12 +145,15 @@ $帳號 = $_SESSION['帳號']; // 獲取登入的帳號
             background: linear-gradient(to bottom, #fbe3c9, #f5d3ab); /* 漸層效果 */
             color: #5a3d2b;
             display: flex;
-            justify-content: flex-end;
+            justify-content: space-between;/* 左右對齊 */
             align-items: center;
             padding: 10px 20px;
+			
             box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.2); /* 陰影效果 */
         }
-
+		
+		
+		
         .banner a {
             color: #5a3d2b;
             text-decoration: none;
@@ -96,17 +164,44 @@ $帳號 = $_SESSION['帳號']; // 獲取登入的帳號
         .banner a:hover {
     color: #007bff; /* 當滑鼠懸停時變換顏色 */
 }
+
+
+.banner .left {
+    text-align: left;
+	gap: 20px;
+}
+.banner .right {
+    display: flex;
+    gap: 20px; /* 按鈕間距 */
+    align-items: center;
+}
+
+.banner a:hover {
+    color: #007bff;
+}
     </style>
 </head>
 <body>
-<div class="banner">
-    <span>歡迎，<?php echo htmlspecialchars($帳號); ?>！</span> <!-- 顯示登入的帳號 -->
-    <a href="登出.php" style="align-items: right;">登出</a>
+
+
+
+<div class='banner'>
+    <div class='right'><?php echo htmlspecialchars($部門); ?> - <?php echo htmlspecialchars($員工編號); ?></div>
+    <div class='right'>
+        <span>歡迎，<?php echo htmlspecialchars($帳號); ?>！</span> 
+        <a href='登出.php'>登出</a>
+    </div>
 </div>
+
+
+
+
+
+
 <div class="container">
     <h1>線上申請表單</h1>
-    <a href="ll1.php" class="btn">預支申請</a>
-    <a href="綜合.html" class="btn">支出核銷 / 報帳</a>
+    <a href="7html.php" class="btn">預支申請</a>
+    <a href="0302html.php" class="btn">支出核銷 / 報帳</a>
     <a href="申請紀錄.php" class="btn">查看申請紀錄</a>
     <div class="footer">
         &copy; 2024 財團法人台北市失親兒福利基金會

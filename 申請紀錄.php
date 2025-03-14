@@ -1,6 +1,4 @@
 <?php
-
-
 session_start();
 
 // 檢查是否已登入
@@ -12,22 +10,28 @@ if (!isset($_SESSION['帳號'])) {
 // 獲取用戶帳號
 $current_user = $_SESSION['帳號'];
 
-
-
 // 資料庫連線參數
 $servername = "localhost:3307";
 $username = "root";
 $password = "3307";
 
 // 連接到 op2 資料庫
-$dbname_預支 = "預支";
+$dbname_預支 = "0228";
+$dbname_註冊 = "註冊";
 $dbname_review = "review_comments"; // 假設 review_comments 資料庫名稱
 $db_link_預支 = new mysqli($servername, $username, $password, $dbname_預支);
+
+$db_link_註冊 = new mysqli($servername, $username, $password, $dbname_註冊);
+
 $db_link_review = new mysqli($servername, $username, $password, $dbname_review);
 
 // 檢查資料庫連線
 if ($db_link_預支->connect_error) {
     die("連線到 預支 資料庫失敗: " . $db_link_預支->connect_error);
+}
+// 檢查資料庫連線
+if ($db_link_註冊->connect_error) {
+    die("連線到 註冊 資料庫失敗: " . $db_link_註冊->connect_error);
 }
 
 if ($db_link_review->connect_error) {
@@ -39,31 +43,63 @@ if ($db_link_review->connect_error) {
 $search_serial = isset($_GET['search_serial']) ? $_GET['search_serial'] : '';
 $search_item = isset($_GET['search_item']) ? $_GET['search_item'] : '';
 
-// 合併查詢語句
+$sql_註冊 = "SELECT 員工編號 FROM 註冊資料表 WHERE 帳號 = ?";
+$stmt = $db_link_註冊->prepare($sql_註冊);
+$stmt->bind_param("s", $current_user);
+$stmt->execute();
+$stmt->bind_result($員工編號);
+$stmt->fetch();
+$stmt->close();
+
+// 修正查詢條件，確保只顯示填表人為登入者的員工編號
+// 查詢預支資料
 $sql = "
 SELECT 
-    b.`count`,
-	b.填表人,
-    b.受款人,
-    b.填表日期,
-    s.支出項目,
-    d.說明,
-    p.金額
+b.受款人代號 ,
+b.受款人姓名 ,
+s.交易單號,
+s.業務代號,
+s.國字金額,
+s.交易時間,
+s.交易方式,
+s.銀行別,
+s.行號,
+s.戶名,
+s.帳號,
+s.票號,
+s.簽收日,
+s.簽收人,
+s.到期日,
+s.付款金額,
+d.支出項目,
+d.填表日期,
+d.付款日期,
+d.經辦代號,
+d.說明,
+d.專案活動,
+d.活動名稱,
+d.專案日期,
+d.獎學金人數,
+d.獎學金專案,
+d.主題,
+d.獎學金日期,
+d.經濟扶助,
+d.其他項目,
+s.金額
+	
 FROM 
-    基本資料 AS b
+    受款人資料檔 AS b
 LEFT JOIN 
-    支出項目 AS s ON b.`count` = s.`count`
-LEFT JOIN 
-    說明 AS d ON b.`count` = d.`count`
-LEFT JOIN 
-    支付方式 AS p ON b.`count` = p.`count`
+    經辦人交易檔 AS s ON b.受款人代號 = s.受款人代號
+LEFT JOIN 	
+    經辦業務檔 AS d ON b.受款人代號 = d.受款人代號
 WHERE 
-    p.金額 IS NOT NULL";
+    s.金額 IS NOT NULL
+    AND d.經辦代號 = '$員工編號'"; // 確保員工編號符合
 
 
-// 加入搜尋條件
 if (!empty($search_serial)) {
-    $sql .= " AND `count` LIKE '%$search_serial%'";
+    $sql .= " AND `交易單號` LIKE '%$search_serial%'";
 }
 if (!empty($search_item)) {
     $sql .= " AND `支出項目` = '$search_item'";
@@ -182,7 +218,7 @@ echo "
         <select name='search_item'>
             <option value=''>-- 全部 --</option>
             <option value='活動費用'" . ($search_item == '活動費用' ? " selected" : "") . ">活動費用</option>
-            <option value='獎助學金'" . ($search_item == '獎助學金' ? " selected" : "") . ">獎助學金</option>
+            <option value='獎學金'" . ($search_item == '獎助學金' ? " selected" : "") . ">獎學金</option>
             <option value='經濟扶助'" . ($search_item == '經濟扶助' ? " selected" : "") . ">經濟扶助</option>
             <option value='其他'" . ($search_item == '其他' ? " selected" : "") . ">其他</option>
         </select>
@@ -193,23 +229,23 @@ echo "
 
     // 顯示每一行資料 
     while ($row = $result->fetch_assoc()) {
-        $serial_count = $row["count"];
+        $serial_count = $row["受款人代號"];
 
-        // 查詢 Review_comments 資料庫中的督導審核意見
-        $sql_review_opinion = "SELECT 狀態 FROM 督導審核意見 WHERE 單號 = '$serial_count' LIMIT 1";
+        // 查詢 Review_comments 資料庫中的部門主管審核意見
+        $sql_review_opinion = "SELECT 狀態 FROM 部門主管審核意見 WHERE 單號 = '$serial_count' LIMIT 1";
         $review_result = $db_link_review->query($sql_review_opinion);
 
         // 預設狀態
         $status = "<span style='color: orange;'>待審核</span>";
 
-        // 判斷督導審核狀態
+        // 判斷部門主管審核狀態
 		
 		
         if ($review_result && $review_result->num_rows > 0) {
             $review_row = $review_result->fetch_assoc();
             $opinion = $review_row["狀態"];
 
-            // 根據督導審核意見判斷狀態
+            // 根據部門主管審核意見判斷狀態
             if ($opinion == "通過") {
 				// if ($row["金額"] < 1000) {
 				// $status = "<span style='color: green;'>會計審核中</span>";}
@@ -276,28 +312,31 @@ echo "
                     }
                 }
             } else {
-                $status = "<span style='color: red;'>督導不通過</span>";
+                $status = "<span style='color: red;'>部門主管不通過</span>";
             }
         }
 
         echo "<tr class='second-row'>";
-        echo "<td>" . $row["count"] . "</td>";
-		echo "<td>" . $row["填表人"] . "</td>";
-        echo "<td>" . $row["受款人"] . "</td>";
-        echo "<td>" . $row["金額"] . "</td>";
-        echo "<td>" . $row["填表日期"] . "</td>";
-        echo "<td>" . $row["支出項目"] . "</td>";
+ 	
+		echo "<tr class='second-row'>";
+        echo "<td>" . ($row["交易單號"]) . "</td>";
+        echo "<td>" . ($row["經辦代號"]) . "</td>";
+        echo "<td>" . ($row["受款人代號"]) . "</td>";
+        echo "<td>" . ($row["金額"]) . "</td>";
+        echo "<td>" . ($row["填表日期"]) . "</td>";
+        echo "<td>" . ($row["支出項目"]) . "</td>";
+		
         echo "<td>" . $status . "</td>"; // 顯示審核狀態
         echo "<td>
 		<div style='display: flex; justify-content: center; align-items: center; height: 100xp;'>
 		<div style='display: flex; gap: 10px;'>
             <form method='post' action='查看.php'>
-                <input type='hidden' name='count' value='" . $row["count"] . "'>
+                <input type='hidden' name='受款人代號' value='" . $row["受款人代號"] . "'>
                 <button type='submit' name='review'>查看</button>
             </form>
 			
 			<form method='post' action='意見.php'>
-                <input type='hidden' name='count' value='" . $row["count"] . "'>
+                <input type='hidden' name='受款人代號' value='" . $row["受款人代號"] . "'>
                 <button type='submit' name='意見'>意見</button>
             </form>
 			</div>

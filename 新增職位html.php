@@ -3,7 +3,7 @@ session_start();
 
 // (A) 檢查登入（若需要）
 if (!isset($_SESSION['帳號'])) {
-    header("Location: 新增職位設定.php");
+    header("Location: 新增職位.php");
     exit;
 }
 $current_user = $_SESSION['帳號'];
@@ -12,9 +12,9 @@ $current_user = $_SESSION['帳號'];
 $host      = 'localhost:3307';
 $db_user   = 'root';
 $db_pass   = '3307';  // 若無密碼可為空字串
-$db_name = '部門設定';
+$db_name = '註冊';
 
-// (C) 建立「部門設定」資料庫（若不存在）
+// (C) 建立「職位設定」資料庫（若不存在）
 $temp_link = new mysqli($host, $db_user, $db_pass);
 if ($temp_link->connect_error) {
     die("無法連線 MySQL：" . $temp_link->connect_error);
@@ -27,26 +27,28 @@ $create_db_sql = "
 $temp_link->query($create_db_sql);
 $temp_link->close();
 
-// (D) 連線到「部門設定」資料庫
-$db_link_部門 = new mysqli($host, $db_user, $db_pass, $db_name);
-if ($db_link_部門->connect_error) {
-    die("資料庫連線失敗：" . $db_link_部門->connect_error);
+// (D) 連線到「職位設定」資料庫
+$db_link_職位 = new mysqli($host, $db_user, $db_pass, $db_name);
+if ($db_link_職位->connect_error) {
+    die("資料庫連線失敗：" . $db_link_職位->connect_error);
 }
 
-// (E) 若資料表「部門」不存在，則建立它
+// (E) 若資料表「職位」不存在，則建立它
 $create_table_sql = "
-  CREATE TABLE IF NOT EXISTS `部門` (
-    `部門代號`  VARCHAR(50)  NOT NULL,
-    `部門名稱`  VARCHAR(100) NOT NULL,
+  CREATE TABLE IF NOT EXISTS `職位` (
+    `編號`  VARCHAR(50)  NOT NULL,
+    `職位名稱`  VARCHAR(100) NOT NULL,
+	`上限`  INT NOT NULL,
+	`下限`  INT NOT NULL,
     `建立時間`  TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    PRIMARY KEY (`部門代號`)
+    PRIMARY KEY (`編號`)
   ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 ";
-$db_link_部門->query($create_table_sql);
+$db_link_職位->query($create_table_sql);
 
-// (F) 讀取目前全部門資料
-$sql = "SELECT * FROM `部門` ORDER BY `建立時間` DESC";
-$result = $db_link_部門->query($sql);
+// (F) 讀取目前全職位資料
+$sql = "SELECT * FROM `職位` ORDER BY `建立時間` DESC";
+$result = $db_link_職位->query($sql);
 
 // (G) 讀取從其他檔案可能傳來的錯誤訊息
 $error_msg = isset($_GET['error']) ? $_GET['error'] : '';
@@ -55,7 +57,7 @@ $error_msg = isset($_GET['error']) ? $_GET['error'] : '';
 <html lang="zh-Hant">
 <head>
   <meta charset="UTF-8" />
-  <title>新增部門</title>
+  <title>新增職位</title>
   <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.gstatic.com" />
   <link
@@ -128,7 +130,7 @@ $error_msg = isset($_GET['error']) ? $_GET['error'] : '';
       text-align: center;
       margin-bottom: 16px;
     }
-    /* 表單設定（新增部門） */
+    /* 表單設定（新增職位） */
     form.add-form {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -185,7 +187,7 @@ $error_msg = isset($_GET['error']) ? $_GET['error'] : '';
     input[type="submit"]:active {
       transform: translateY(0);
     }
-    /* 目前部門列表 */
+    /* 目前職位列表 */
     h2 {
       margin-top: 30px;
       font-size: 1.6rem;
@@ -369,7 +371,7 @@ $error_msg = isset($_GET['error']) ? $_GET['error'] : '';
     }
   </style>
   <script>
-  // 全域變數：目前正在編輯的「舊部門代號」
+  // 全域變數：目前正在編輯的「舊編號」
   let currentOldDeptId = "";
 
   // 顯示修改視窗（將資料帶入彈窗）
@@ -412,7 +414,7 @@ $error_msg = isset($_GET['error']) ? $_GET['error'] : '';
 <div class="container">
     <!-- 標題區 -->
     <div class="form-header">
-      <h1>新增部門</h1>
+      <h1>新增職位</h1>
       <p>※ 確認資料無誤後再點選送出按鈕</p>
     </div>
 
@@ -423,61 +425,72 @@ $error_msg = isset($_GET['error']) ? $_GET['error'] : '';
       </div>
     <?php endif; ?>
 
-    <!-- 新增部門表單：送到「新增部門.php」處理新增動作 -->
-    <form class="add-form" action="新增部門.php" method="POST">
+    <!-- 新增職位表單：送到「新增職位.php」處理新增動作 -->
+    <form class="add-form" action="新增職位.php" method="POST">
       <div class="form-group">
-        <label for="部門代號">部門代號<span style="color: red;">*</span></label>
-        <input type="text" id="部門代號" name="部門代號" placeholder="請輸入部門代號" required />
+        <label for="編號">編號<span style="color: red;">*</span></label>
+        <input type="text" id="編號" name="編號" placeholder="請輸入編號" required />
       </div>
       <div class="form-group">
-        <label for="部門名稱">部門名稱<span style="color: red;">*</span></label>
-        <input type="text" id="部門名稱" name="部門名稱" placeholder="請輸入部門名稱" required/>
+        <label for="職位名稱">職位名稱<span style="color: red;">*</span></label>
+        <input type="text" id="職位名稱" name="職位名稱" placeholder="請輸入職位名稱" required/>
+      </div>
+	  <div class="form-group">
+        <label for="上限">上限<span style="color: red;">*</span></label>
+        <input type="number" id="上限" name="上限" placeholder="請輸入金額上限" required/>
+      </div>
+	  <div class="form-group">
+        <label for="下限">下限<span style="color: red;">*</span></label>
+        <input type="number" id="下限" name="下限" placeholder="請輸入金額下限" required/>
       </div>
       <div class="submit-btn-container">
         <input type="submit" value="新 增" />
       </div>
     </form>
 
-    <!-- 部門列表 -->
-    <h2>目前部門列表</h2>
+    <!-- 職位列表 -->
+    <h2>目前職位列表</h2>
     <table>
       <thead>
         <tr>
-          <th style="width: 20%;">部門代號</th>
-          <th style="width: 30%;">部門名稱</th>
-          <th style="width: 20%;">建立時間</th>
-          <th style="width: 30%;">編輯</th>
+          <th style="width: 10%;">編號</th>
+          <th style="width: 30%;">職位名稱</th>
+		  <th style="width: 10%;">上限</th>
+		  <th style="width: 10%;">下限</th>
+          <th style="width: 40%;">編輯</th>
         </tr>
       </thead>
       <tbody>
       <?php if ($result && $result->num_rows > 0): ?>
         <?php while ($row = $result->fetch_assoc()): ?>
           <?php
-            $deptId   = htmlspecialchars($row["部門代號"], ENT_QUOTES, 'UTF-8');
-            $deptName = htmlspecialchars($row["部門名稱"], ENT_QUOTES, 'UTF-8');
-            $deptTime = htmlspecialchars($row["建立時間"], ENT_QUOTES, 'UTF-8');
+            $deptId   = htmlspecialchars($row["編號"], ENT_QUOTES, 'UTF-8');
+            $deptName = htmlspecialchars($row["職位名稱"], ENT_QUOTES, 'UTF-8');
+			$up = htmlspecialchars($row["上限"], ENT_QUOTES, 'UTF-8');
+			$down = htmlspecialchars($row["下限"], ENT_QUOTES, 'UTF-8');
           ?>
           <tr>
             <td><?php echo $deptId; ?></td>
             <td><?php echo $deptName; ?></td>
-            <td><?php echo $deptTime; ?></td>
+            <td><?php echo $up; ?></td> 
+			<td><?php echo $down; ?></td>
             <td class="text-center">
               <!-- 修改（開啟彈窗） -->
               <a class="edit-btn" href="javascript:void(0);"
-                 onclick="openEditModal('<?php echo $deptId; ?>', '<?php echo $deptName; ?>')">
+                 onclick="openEditModal('<?php echo $deptId; ?>', '<?php echo $deptName; ?>', '<?php echo $up; ?>', '<?php echo $down; ?>')">
                  修改
               </a>
-              <!-- 刪除（連到清除部門.php） -->
+              <!-- 刪除（連到清除職位.php） -->
               <a class="delete-btn"
-                 href="清除部門.php?部門代號=<?php echo urlencode($deptId); ?>"
-                 onclick="return confirm('你確定要刪除此部門嗎？');">
+                 href="清除職位.php?編號=<?php echo urlencode($deptId); ?>"
+                 onclick="return confirm('你確定要刪除此職位嗎？');">
                  刪除
               </a>
             </td>
           </tr>
         <?php endwhile; ?>
       <?php else: ?>
-        <tr><td colspan="4">目前無部門資料</td></tr>
+        <tr><td colspan="4">目前無職位資料</td></tr>
       <?php endif; ?>
       </tbody>
     </table>
@@ -485,22 +498,25 @@ $error_msg = isset($_GET['error']) ? $_GET['error'] : '';
     
 </div>
 
-<!-- (彈窗) 修改部門：送到「修改部門.php」 -->
+<!-- (彈窗) 修改職位：送到「修改職位.php」 -->
 <div id="editModal" class="modal">
   <div class="modal-content">
     <!-- 叉叉按鈕（右上角） -->
     <button type="button" class="close-btn" onclick="closeEditModal()">×</button>
 
     <h2>修改</h2>
-    <form class="edit-form" action="修改部門.php" method="POST">
-      <!-- 舊部門代號 (隱藏) -->
+    <form class="edit-form" action="修改職位.php" method="POST">
+      <!-- 舊編號 (隱藏) -->
       <input type="hidden" id="edit_oldDeptId" name="oldDeptId" value="" />
 
-      <label for="edit_deptId">部門代號</label>
-      <input type="text" id="edit_deptId" name="部門代號" value="" />
-
-      <label for="edit_deptName">部門名稱</label>
-      <input type="text" id="edit_deptName" name="部門名稱" value="" />
+      <label for="edit_deptId">編號</label>
+      <input type="text" id="edit_deptId" name="編號" value="" />
+      <label for="edit_deptName">職位名稱</label>
+      <input type="text" id="edit_deptName" name="職位名稱" value=""  />
+	  <label for="up">上限</label>
+      <input type="number" id="edit_deptName" name="上限" value=""  min="0"/>
+	  <label for="down">下限</label>
+      <input type="number" id="edit_deptName" name="下限" value=""  min="0"/>
 
       <button type="submit" class="modal-submit-btn">確定修改</button>
 	  <div class="form-footer">
@@ -514,7 +530,7 @@ $error_msg = isset($_GET['error']) ? $_GET['error'] : '';
 </html>
 <?php
 // 關閉連線
-if (isset($db_link_部門)) {
-    $db_link_部門->close();
+if (isset($db_link_職位)) {
+    $db_link_職位->close();
 }
 ?>
