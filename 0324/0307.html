@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <title>支出項目統計查詢</title>
+  <!-- 載入 Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+  <!-- 載入 html2canvas 與 jspdf (用於匯出PDF) -->
+  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.0/dist/jspdf.umd.min.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Poppins', sans-serif; background: #F0F4F8; padding: 20px; }
+    .container {
+      max-width: 700px;
+      margin: 0 auto;
+      background: #fff;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    h1 { text-align: center; color: #4A90E2; margin-bottom: 20px; }
+    form {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+    label { font-weight: 600; margin-right: 8px; }
+    input[type="month"], button {
+      padding: 8px 12px;
+      font-size: 1rem;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+    }
+    button {
+      background: #4A90E2;
+      color: #fff;
+      border: none;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    button:hover { background: #357ABD; }
+    iframe {
+      width: 100%;
+      height: 600px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+    }
+    .pdf-btn { background: #50C878; }
+    /* ===== 自訂下拉選單 ===== */
+    .custom-dropdown { position: relative; display: inline-block; }
+    .dropdown-toggle {
+      padding: 8px 12px;
+      font-size: 1rem;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      background: #fff;
+      cursor: pointer;
+      user-select: none;
+    }
+    /* 注意：移除所有 CSS 依 hover 顯示的規則，由 JS 控制 */
+    .dropdown-menu {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      background: #fff;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      min-width: 140px;
+      display: none;
+      z-index: 99;
+    }
+    .dropdown-item {
+      padding: 8px 12px;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    .dropdown-item:hover { background: #eee; }
+    .dropdown-item.has-submenu { position: relative; }
+    /* 讓父項可直接點選 */
+    .parent-label { display: inline-block; width: 80%; }
+    .submenu {
+      position: absolute;
+      top: 0;
+      left: calc(100% - 2px); /* 微重疊，避免縫隙 */
+      background: #fff;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      min-width: 140px;
+      display: none;
+      z-index: 99;
+    }
+    .submenu-item {
+      padding: 8px 12px;
+      cursor: pointer;
+      white-space: nowrap;
+      border-left: 3px solid #4A90E2;
+    }
+    .submenu-item:hover { background: #f2f8ff; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>統計查詢</h1>
+    
+    <form method="GET" action="0307.php" target="resultFrame" id="searchForm">
+      <div>
+        <label for="expenseItemInput">支出項目：</label>
+        <div class="custom-dropdown" id="customDropdown">
+          <!-- 顯示目前選到的值 -->
+          <div class="dropdown-toggle" id="dropdownToggle">全部</div>
+          <!-- 主選單 -->
+          <ul class="dropdown-menu" id="dropdownMenu">
+            <li class="dropdown-item" data-value="全部">全部</li>
+            <li class="dropdown-item has-submenu" data-value="W活動費用">
+              <span class="parent-label">W活動費用</span>
+              <ul class="submenu">
+                <li class="submenu-item" data-value="W活動費用-半日/一日型">半日/一日型</li>
+                <li class="submenu-item" data-value="W活動費用-過夜型">過夜型</li>
+                <li class="submenu-item" data-value="W活動費用-企業贊助活動">企業贊助活動</li>
+                <li class="submenu-item" data-value="W活動費用-多次型">多次型</li>
+                <li class="submenu-item" data-value="W活動費用-其他：體驗活動">其他：體驗活動</li>
+              </ul>
+            </li>
+            <li class="dropdown-item" data-value="X獎學金">X獎學金</li>
+            <li class="dropdown-item has-submenu" data-value="Y經濟扶助">
+              <span class="parent-label">Y經濟扶助</span>
+              <ul class="submenu">
+                <li class="submenu-item" data-value="Y經濟扶助-急難救助">急難救助</li>
+                <li class="submenu-item" data-value="Y經濟扶助-醫療補助">醫療補助</li>
+                <li class="submenu-item" data-value="Y經濟扶助-生活扶助">生活扶助</li>
+                <li class="submenu-item" data-value="Y經濟扶助-其他專案">其他專案</li>
+              </ul>
+            </li>
+            <li class="dropdown-item" data-value="Z其他">Z其他</li>
+          </ul>
+          <!-- 隱藏欄位，表單提交時傳送此值 -->
+          <input type="hidden" name="expenseItem" id="expenseItemInput" value="全部">
+        </div>
+      </div>
+      
+      <div>
+        <label for="monthFilter">月份：</label>
+        <input type="month" id="monthFilter" name="monthFilter">
+      </div>
+      
+      <button type="submit">查詢</button>
+      <button type="button" class="pdf-btn" onclick="exportPDF()">匯出PDF</button>
+    </form>
+    
+    <iframe name="resultFrame" src="0307.php"></iframe>
+  </div>
+  
+  <script>
+    // 產生 PDF 檔名函式
+    function getPDFFileName() {
+      const now = new Date();
+      const y = now.getFullYear();
+      const m = String(now.getMonth() + 1).padStart(2, '0');
+      const d = String(now.getDate()).padStart(2, '0');
+      const expenseItemElem = document.getElementById('expenseItemInput');
+      const monthFilterElem = document.getElementById('monthFilter');
+      let expenseItem = expenseItemElem ? expenseItemElem.value : '';
+      let monthFilter = monthFilterElem ? monthFilterElem.value : '';
+      if (!expenseItem) expenseItem = '全部';
+      if (!monthFilter) monthFilter = '全部';
+      return `report_${expenseItem}_${monthFilter}_${y}${m}${d}.pdf`;
+    }
+    
+    // 匯出 PDF 函式
+    async function exportPDF() {
+      const iframeDoc = document.querySelector('iframe').contentDocument;
+      if (!iframeDoc) { alert("無法取得 iframe 內容。"); return; }
+      const container = iframeDoc.querySelector('.container');
+      if (!container) { alert("結果尚未載入，或無資料。"); return; }
+      try {
+        const canvas = await html2canvas(container, { scale: 2 });
+        const imgData = canvas.toDataURL("image/png");
+        const { jsPDF } = window.jspdf;
+        const pdf = new jsPDF('p', 'pt', 'a4');
+        const pdfWidth = pdf.internal.pageSize.getWidth();
+        const canvasWidth = canvas.width;
+        const canvasHeight = canvas.height;
+        const ratio = pdfWidth / canvasWidth;
+        const pdfHeight = canvasHeight * ratio;
+        pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+        pdf.save(getPDFFileName());
+      } catch (err) {
+        console.error(err);
+        alert("匯出PDF失敗：" + err);
+      }
+    }
+    
+    // 利用 JavaScript 延遲隱藏選單，避免滑鼠稍微離開就消失
+    document.addEventListener('DOMContentLoaded', () => {
+      const customDropdown = document.getElementById('customDropdown');
+      const dropdownMenu = document.getElementById('dropdownMenu');
+      const dropdownToggle = document.getElementById('dropdownToggle');
+      const expenseItemInput = document.getElementById('expenseItemInput');
+      
+      let dropdownHideTimer = null;
+      
+      // 當滑鼠進入自訂下拉區域時，顯示選單並清除隱藏計時
+      customDropdown.addEventListener('mouseenter', () => {
+        if (dropdownHideTimer) { clearTimeout(dropdownHideTimer); dropdownHideTimer = null; }
+        dropdownMenu.style.display = 'block';
+      });
+      
+      // 當滑鼠離開自訂下拉區域時，延遲 500 毫秒隱藏選單
+      customDropdown.addEventListener('mouseleave', () => {
+        dropdownHideTimer = setTimeout(() => { dropdownMenu.style.display = 'none'; }, 500);
+      });
+      
+      // 父項標籤可直接點選：更新值並隱藏選單
+      const parentLabels = document.querySelectorAll('.parent-label');
+      parentLabels.forEach(label => {
+        label.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const parentItem = e.target.closest('.dropdown-item');
+          const value = parentItem.getAttribute('data-value');
+          dropdownToggle.textContent = value;
+          expenseItemInput.value = value;
+          dropdownMenu.style.display = 'none';
+        });
+      });
+      
+      // 點擊主選單項目（無子選單）或子選單項目，更新值並隱藏選單
+      dropdownMenu.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const target = e.target;
+        if (target.classList.contains('dropdown-item') && !target.classList.contains('has-submenu')) {
+          const value = target.getAttribute('data-value');
+          dropdownToggle.textContent = value;
+          expenseItemInput.value = value;
+          dropdownMenu.style.display = 'none';
+        }
+        if (target.classList.contains('submenu-item')) {
+          const value = target.getAttribute('data-value');
+          dropdownToggle.textContent = value;
+          expenseItemInput.value = value;
+          dropdownMenu.style.display = 'none';
+        }
+      });
+      
+      // 為每個具有子選單的項目，增加延遲隱藏子選單
+      const submenuParents = document.querySelectorAll('.dropdown-item.has-submenu');
+      submenuParents.forEach(item => {
+        const submenu = item.querySelector('.submenu');
+        let submenuHideTimer = null;
+        item.addEventListener('mouseenter', () => {
+          if (submenuHideTimer) { clearTimeout(submenuHideTimer); submenuHideTimer = null; }
+          submenu.style.display = 'block';
+        });
+        item.addEventListener('mouseleave', () => {
+          submenuHideTimer = setTimeout(() => { submenu.style.display = 'none'; }, 500);
+        });
+      });
+    });
+  </script>
+</body>
+</html>
