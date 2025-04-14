@@ -1,69 +1,370 @@
-<?php
-// 連接資料庫
-$server = 'localhost:3307';
-$用戶名 = 'root';
-$密碼 = '3307';
-$資料庫 = '我要哭';
+<?php 
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+date_default_timezone_set('Asia/Taipei');
 
-// 連接到 MySQL
-$連接 = mysqli_connect($server, $用戶名, $密碼);
+// 將單檔上傳上限、整個 POST 資料上限、執行時間與記憶體限制都設定為 1024M (1GB) 或 600 秒
+ini_set('upload_max_filesize', '1024M');
+ini_set('post_max_size', '1024M');
+ini_set('max_execution_time', '600');
+ini_set('memory_limit', '1024M');
 
-// 檢查連接
-if (!$連接) {
-    die("連接失敗: " . mysqli_connect_error());
+$host     = 'localhost:3307';
+$dbname   = '基金會';  // 若是數字開頭名稱需用反引號
+$username = 'root';
+$password = '3307';      // 若有密碼請填入
+
+try {
+    $pdo = new PDO("mysql:host=$host;charset=utf8", $username, $password);
+    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+
+    // 建立資料庫（若不存在）
+    $pdo->exec("
+        CREATE DATABASE IF NOT EXISTS `$dbname`
+        DEFAULT CHARACTER SET utf8
+        COLLATE utf8_general_ci;
+    ");
+    $pdo->exec("USE `$dbname`;");
+
+    // 1) 受款人資料檔
+    // $pdo->exec("
+        // CREATE TABLE IF NOT EXISTS 受款人資料檔 (
+            // 受款人代號 VARCHAR(5) NOT NULL,
+            // 受款人姓名 VARCHAR(50) NOT NULL,
+            // 手機號碼   VARCHAR(20) NOT NULL,
+            // 地址       VARCHAR(100) NOT NULL,
+            // PRIMARY KEY (受款人代號)
+        // ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+    // ");
+
+    // 2) 經辦業務檔 (填表日期: DATETIME、付款日期: DATE)
+    $pdo->exec("
+        CREATE TABLE IF NOT EXISTS 經辦業務檔 (
+            業務代號      VARCHAR(5)  DEFAULT NULL,
+            受款人代號    VARCHAR(5)  NOT NULL,
+            填表日期      DATETIME    NOT NULL,
+            付款日期      DATE        NOT NULL,
+            支出項目      VARCHAR(50) NOT NULL,
+            經辦代號      VARCHAR(50) NOT NULL,
+            說明          TEXT        DEFAULT NULL,
+            專案活動      VARCHAR(50)  DEFAULT NULL,
+            活動名稱      VARCHAR(100) DEFAULT NULL,
+            專案日期      DATE        DEFAULT NULL,
+            獎學金人數    INT         DEFAULT NULL,
+            獎學金專案    VARCHAR(100) DEFAULT NULL,
+            主題          VARCHAR(100) DEFAULT NULL,
+            獎學金日期    DATE        DEFAULT NULL,
+            經濟扶助      VARCHAR(50)  DEFAULT NULL,
+            其他項目      TEXT         DEFAULT NULL,
+            PRIMARY KEY (業務代號),
+            CONSTRAINT fk_業務_受款人
+              FOREIGN KEY (受款人代號)
+              REFERENCES 受款人資料檔 (受款人代號)
+              ON UPDATE CASCADE
+              ON DELETE RESTRICT
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+    ");
+
+    // 3) 經辦人交易檔
+    $pdo->exec("
+        CREATE TABLE IF NOT EXISTS 經辦人交易檔 (
+            交易單號    VARCHAR(15)  NOT NULL,
+            受款人代號  VARCHAR(5)   NOT NULL,
+            業務代號    VARCHAR(5)   NOT NULL,
+            金額        DECIMAL(10,2) NOT NULL,
+            國字金額    VARCHAR(100) DEFAULT NULL,
+            交易時間    DATETIME    NOT NULL,
+            交易方式    VARCHAR(10)  NOT NULL,
+            銀行別      VARCHAR(50)  DEFAULT NULL,
+            行號        VARCHAR(10)  DEFAULT NULL,
+            戶名        VARCHAR(50)  DEFAULT NULL,
+            帳號        VARCHAR(50)  DEFAULT NULL,
+            票號        VARCHAR(50)  DEFAULT NULL,
+            簽收日 		DATE         DEFAULT NULL,
+            到期日      DATE         DEFAULT NULL,
+			實支金額    DECIMAL(10,2) DEFAULT NULL,
+			結餘        DECIMAL(10,2) DEFAULT NULL,
+			審核狀態    VARCHAR(50)   DEFAULT NULL,
+            PRIMARY KEY (交易單號),
+            CONSTRAINT fk_交易檔_受款人
+              FOREIGN KEY (受款人代號)
+              REFERENCES 受款人資料檔 (受款人代號)
+              ON UPDATE CASCADE
+              ON DELETE RESTRICT,
+            CONSTRAINT fk_交易檔_業務
+              FOREIGN KEY (業務代號)
+              REFERENCES 經辦業務檔 (業務代號)
+              ON UPDATE CASCADE
+              ON DELETE RESTRICT
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+    ");
+
+    // 4) uploads 資料表（保持原來兩格欄位）
+    $pdo->exec("
+        CREATE TABLE IF NOT EXISTS uploads (
+            交易單號     VARCHAR(15) NOT NULL,
+            image_path   TEXT NOT NULL,
+            csv_path     TEXT NOT NULL,
+            upload_timestamp TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            單據張數     INT NOT NULL,
+            PRIMARY KEY (交易單號),
+            FOREIGN KEY (交易單號) REFERENCES 經辦人交易檔(交易單號)
+              ON DELETE CASCADE
+              ON UPDATE CASCADE
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+    ");
+
+} catch (PDOException $e) {
+    die('資料庫或資料表建立失敗: ' . $e->getMessage());
 }
 
-// 檢查資料庫是否已存在，若不存在則創建
-$sql = "CREATE DATABASE IF NOT EXISTS $資料庫";
-if (mysqli_query($連接, $sql)) {
-    echo "資料庫已存在或創建成功!!<br>";
+/**
+ * 產生交易單號：格式 = B + 民國年 + 月 + 5碼流水號
+ * 例如：B11203xxxxx
+ */
+function generateTransactionID(PDO $pdo) {
+    $now = new DateTime();
+    $rocYear = $now->format('Y') - 1911;  // 民國年
+    $month   = $now->format('m');
+    $prefix  = "A{$rocYear}{$month}C";
+    $stmt = $pdo->prepare("SELECT MAX(交易單號) AS max_id FROM 經辦人交易檔 WHERE 交易單號 LIKE ?");
+    $stmt->execute(["{$prefix}%"]);
+    $row = $stmt->fetch(PDO::FETCH_ASSOC);
+    if ($row && $row['max_id']) {
+        $lastSerial = (int)substr($row['max_id'], strlen($prefix));
+        $newSerial  = $lastSerial + 1;
+    } else {
+        $newSerial  = 1;
+    }
+    return $prefix . str_pad($newSerial, 5, '0', STR_PAD_LEFT);
+}
+
+
+
+// ------------------------------------------------------------------------
+// 處理表單提交
+// ------------------------------------------------------------------------
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+
+    // 如果選擇「支出核銷」，這裡暫不處理
+    $formType = $_POST['選擇表單'] ?? '';
+    if ($formType === '支出核銷') {
+        echo "您選擇了支出核銷(單號查詢)，尚未實作。";
+        exit;
+    }
+
+    // 取得表單資料
+    $recipientCode = $_POST['受款人'] ?? '';
+	
+	$recipientName = $_POST['受款人姓名'] ?? '';  // 使用者自行輸入
+    $expenseItem   = $_POST['支出項目'] ?? '';
+    $businessName  = $_POST['填表人'] ?? '';
+    $desc          = $_POST['說明'] ?? '';
+	$手機號碼          = $_POST['手機號碼']     ?? '';
+	$地址          = $_POST['地址']     ?? '';
+    // (a) 填表日期 (DATETIME)
+    $fillDateStr = $_POST['填表日期'] ?? '';
+    if (!empty($fillDateStr)) {
+        $fillDate = $fillDateStr . ' ' . date('H:i:s');
+    } else {
+        $fillDate = date('Y-m-d H:i:s');
+    }
+
+    // (b) 付款日期 (DATE)
+    $payDateStr = $_POST['付款日期'] ?? '';
+    if (!empty($payDateStr)) {
+        $payDate = $payDateStr;
+    } else {
+        $payDate = date('Y-m-d');
+    }
+
+    // 金額與支付方式
+    $amtNum     = isset($_POST['金額']) ? floatval($_POST['金額']) : 0;
+    $amtChinese = $_POST['國字金額_hidden'] ?? '';
+    $payMethod  = $_POST['支付方式'] ?? '';
+    $單據張數   = isset($_POST['單據張數']) ? intval($_POST['單據張數']) : 0;
+
+    // 經辦業務檔其他欄位
+    $projectType  = $_POST['專案活動'] ?? '';
+    $activityName = $_POST['活動名稱'] ?? '';
+    $activityDate = $_POST['專案日期'] ?? '';
+    $scholarCount = $_POST['獎學金人數'] ?? '';
+    $scholarProj  = $_POST['專案名稱'] ?? '';
+    $scholarTopic = $_POST['主題'] ?? '';
+    $scholarDate  = $_POST['獎學金日期'] ?? '';
+    $helpType     = $_POST['經濟扶助'] ?? '';
+    $othersArr    = $_POST['其他項目'] ?? [];
+    $othersStr    = is_array($othersArr) ? implode(',', $othersArr) : '';
+
+    // 經辦人交易檔其他欄位	
+    $signDate   = $_POST['簽收日'] ?? '';
+    $bank       = $_POST['銀行郵局'] ?? '';
+    $branch     = $_POST['分行'] ?? '';
+    $acctName   = $_POST['戶名'] ?? '';
+    $acctNumber = $_POST['帳號'] ?? '';
+    $checkNo    = $_POST['票號'] ?? '';
+    $dueDate    = $_POST['到期日'] ?? '';
+    $實支金額   = $_POST['實支金額'] ?? '';
+    $結餘       = $_POST['結餘'] ?? '';
+    // $審核狀態   = $_POST['審核狀態'] ?? '';
+	
+	// 防呆檢查
+    // if (empty($recipientCode)) {
+        // die("[錯誤] 受款人代號 不可為空");
+    // }
+    // if (!$recipientName) {
+        // die("[錯誤] 受款人姓名 不可為空");
+    // }
+    // if (empty($expenseItem) || empty($businessName)) {
+        // die("[錯誤] 支出項目 / 填表人 不可為空");
+    // }
+    // if ($amtNum <= 0 || empty($payMethod)) {
+        // die("[錯誤] 金額必須大於 0，且支付方式不可為空");
+    // }
+
+    // 產生業務代號與交易單號
+    // $businessCode = generateBusinessCode($pdo, $expenseItem);
+    $trxID = generateTransactionID($pdo);
+
+    // --------------------------------------------------------------------
+    // (1) 多檔上傳：圖片欄位
+    $imagePaths = [];
+    if (isset($_FILES['image_files'])) {
+        foreach ($_FILES['image_files']['error'] as $key => $error) {
+            if ($error === UPLOAD_ERR_OK) {
+                $tmpName = $_FILES['image_files']['tmp_name'][$key];
+                $rawName = $_FILES['image_files']['name'][$key];
+                if (!empty($rawName)) {
+                    $safeName = str_replace('/', '_', $rawName);
+                    $imageFolder = 'uploads/images/';
+                    if (!is_dir($imageFolder)) mkdir($imageFolder, 0777, true);
+                    $uniqueName = uniqid() . '_' . $safeName;
+                    $targetPath = $imageFolder . $uniqueName;
+                    if (move_uploaded_file($tmpName, $targetPath)) {
+                        $imagePaths[] = $targetPath;
+                    }
+                }
+            }
+        }
+    }
+    $imagePath = count($imagePaths) ? implode(',', $imagePaths) : '--';
+
+    // --------------------------------------------------------------------
+    // (2) 多檔上傳：CSV 欄位
+    $csvPaths = [];
+    if (isset($_FILES['csv_files'])) {
+        foreach ($_FILES['csv_files']['error'] as $key => $error) {
+            if ($error === UPLOAD_ERR_OK) {
+                $tmpName = $_FILES['csv_files']['tmp_name'][$key];
+                $rawName = $_FILES['csv_files']['name'][$key];
+                if (!empty($rawName)) {
+                    $safeName = str_replace('/', '_', $rawName);
+                    $csvFolder = 'uploads/csv/';
+                    if (!is_dir($csvFolder)) mkdir($csvFolder, 0777, true);
+                    $uniqueCsvName = uniqid() . '_' . $safeName;
+                    $targetCsvPath = $csvFolder . $uniqueCsvName;
+                    if (move_uploaded_file($tmpName, $targetCsvPath)) {
+                        $csvPaths[] = $targetCsvPath;
+                    }
+                }
+            }
+        }
+    }
+    $csvPath = count($csvPaths) ? implode(',', $csvPaths) : '--';
+
+    try {
+        $pdo->beginTransaction();
+
+        
+
+        // 7.2 新增 經辦業務檔
+        $stmt2 = $pdo->prepare("
+            INSERT INTO 經辦業務檔
+            (
+              業務代號, 受款人代號, 填表日期, 付款日期,
+              支出項目, 經辦代號, 說明,
+              專案活動, 活動名稱, 專案日期,
+              獎學金人數, 獎學金專案, 主題, 獎學金日期,
+              經濟扶助, 其他項目
+            )
+            VALUES (?, ?, ?, ?, ?, ?, ?,
+                    ?, ?, ?,
+                    ?, ?, ?, ?,
+                    ?, ?)
+        ");
+        $stmt2->execute([
+            $businessCode,
+            $recipientCode,
+            $fillDate,
+            $payDate,
+            $expenseItem,
+            $businessName,
+            $desc ?: null,
+            $projectType ?: null,
+            $activityName ?: null,
+            !empty($activityDate) ? $activityDate : null,
+            !empty($scholarCount) ? intval($scholarCount) : null,
+            $scholarProj ?: null,
+            $scholarTopic ?: null,
+            !empty($scholarDate) ? $scholarDate : null,
+            $helpType ?: null,
+            $othersStr ?: null
+        ]);
+
+        // 7.3 新增 經辦人交易檔
+        $stmt3 = $pdo->prepare("
+    INSERT INTO 經辦人交易檔
+    (
+        交易單號, 受款人代號, 業務代號, 金額, 國字金額, 交易時間, 交易方式,
+        銀行別, 行號, 戶名, 帳號, 票號, 到期日, 簽收日,
+        實支金額, 結餘, 審核狀態
+    )
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+");
+        $stmt3->execute([
+    $trxID,
+    $recipientCode,
+    $businessCode,
+    $amtNum,
+    $amtChinese ?: null,
+    date('Y-m-d H:i:s'),
+    $payMethod,
+    $bank       ?: null,
+    $branch     ?: null,
+    $acctName   ?: null,
+    $acctNumber ?: null,
+    $checkNo    ?: null,
+    !empty($dueDate) ? $dueDate : null,
+    !empty($signDate) ? $signDate : null,
+    null,  // 實支金額
+    null,  // 結餘
+    $reviewStatus
+]);
+
+        // 7.4 新增 uploads (存多檔路徑)
+        $stmt4 = $pdo->prepare("
+            INSERT INTO uploads
+            (交易單號, image_path, csv_path, 單據張數)
+            VALUES (?, ?, ?, ?)
+        ");
+        $stmt4->execute([
+            $trxID,
+            $imagePath,
+            $csvPath,
+            $單據張數
+        ]);
+
+        $pdo->commit();
+
+        echo "表單提交成功 | 受款人代號: {$recipientCode}, 業務代號: {$businessCode}, 交易單號: {$trxID}";
+        exit;
+
+    } catch (Exception $ex) {
+        $pdo->rollBack();
+        die("[錯誤] 資料寫入失敗: " . $ex->getMessage());
+    }
+
 } else {
-    die("創建資料庫失敗: " . mysqli_error($連接) . "<br>");
+    die("請使用POST方式提交表單。");
 }
-
-// 選擇資料庫
-if (!mysqli_select_db($連接, $資料庫)) {
-    die("選擇資料庫失敗: " . mysqli_error($連接) . "<br>");
-}
-
-// 創建資料表
-$create_table_sql = "CREATE TABLE IF NOT EXISTS 核銷表 (
-    單號 VARCHAR(50) PRIMARY KEY,
-    實支金額 DECIMAL(10,2),
-    結餘 DECIMAL(10,2),
-    金額 DECIMAL(10,2) -- 新增金額欄位
-)";
-if (mysqli_query($連接, $create_table_sql)) {
-    echo "支用資料表創建成功或已存在!!<br>";
-} else {
-    die("創建支用資料表失敗: " . mysqli_error($連接) . "<br>");
-}
-
-// 取得表單資料
-$單號 = mysqli_real_escape_string($連接, $_POST['單號查詢']);
-$實支金額 = isset($_POST['實支金額']) && $_POST['實支金額'] !== '' ? floatval($_POST['實支金額']) : null;
-$結餘 = isset($_POST['結餘']) && $_POST['結餘'] !== '' ? floatval($_POST['結餘']) : null;
-$金額 = mysqli_real_escape_string($連接, $_POST['金額']);
-var_dump($_POST);
-
-// 確保金額和結餘不是 NULL
-if ($實支金額 === null) {
-    die("[錯誤] 實支金額 不能為空");
-}
-if ($結餘 === null) {
-    die("[錯誤] 結餘 不能為空");
-}
-
-// 插入資料
-$insert_record_sql = "INSERT INTO 核銷表 (單號, 實支金額, 結餘, 金額) 
-VALUES ('$單號', " . ($實支金額 !== null ? $實支金額 : 'NULL') . ", " . ($結餘 !== null ? $結餘 : 'NULL') . ", '$金額')";
-
-if (mysqli_query($連接, $insert_record_sql)) {
-    echo "表單已成功提交!!<br>";
-} else {
-    die("插入資料失敗: " . mysqli_error($連接) . "<br>SQL: " . $insert_record_sql);
-}
-
-// 關閉資料庫連接
-mysqli_close($連接);
 ?>
