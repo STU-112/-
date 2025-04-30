@@ -497,20 +497,7 @@ textarea:invalid + .error-message {
         transform: scale(1);
     }
 }
-#填表人 {
-    font-weight: bold;
-    font-size: 1rem;
-    color: #1A73E8; /* 添加一個明亮的藍色 */
-    background-color: transparent;
-    border: none;
-    outline: none;
-    text-align: left;
-    padding: 0;
-    margin: 0;
-}
-
-
-</style>
+ </style>
 </head>
 <body>
 
@@ -518,23 +505,18 @@ textarea:invalid + .error-message {
     <div class="form-container" aria-labelledby="formTitle">
       <form id="paymentForm" action="agg.php" method="POST" novalidate>
         <h1>財團法人台北市失親兒福利基金會</h1>
-		
  <!-- 填表人員工編號 -->
 <div class="form-group">
   <label for="填表人">填表人：</label>
-  <input type="text" id="填表人" name="填表人"  value="陳小姐TP318">
+  <input type="text" id="填表人" name="填表人" readonly value="TP318">
 </div>
-
-
- <!-- 受款人姓名 -->
+        <!-- 受款人姓名 -->
         <div class="form-group">
           <label for="受款人">受款人姓名：<span class="required-star">*</span></label>
           <input type="text" id="受款人" name="受款人" placeholder="請輸入受款人姓名" required>
           <span class="error-message" id="受款人-error"></span>
         </div>
 
-        
-    
         <!-- 填表日期 -->
         <div class="form-group">
           <label for="填表日期">填表日期：<span class="required-star">*</span></label>
@@ -658,17 +640,6 @@ textarea:invalid + .error-message {
           <span class="error-message" id="說明-error"></span>
         </div>
 
-<!-- 金額 -->
-        <div class="form-group">
-          <label for="國字金額">金額：<span class="required-star">*</span></label>
-          <input type="number" id="國字金額" name="國字金額" placeholder="請輸入金額" min="0" required oninput="convertAmountToChinese()">
-          <!-- 隱藏欄位用來儲存國字金額 -->
-          <input type="hidden" id="國字金額_hidden" name="國字金額_hidden">
-          <!-- 新增顯示國字金額 -->
-          <div id="國字金額_display" class="chinese-amount-display"></div>
-          <span class="error-message" id="國字金額-error"></span>
-        </div>
-
         <!-- 支付方式 -->
         <div class="form-group">
           <label for="支付方式">支付方式：<span class="required-star">*</span></label>
@@ -683,16 +654,29 @@ textarea:invalid + .error-message {
           <span class="error-message" id="支付方式-error"></span>
         </div>
 
+        <!-- 金額 -->
+        <div class="form-group">
+          <label for="國字金額">金額：<span class="required-star">*</span></label>
+          <input type="number" id="國字金額" name="國字金額" placeholder="請輸入金額" min="0" required oninput="convertAmountToChinese()">
+          <!-- 隱藏欄位用來儲存國字金額 -->
+          <input type="hidden" id="國字金額_hidden" name="國字金額_hidden">
+          <!-- 新增顯示國字金額 -->
+          <div id="國字金額_display" class="chinese-amount-display"></div>
+          <span class="error-message" id="國字金額-error"></span>
+        </div>
 
         <!-- 現金簽收欄位 -->
-		
         <div id="現金簽收欄位" class="conditional-group" style="display: none;">
           <div class="form-group">
             <label for="簽收金額">金額：<span class="required-star">*</span></label>
             <input type="number" id="簽收金額" name="簽收金額" min="0" required>
             <span class="error-message" id="簽收金額-error"></span>
           </div>
-        
+          <div class="form-group">
+            <label for="簽收人">簽收人：<span class="required-star">*</span></label>
+            <input type="text" id="簽收人" name="簽收人" placeholder="請輸入簽收人" required>
+            <span class="error-message" id="簽收人-error"></span>
+          </div>
           <div class="form-group">
             <label for="簽收日">簽收日：<span class="required-star">*</span></label>
             <input type="date" id="簽收日" name="簽收日" required>
@@ -799,7 +783,7 @@ textarea:invalid + .error-message {
             受款人.classList.add('input-error');
             isValid = false;
         } else if (containsSpecialChars(受款人.value)) {
-            受款人Error.textContent = "受款人中不可包含特殊符號。";
+            受款人Error.textContent = "姓名中不可包含特殊符號。";
             受款人Error.style.display = 'block';
             受款人.classList.add('input-error');
             isValid = false;
@@ -1019,15 +1003,15 @@ textarea:invalid + .error-message {
                 isValid = false;
             }
 
-            const 簽收人 = document.getElementById('受款人');
-            const 簽收人Error = document.getElementById('受款人-error');
+            const 簽收人 = document.getElementById('簽收人');
+            const 簽收人Error = document.getElementById('簽收人-error');
             if (!簽收人.value.trim()) {
-                簽收人Error.textContent = "請填寫受款人姓名。";
+                簽收人Error.textContent = "請填寫簽收人。";
                 簽收人Error.style.display = 'block';
                 簽收人.classList.add('input-error');
                 isValid = false;
             } else if (containsSpecialChars(簽收人.value)) {
-                簽收人Error.textContent = "受款人中不可包含特殊符號。";
+                簽收人Error.textContent = "簽收人中不可包含特殊符號。";
                 簽收人Error.style.display = 'block';
                 簽收人.classList.add('input-error');
                 isValid = false;
@@ -1391,7 +1375,7 @@ textarea:invalid + .error-message {
             field.classList.remove('input-error');
         }
     }
-  </script>
+</script>
 
 </body>
 </html>
