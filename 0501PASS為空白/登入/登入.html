@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>登入與註冊</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: url('Logo圖檔_財團法人台北市失親兒福利基金會_20200624143523.jpg') no-repeat center center fixed;
+            background-size: 50%; /* Adjusted size to make the image smaller */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .container {
+            background-color: rgba(255, 255, 255, 0.8);
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+            max-width: 360px;
+            width: 100%;
+            text-align: center;
+        }
+        h2 {
+            color: #343a40;
+            margin-bottom: 20px;
+        }
+        form {
+            display: flex;
+            flex-direction: column;
+        }
+        label {
+            font-weight: bold;
+            color: #495057;
+            margin-bottom: 5px;
+            text-align: left;
+        }
+        input[type="text"], input[type="password"] {
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ced4da;
+            border-radius: 8px;
+            font-size: 16px;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+        input[type="text"]:focus, input[type="password"]:focus {
+            border-color: #80bdff;
+        }
+        button {
+            padding: 12px;
+            background-color: #007bff;
+            color: #fff;
+            font-size: 16px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .link {
+            margin-top: 20px;
+        }
+        .link a {
+            color: #007bff;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+        .link a:hover {
+            color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>台北市失親兒福利基會
+        <h2>支出報帳審核系統</h2>
+        <form action="登入.php" method="post">
+            <label for="db_id">帳號</label>
+            <input type="text" id="db_id" name="db_id" placeholder="輸入帳號" required>
+
+            <label for="db_pw">密碼</label>
+            <input type="password" id="db_pw" name="db_pw" placeholder="輸入密碼" required>
+
+            <button type="submit">登入</button>
+        </form>
+
+        <!-- <div class="link"> -->
+            <!-- <p>還沒有帳號嗎？<a href="註冊.html">立即註冊</a></p> -->
+        <!-- </div> -->
+    </div>
+</body>
+<script>
+    // 取得登入表單、管理區塊以及登入區塊的 DOM 元素
+    const loginForm = document.getElementById('login-form');
+    const adminSection = document.getElementById('admin-section');
+    const loginSection = document.getElementById('login-section');
+
+    // 為登入表單新增提交事件監聽器
+    loginForm.addEventListener('submit', function(event) {
+        // 阻止表單的預設提交行為
+        event.preventDefault();
+
+        // 取得使用者輸入的帳號和密碼
+        const account = document.getElementById('login-account').value;
+        const password = document.getElementById('login-password').value;
+
+        // 檢查帳號和密碼是否正確
+        if (account === 'admin' && password === 'A1') {
+            // 隱藏登入區塊，顯示管理區塊
+            loginSection.style.display = 'none';
+            adminSection.style.display = 'block';
+        } else {
+            // 帳號或密碼錯誤時顯示提示訊息
+            alert('帳號或密碼錯誤！');
+        }
+    });
+</script>
+</html>
