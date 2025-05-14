@@ -1,0 +1,66 @@
+<?php
+session_start();
+
+// 檢查是否登入
+if (!isset($_SESSION['帳號'])) {
+    header("Location: 新增部門1html.php");
+    exit;
+}
+
+// 連線參數
+$host = 'localhost:3307';
+$db_user = 'root';
+$db_pass = ' ';
+$db_name = '部門設定';
+
+// 連線資料庫
+$db = new mysqli($host, $db_user, $db_pass, $db_name);
+if ($db->connect_error) {
+    die("連線失敗：" . $db->connect_error);
+}
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $deptId = trim($_POST['部門代號']);
+    $deptName = trim($_POST['部門名稱']);
+
+    if ($deptId === '' || $deptName === '') {
+        $error = "部門代號或部門名稱不可空白";
+        header("Location: 新增部門1html.php?error=" . urlencode($error));
+        exit;
+    }
+
+    // 檢查是否重複
+    $stmt = $db->prepare("SELECT COUNT(*) FROM 部門 WHERE 部門代號 = ? OR 部門名稱 = ?");
+    $stmt->bind_param('ss', $deptId, $deptName);
+    $stmt->execute();
+    $stmt->bind_result($count);
+    $stmt->fetch();
+    $stmt->close();
+
+    if ($count > 0) {
+        $error = "部門代號或部門名稱已存在";
+        header("Location: 新增部門1html.php?error=" . urlencode($error));
+        exit;
+    }
+
+    // 寫入資料
+    $stmt = $db->prepare("INSERT INTO 部門 (部門代號, 部門名稱) VALUES (?, ?)");
+    $stmt->bind_param('ss', $deptId, $deptName);
+    if ($stmt->execute()) {
+        $stmt->close();
+        $db->close();
+        header("Location: 新增部門1html.php");
+        exit;
+    } else {
+        $error = "新增失敗：" . $stmt->error;
+        $stmt->close();
+        $db->close();
+        header("Location: 新增部門1html.php?error=" . urlencode($error));
+        exit;
+    }
+}
+
+$db->close();
+header("Location: 新增部門1html.php");
+exit;
+?>

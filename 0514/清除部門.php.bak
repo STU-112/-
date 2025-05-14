@@ -1,0 +1,31 @@
+<?php
+session_start();
+
+if (!isset($_SESSION['帳號'])) {
+    header("Location: 新增職位設定.php");
+    exit;
+}
+
+$host      = 'localhost:3307';
+$db_user   = 'root';
+$db_pass   = ' ';
+$db_name   = '部門設定';
+
+$db_link = new mysqli($host, $db_user, $db_pass, $db_name);
+if ($db_link->connect_error) {
+    die("資料庫連線失敗：" . $db_link->connect_error);
+}
+
+if (isset($_GET['部門代號'])) {
+    $deptId = $_GET['部門代號'];
+    $delete_sql = "DELETE FROM 部門 WHERE 部門代號 = ?";
+    $stmt = $db_link->prepare($delete_sql);
+    $stmt->bind_param('s', $deptId);
+    $stmt->execute();
+    $stmt->close();
+}
+
+$db_link->close();
+header('Location: 新增部門html.php');
+exit;
+?>
