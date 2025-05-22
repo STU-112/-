@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <title>支出項目統計查詢</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.0/dist/jspdf.umd.min.js"></script>
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box;}
+    body{font-family:'Poppins',sans-serif;background:#eef6f4;padding:20px;}
+    .container{max-width:760px;margin:0 auto;background:#fff;padding:30px;border-radius:12px;}
+    h1{text-align:center;color:#2a7f7d;margin-bottom:20px;font-weight:600;}
+    form{display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:20px;}
+    label{font-weight:600;}
+    input[type="month"],button{padding:8px 12px;font-size:1rem;border:1px solid #ccc;border-radius:6px;}
+    button{cursor:pointer;transition:background .3s;}
+    button[type="submit"]{background:#2a7f7d;color:#fff;border:none;}
+    button[type="submit"]:hover{background:#24635f;}
+    .pdf-btn{background:#4fb5a8;color:#fff;border:none;}
+    .pdf-btn:hover{background:#3d9380;}
+    iframe{width:100%;height:600px;border:none;border-radius:8px;}
+    /* modal 样式 */
+    .modal{display:none;position:fixed;z-index:10000;inset:0;background:rgba(0,0,0,0.4);align-items:center;justify-content:center;}
+    .modal-content{background:#fff;padding:20px;border-radius:12px;max-width:400px;width:90%;}
+    .modal-close{float:right;cursor:pointer;font-size:1.2rem;}
+    .modal-menu{list-style:none;margin-top:20px;padding:0;}
+    .modal-menu li{padding:10px;border-bottom:1px solid #ddd;cursor:pointer;position:relative;}
+    .modal-menu li:hover{background:#f0f8f7;}
+    .has-submenu>.toggle{float:right;cursor:pointer;}
+    .submenu{list-style:none;margin:5px 0 0 20px;padding:0;display:none;}
+    .has-submenu.open>.submenu{display:block;}
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>統計查詢</h1>
+    <form method="GET" action="0307.php" target="resultFrame">
+      <label>支出項目：
+        <button type="button" id="dropdownToggle">全部</button>
+        <input type="hidden" name="expenseItem" id="expenseItemInput" value="全部">
+      </label>
+      <label>月份：
+        <input type="month" name="monthFilter">
+      </label>
+      <button type="submit">查詢</button>
+      <button type="button" class="pdf-btn" onclick="exportPDF()">匯出PDF</button>
+    </form>
+    <iframe name="resultFrame" src="0307.php"></iframe>
+  </div>
+
+  <!-- 下拉 modal -->
+  <div id="dropdownModal" class="modal">
+    <div class="modal-content">
+      <span class="modal-close">&times;</span>
+      <h2>請選擇支出項目</h2>
+      <ul class="modal-menu">
+        <li data-value="全部">全部</li>
+        <li class="has-submenu" data-value="W活動費用">
+          <span>W活動費用</span><span class="toggle">▸</span>
+          <ul class="submenu">
+            <li data-value="W活動費用-半日/一日型">半日/一日型</li>
+            <li data-value="W活動費用-過夜型">過夜型</li>
+            <li data-value="W活動費用-企業贊助活動">企業贊助活動</li>
+            <li data-value="W活動費用-多次型">多次型</li>
+            <li data-value="W活動費用-其他：體驗活動">其他：體驗活動</li>
+          </ul>
+        </li>
+        <li data-value="X獎學金">X獎學金</li>
+        <li class="has-submenu" data-value="Y經濟扶助">
+          <span>Y經濟扶助</span><span class="toggle">▸</span>
+          <ul class="submenu">
+            <li data-value="Y經濟扶助-急難救助">急難救助</li>
+            <li data-value="Y經濟扶助-醫療補助">醫療補助</li>
+            <li data-value="Y經濟扶助-生活扶助">生活扶助</li>
+            <li data-value="Y經濟扶助-其他專案">其他專案</li>
+          </ul>
+        </li>
+        <li data-value="Z其他">Z其他</li>
+      </ul>
+    </div>
+  </div>
+
+  <script>
+    // dropdown toggle
+    const toggle = document.getElementById('dropdownToggle'),
+          modal  = document.getElementById('dropdownModal'),
+          input  = document.getElementById('expenseItemInput'),
+          close  = modal.querySelector('.modal-close'),
+          items  = modal.querySelectorAll('li');
+
+    toggle.onclick = e => { e.stopPropagation(); modal.style.display='flex'; };
+    close.onclick  = () => modal.style.display='none';
+    window.onclick  = e => { if (e.target === modal) modal.style.display='none'; };
+
+    items.forEach(li => {
+      li.onclick = e => {
+        e.stopPropagation();
+        if (e.target.classList.contains('toggle')) {
+          li.classList.toggle('open');
+          e.target.textContent = e.target.textContent==='▸'?'▾':'▸';
+        } else {
+          const v = li.getAttribute('data-value');
+          toggle.textContent = v;
+          input.value = v;
+          modal.style.display='none';
+        }
+      };
+    });
+
+    async function exportPDF(){
+      const iframe = document.querySelector('iframe'),
+            doc    = iframe.contentDocument;
+      if(!doc){ alert('尚無結果'); return; }
+
+      const box    = doc.querySelector('.container'),
+            canvas = await html2canvas(box, { scale:2, backgroundColor:'#fff' }),
+            img    = canvas.toDataURL(),
+            { jsPDF } = window.jspdf,
+            pdf    = new jsPDF('p','pt','a4'),
+            pw     = pdf.internal.pageSize.getWidth(),
+            ph     = pdf.internal.pageSize.getHeight(),
+            r      = Math.min(pw/canvas.width, ph/canvas.height);
+
+      pdf.addImage(img,'PNG',(pw-canvas.width*r)/2,(ph-canvas.height*r)/2,canvas.width*r,canvas.height*r);
+
+      // 生成檔名
+      let filename = 'report';
+      const summary = doc.querySelector('.filter-summary');
+      if (summary) {
+        const parts = summary.textContent.split(/\s*[–—-]\s*/);
+        let item = parts[0].replace(/支出項目：/, '').trim().replace(/\s+/g,'_'),
+            mon  = (parts[1]||'').replace(/月份：/, '').trim().replace(/\s+/g,'_');
+        filename += `_${item}_${mon}`;
+      } else {
+        const item = toggle.textContent.trim() || '全部',
+              m    = document.querySelector('input[name="monthFilter"]').value || '全部';
+        filename += `_${item.replace(/\s+/g,'_')}_${m.replace(/\s+/g,'_')}`;
+      }
+
+      pdf.save(`${filename}.pdf`);
+    }
+  </script>
+</body>
+</html>
