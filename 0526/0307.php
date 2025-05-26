@@ -231,7 +231,23 @@ if ($detailItem) {
         document.querySelectorAll('.summary-select').forEach(cb=>cb.checked=this.checked);
         document.querySelectorAll('.row-select').forEach(cb=>cb.checked=this.checked);
       });
-    </script>
+	// (D) 主項勾銷 防呆：當主項 checkbox 狀態改變，同步到細項，並隱藏／顯示整個細項區塊
+document.querySelectorAll('.summary-select').forEach(cb => {
+  cb.addEventListener('change', () => {
+    const sub = cb.getAttribute('data-sub');
+    // 1. 同步子項 checkbox
+    document.querySelectorAll(`.full-section[data-parent="${sub}"] .row-select`)
+            .forEach(childCb => { childCb.checked = cb.checked; });
+    // 2. 隱藏 or 顯示整個細項區塊
+    const sec = document.querySelector(`.full-section[data-parent="${sub}"]`);
+    if (sec) {
+      sec.style.display = cb.checked ? 'table-row' : 'none';
+    }
+  });
+});
+
+      </script>
+    </div>
   </body>
   </html>
   <?php
